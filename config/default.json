@@ -1,0 +1,15 @@
+{
+  "ServerConfiguration": {
+    "Ip": "127.0.0.1",
+    "Port": "25565",
+    "Version": "1.16.5"
+  },
+  "BotConfiguration": {
+    "Count": "inf",
+    "Delay": 1,
+    "Modules": {
+      "Prefix": "dodo",
+      "NameRandomizer": true
+    }
+  }
+}

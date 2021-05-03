@@ -1,18 +1,19 @@
 const client = require('mineflayer')
+const config = require('config')
 
 /* CONFIGURATION */
-const serverIp = "127.0.0.1"
-const serverPort = "25565"
-const botCount = 20 // Inf for infinite
-const delay = 100 // Millisecond
-const version = "1.16.5"
+const serverIp = config.get("ServerConfiguration.Ip")
+const serverPort = config.get("ServerConfiguration.Port")
+const version = config.get("ServerConfiguration.Version")
+const botCount = config.get("BotConfiguration.Count") // inf for infinite
+const delay = config.get("BotConfiguration.Delay") // Millisecond
 
 /* MODULES */
-const prefix = "dodo" // Null for empty
-const nameRandomizer = true // After prefix
+const prefix = config.get("BotConfiguration.Modules.Prefix") // Null for empty
+const nameRandomizer = config.get("BotConfiguration.Modules.NameRandomizer") // After prefix
 //const chatSpammer = true // TODO
 //const authentication = true // TODO
-//const useProxy = true //TODO
+//const useProxy = true // TODO
 
 /* VARIABLES */
 botMap = new Map()
@@ -23,7 +24,7 @@ createClients()
 
 /* FUNCTIONS */
 function createClients() {
-    if (currentBotCount < botCount) {
+    if (botCount === "inf" ? true : currentBotCount < botCount) {
         currentBotCount++
         setTimeout(() => {
             createBot()
