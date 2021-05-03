@@ -2,7 +2,7 @@
 Minecraft basic user spammer with Mineflayer
 
 # Features
-Can spam players in every version
+1.8 ~ 1.16 Version support
 <br>Name randomizer
 <br>Name prefix
 <br>Chat spammer
