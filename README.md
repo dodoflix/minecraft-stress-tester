@@ -1,5 +1,5 @@
-# minecraft-server-attacker
-Minecraft user spammer
+# Minecraft Server Attacker
+Minecraft basic user spammer with Mineflayer
 
 # Features
 Spam players every server in every version.
