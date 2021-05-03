@@ -1,5 +1,5 @@
 # minecraft-server-attacker
-Minecraft server user spammer. I did cuz i bored nothing much here...
+Minecraft user spammer. I did cuz i bored nothing much here...
 
 # Features
 Spam players every server in every version.
