@@ -5,7 +5,7 @@ const serverIp = "127.0.0.1"
 const serverPort = "25565"
 const botCount = 20 // Inf for infinite
 const delay = 100 // Millisecond
-const version = 1.16
+const version = "1.16.5"
 
 /* MODULES */
 const prefix = "dodo" // Null for empty
