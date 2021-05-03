@@ -6,15 +6,19 @@ Spam players every server in every version.
 <br>Name randomizer
 <br>Name prefix
 
-# TODO
+# Requirements
+Mineflayer
+<br>Config
+
+# To-Do
 Proxy system
 <br>Chat spammer
 <br>Authentication
 
-# HOW TO USE
+# How To Use
 Install node js
 <br>Clone repository
 <br>Open terminal at repository folder
-<br>Type `npm install mineflayer`
+<br>Type `npm install requirements.txt`
 <br>Make configuration
-<br>And go! `node index.js`
+<br>And lest started! `node index.js`
