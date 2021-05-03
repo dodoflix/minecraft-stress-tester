@@ -5,11 +5,16 @@
     "Version": "1.16.5"
   },
   "BotConfiguration": {
-    "Count": "inf",
-    "Delay": 1,
+    "Count": "20",
+    "Delay": 10,
     "Modules": {
       "Prefix": "dodo",
-      "NameRandomizer": true
+      "NameRandomizer": true,
+      "ChatSpam": {
+        "Enabled": true,
+        "Content": "Made by dodoflix!",
+        "Delay": 10
+      }
     }
   }
 }

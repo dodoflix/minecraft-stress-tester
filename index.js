@@ -11,13 +11,16 @@ const delay = config.get("BotConfiguration.Delay") // Millisecond
 /* MODULES */
 const prefix = config.get("BotConfiguration.Modules.Prefix") // Null for empty
 const nameRandomizer = config.get("BotConfiguration.Modules.NameRandomizer") // After prefix
-//const chatSpammer = true // TODO
+const chatSpammer = config.get("BotConfiguration.Modules.ChatSpam.Enabled")
+const chatSpamContent = config.get("BotConfiguration.Modules.ChatSpam.Content")
+const chatSpamDelay = config.get("BotConfiguration.Modules.ChatSpam.Delay")
 //const authentication = true // TODO
 //const useProxy = true // TODO
 
 /* VARIABLES */
 botMap = new Map()
 let currentBotCount = 0
+let chatSpamVariable = 0
 
 /* MAIN */
 createClients()
@@ -30,20 +33,33 @@ function createClients() {
             createBot()
             createClients() // Make it repeat
         }, delay)
+    } else {
+        if (chatSpammer)
+            chatSpam()
     }
 }
 
-function createBot() {
-    botMap.set(botCount, client.createBot({
-        host: serverIp,
-        port: serverPort,
-        username: prefix + (nameRandomizer ? randomUserName(16 - prefix.length) : ""), // 16 is max for username
-        version: version
-    }))
-    console.log("Bot " + currentBotCount + " sent.")
+function chatSpam() {
+    if (chatSpamVariable >= botMap.size)
+        chatSpamVariable = 0
+    chatSpamVariable++
+    setTimeout(() => {
+        botMap.get(chatSpamVariable).chat(chatSpamContent)
+        chatSpam()
+    }, chatSpamDelay)
 }
 
-function randomUserName(length) {
+function createBot() {
+    botMap.set(currentBotCount, client.createBot({
+        host: serverIp,
+        port: serverPort,
+        username: prefix + (nameRandomizer ? randomString(16 - prefix.length) : ""), // 16 is max for username
+        version: version
+    }))
+    console.log("Bot " + currentBotCount + " sent." + "[" + botMap.size + "]")
+}
+
+function randomString(length) {
     var result = [];
     var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var charactersLength = characters.length;

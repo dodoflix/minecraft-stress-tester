@@ -2,9 +2,10 @@
 Minecraft basic user spammer with Mineflayer
 
 # Features
-Spam players every server in every version.
+Spam players every server in every version
 <br>Name randomizer
 <br>Name prefix
+<br>Chat spammer
 
 # Requirements
 Mineflayer
@@ -12,7 +13,6 @@ Mineflayer
 
 # To-Do
 Proxy system
-<br>Chat spammer
 <br>Authentication
 
 # How To Use
