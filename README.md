@@ -21,4 +21,4 @@ Install node js
 <br>Open terminal at repository folder
 <br>Type `npm install requirements.txt`
 <br>Make configuration
-<br>And lest started! `node index.js`
+<br>And lets started! `node index.js`
