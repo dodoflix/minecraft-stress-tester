@@ -19,6 +19,6 @@ Proxy system
 Install node js
 <br>Clone repository
 <br>Open terminal at repository folder
-<br>Type `npm install requirements.txt`
+<br>Type `npm install`
 <br>Make configuration
 <br>And lets started! `node index.js`
