@@ -13,6 +13,7 @@ This is a stress tester for minecraft servers to make developers optimize their 
 ```
 npm install
 ```
+- Make sure your server is in offline mode.
 - Start project.
 ```
 node .
