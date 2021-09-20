@@ -1,5 +1,5 @@
 # Minecraft Stress Tester
-This is a stress tester for minecraft servers to make developers optimize their servers.
+A tool for stress testing Minecraft servers and helping developers to optimize their servers.
 
 # Dependencies
 - [Mineflayer](https://github.com/PrismarineJS/mineflayer)
