@@ -17,3 +17,6 @@ npm install
 ```
 node .
 ```
+
+# LICENSE
+This project is under MIT License.
