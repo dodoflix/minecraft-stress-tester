@@ -1,0 +1,16 @@
+{
+  "name": "minecraft-stress-tester",
+  "version": "0.1",
+  "description": "Minecraft stress tester for developers.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ."
+  },
+  "keywords": [],
+  "author": "dodo#1337",
+  "license": "ISC",
+  "dependencies": {
+    "mineflayer": "^3.11.1"
+  }
+}
