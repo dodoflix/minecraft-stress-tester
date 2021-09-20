@@ -2,9 +2,9 @@ const mineflayer = require('mineflayer');
 
 const {host, port} = require('./config.json');
 
-const {count} = require('./config.json') ?? 10;
+const {count} = require('./config.json');
 const {prefix} = require('./config.json');
-const {password} = require('./config.json') ?? "123123asD@";
+const {password} = require('./config.json');
 
 let bots = [];
 
@@ -24,11 +24,27 @@ for (let i = 0; i < count; i++) {
     }));
 }
 
+function reconnect(bot) {
+    bots.push(mineflayer.createBot({
+        host: bot.host,
+        port: bot.port,
+        username: bot.username,
+        plugins: bot.plugins,
+        verbose: bot.verbose
+    }));
+    bot.afk.stop();
+    const index = bots.indexOf(bot);
+    if (index > -1) {
+        bots.splice(index, 1);
+    }
+}
+
 bots.forEach(bot => {
     bot.once('spawn', () => {
         bot.chat(`${bot.username} is here!`);
         bot.chat(`/register ${password} ${password}`);
         bot.chat(`/login ${password}`);
+        bot.afk.start();
     });
 
     bot.on('chat', (username, message) => {
@@ -37,29 +53,9 @@ bots.forEach(bot => {
     });
 
     bot.on('kicked', () => {
-        bots.push(mineflayer.createBot({
-            host: bot.host,
-            port: bot.port,
-            username: bot.username,
-            plugins: bot.plugins,
-            verbose: bot.verbose
-        }));
-        const index = bots.indexOf(bot);
-        if(index > -1) {
-            bots.splice(index, 1);
-        }
+        reconnect(bot);
     });
     bot.on('error', () => {
-        bots.push(mineflayer.createBot({
-            host: bot.host,
-            port: bot.port,
-            username: bot.username,
-            plugins: bot.plugins,
-            verbose: bot.verbose
-        }));
-        const index = bots.indexOf(bot);
-        if(index > -1) {
-            bots.splice(index, 1);
-        }
+        reconnect(bot);
     });
 });
