@@ -1,6 +1,6 @@
 {
   "name": "minecraft-stress-tester",
-  "version": "0.2",
+  "version": "0.2.1",
   "description": "Minecraft stress tester for developers.",
   "main": "index.js",
   "scripts": {

@@ -2,5 +2,6 @@
   "host": "localhost",
   "port": "25565",
   "count": 10,
-  "prefix": "dodo"
+  "prefix": "dodo",
+  "password": "123123asD@"
 }
