@@ -1,11 +1,14 @@
 {
   "host": "localhost",
   "port": "25565",
-  "count": 10,
+  "count": 3,
   "prefix": "dodo",
+  "authenticationEnabled": true,
   "password": "123123asD@",
   "loginCommand": "/login {password}",
   "registerCommand": "/register {password} {password}",
-  "chatSpamMessage": "minecraft-stress-tester is here! By dodoflix.",
-  "chatSpamDelay": 3000
+  "chatSpamEnabled": true,
+  "chatSpamMessage": "minecraft-stress-tester is here!",
+  "chatSpamDelay": 3000,
+  "antiAfkEnabled": true
 }

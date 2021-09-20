@@ -1,7 +1,23 @@
+const {antiAfkEnabled} = require('../config.json')
+
 module.exports = bot => {
     let rotater
     let rotated = false
     bot.antiAfk = {}
+
+    bot.on('spawn', () => {
+        if (antiAfkEnabled) {
+            console.log(`AntiAfk has been started for ${bot.username}.`)
+            bot.antiAfk.start()
+        }
+    })
+
+    bot.on('kicked', () => {
+        if (antiAfkEnabled) {
+            console.log(`AntiAfk has been stopped for ${bot.username}.`)
+            bot.antiAfk.stop()
+        }
+    })
 
     bot.antiAfk.start = () => {
         if (rotater) return
@@ -13,7 +29,7 @@ module.exports = bot => {
         clearInterval(rotater)
     }
 
-    function rotate () {
+    function rotate() {
         bot.look(rotated ? 0 : Math.PI, 0)
         rotated = !rotated
     }
