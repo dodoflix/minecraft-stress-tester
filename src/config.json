@@ -3,5 +3,7 @@
   "port": "25565",
   "count": 3,
   "prefix": "dodo",
-  "password": "123123asD@"
+  "password": "123123asD@",
+  "loginCommand": "/login {password}",
+  "registerCommand": "/register {password} {password}"
 }

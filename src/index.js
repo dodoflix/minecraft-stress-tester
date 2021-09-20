@@ -4,7 +4,11 @@ const {host, port} = require('./config.json');
 
 const {count} = require('./config.json');
 const {prefix} = require('./config.json');
+let {loginCommand, registerCommand} = require('./config.json');
 const {password} = require('./config.json');
+
+loginCommand = loginCommand.toString().replace('{password}', password);
+registerCommand = registerCommand.toString().replace('{password}', password);
 
 let bots = [];
 
@@ -42,8 +46,8 @@ function reconnect(bot) {
 bots.forEach(bot => {
     bot.once('spawn', () => {
         bot.chat(`${bot.username} is here!`);
-        bot.chat(`/register ${password} ${password}`);
-        bot.chat(`/login ${password}`);
+        bot.chat(`${registerCommand}`);
+        bot.chat(`${loginCommand}`);
         bot.afk.start();
     });
 
