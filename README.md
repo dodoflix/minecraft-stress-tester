@@ -1,24 +1,19 @@
-# Minecraft Server Attacker
-Minecraft basic user spammer with Mineflayer
+# Minecraft Stress Tester
+This is a stress tester for minecraft servers to make developers optimize their servers.
 
-# Features
-1.8 ~ 1.16 Version support
-<br>Name randomizer
-<br>Name prefix
-<br>Chat spammer
-
-# Requirements
-Mineflayer
-<br>Config
-
-# To-Do
-Proxy system
-<br>Authentication
+# Dependencies
+- [Mineflayer](https://github.com/PrismarineJS/mineflayer)
 
 # How To Use
-Install node js
-<br>Clone repository
-<br>Open terminal at repository folder
-<br>Type `npm install`
-<br>Make configuration
-<br>And lets started! `node index.js`
+- Make sure you have latest [Node.js](https://nodejs.org/en/).
+- Clone project.
+- Make configuration.
+- Open a terminal in project path.
+- Install dependencies.
+```
+npm install
+```
+- Start project.
+```
+node .
+```
