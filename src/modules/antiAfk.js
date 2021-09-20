@@ -1,14 +1,14 @@
 module.exports = bot => {
     let rotater
     let rotated = false
-    bot.afk = {}
+    bot.antiAfk = {}
 
-    bot.afk.start = () => {
+    bot.antiAfk.start = () => {
         if (rotater) return
         rotater = setInterval(rotate, 3000)
     }
 
-    bot.afk.stop = () => {
+    bot.antiAfk.stop = () => {
         if (!rotater) return
         clearInterval(rotater)
     }

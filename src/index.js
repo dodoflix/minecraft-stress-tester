@@ -1,16 +1,16 @@
-const mineflayer = require('mineflayer');
+const mineflayer = require('mineflayer')
 
-const {host, port} = require('./config.json');
+const {host, port} = require('./config.json')
 
-const {count} = require('./config.json');
-const {prefix} = require('./config.json');
-let {loginCommand, registerCommand} = require('./config.json');
-const {password} = require('./config.json');
+const {count} = require('./config.json')
+const {prefix} = require('./config.json')
+let {loginCommand, registerCommand} = require('./config.json')
+const {password} = require('./config.json')
 
-loginCommand = loginCommand.toString().replace('{password}', password);
-registerCommand = registerCommand.toString().replace('{password}', password);
+loginCommand = loginCommand.toString().replace('{password}', password)
+registerCommand = registerCommand.toString().replace('{password}', password)
 
-let bots = [];
+let bots = []
 
 function between(min, max) {
     return Math.floor(
@@ -23,9 +23,12 @@ for (let i = 0; i < count; i++) {
         host: host,
         port: port,
         username: `${prefix}${between(100, 999)}`,
-        plugins: [require('./modules/afk.js')],
+        plugins: {
+            antiAfk: require('./modules/antiAfk'),
+            chatSpam: require('./modules/chatSpam')
+        },
         verbose: true
-    }));
+    }))
 }
 
 function reconnect(bot) {
@@ -35,31 +38,34 @@ function reconnect(bot) {
         username: bot.username,
         plugins: bot.plugins,
         verbose: bot.verbose
-    }));
-    bot.afk.stop();
-    const index = bots.indexOf(bot);
+    }))
+    bot.antiAfk.stop()
+    bot.chatSpam.stop()
+    const index = bots.indexOf(bot)
     if (index > -1) {
-        bots.splice(index, 1);
+        bots.splice(index, 1)
     }
 }
 
 bots.forEach(bot => {
     bot.once('spawn', () => {
-        bot.chat(`${bot.username} is here!`);
-        bot.chat(`${registerCommand}`);
-        bot.chat(`${loginCommand}`);
-        bot.afk.start();
-    });
+        bot.chat(`${bot.username} is here!`)
+        bot.chat(`${registerCommand}`)
+        bot.chat(`${loginCommand}`)
+        bot.antiAfk.start()
+        bot.chatSpam.start()
+    })
 
     bot.on('chat', (username, message) => {
-        if (username.toString().startsWith(prefix)) return;
-        bot.chat(`${username}: ${message}`);
-    });
+        if (username.toString().startsWith(prefix)) return
+        bot.chat(`${username}: ${message}`)
+    })
 
     bot.on('kicked', () => {
-        reconnect(bot);
-    });
+        reconnect(bot)
+    })
+
     bot.on('error', () => {
-        reconnect(bot);
-    });
-});
+        reconnect(bot)
+    })
+})
