@@ -7,14 +7,12 @@ module.exports = bot => {
 
     bot.on('spawn', () => {
         if (antiAfkEnabled) {
-            console.log(`AntiAfk has been started for ${bot.username}.`)
             bot.antiAfk.start()
         }
     })
 
     bot.on('kicked', () => {
         if (antiAfkEnabled) {
-            console.log(`AntiAfk has been stopped for ${bot.username}.`)
             bot.antiAfk.stop()
         }
     })

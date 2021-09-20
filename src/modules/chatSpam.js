@@ -7,14 +7,12 @@ module.exports = bot => {
 
     bot.on('spawn', () => {
         if (chatSpamEnabled) {
-            console.log(`ChatSpam has been started for ${bot.username}.`)
             bot.chatSpam.start()
         }
     })
 
     bot.on('kicked', () => {
         if (chatSpamEnabled) {
-            console.log(`ChatSpam has been stopped for ${bot.username}`)
             bot.chatSpam.stop()
         }
     })
