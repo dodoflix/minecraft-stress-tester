@@ -10,6 +10,9 @@ A tool for stress testing Minecraft servers and helping developers to optimize t
 node -v
 ```
 - Clone project.
+```
+git clone https://github.com/dodoflix/minecraft-stress-tester.git
+```
 - Make configuration.
 - Open a terminal in project path.
 - Install dependencies.
