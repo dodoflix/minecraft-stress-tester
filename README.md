@@ -1,14 +1,11 @@
 # Minecraft Stress Tester
 A tool for stress testing Minecraft servers and helping developers to optimize their servers.
 
-# Dependencies
+# Requirements
+- [Node.js](https://nodejs.org/en/) (16.9.1+)
 - [Mineflayer](https://github.com/PrismarineJS/mineflayer)
 
-# How To Use
-- Make sure you have latest [Node.js](https://nodejs.org/en/) (16.9.1+).
-```
-node -v
-```
+# How to use
 - Clone project.
 ```
 git clone https://github.com/dodoflix/minecraft-stress-tester.git
