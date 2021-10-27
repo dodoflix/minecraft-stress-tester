@@ -3,6 +3,8 @@ A tool for stress testing Minecraft servers and helping developers to optimize t
 
 # Requirements
 - [Node.js](https://nodejs.org/en/)
+
+# Dependencies
 - [Mineflayer](https://github.com/PrismarineJS/mineflayer)
 
 # How to use
