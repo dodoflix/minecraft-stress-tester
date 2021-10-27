@@ -2,7 +2,7 @@
 A tool for stress testing Minecraft servers and helping developers to optimize their servers.
 
 # Requirements
-- [Node.js](https://nodejs.org/en/) (16.9.1+)
+- [Node.js](https://nodejs.org/en/) (16.*)
 - [Mineflayer](https://github.com/PrismarineJS/mineflayer)
 
 # How to use
