@@ -4,7 +4,7 @@
   "count": 3,
   "prefix": "dodo",
   "authenticationEnabled": true,
-  "password": "123123asD@",
+  "password": "your_secret_password",
   "loginCommand": "/login {password}",
   "registerCommand": "/register {password} {password}",
   "chatSpamEnabled": true,
