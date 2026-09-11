@@ -13,9 +13,8 @@ describe.skipIf(!hasJava)("integration: bots vs a real Paper server", () => {
 
   beforeAll(async () => {
     server = await startRealServer();
-    // eslint-disable-next-line no-console
     console.log(`real server up: Paper ${server.version} on :${server.port}`);
-  }, 180000);
+  }, 360000); // jar download + cold Paper boot
 
   afterAll(async () => {
     await server?.close();
