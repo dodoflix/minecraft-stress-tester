@@ -25,6 +25,9 @@ import { startServer } from "./server/httpServer.js";
 const program = new Command();
 program
   .name("mcst")
+  // Without this, options after a subcommand (e.g. `gui --port 9000`) are swallowed by the
+  // program's same-named options and never reach the subcommand handler.
+  .enablePositionalOptions()
   .description("Minecraft server stress tester - authorized testing only.")
   .option("-c, --config <path>", "config file (.yaml or .json)")
   .option("-H, --host <host>", "target host")
