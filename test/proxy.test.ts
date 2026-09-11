@@ -1,5 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { type ParsedProxy, ProxyPool, parseProxy } from "../src/net/proxy.js";
+import { isLocalHost, type ParsedProxy, ProxyPool, parseProxy } from "../src/net/proxy.js";
+
+describe("isLocalHost", () => {
+  it("flags loopback and private ranges, not public hosts", () => {
+    for (const h of [
+      "localhost",
+      "127.0.0.1",
+      "::1",
+      "10.1.2.3",
+      "192.168.0.5",
+      "172.16.0.1",
+      "172.31.9.9",
+    ]) {
+      expect(isLocalHost(h)).toBe(true);
+    }
+    for (const h of ["play.example.com", "1.2.3.4", "172.15.0.1", "172.32.0.1", "8.8.8.8"]) {
+      expect(isLocalHost(h)).toBe(false);
+    }
+  });
+});
 
 describe("parseProxy", () => {
   it("parses a full socks5 URL with credentials", () => {

@@ -12,6 +12,7 @@ import type { BotSpec } from "./drivers/driver.js";
 import { Engine } from "./engine/engine.js";
 import { runSharded } from "./engine/sharded.js";
 import { resolveAutoProxies } from "./net/autoProxies.js";
+import { isLocalHost } from "./net/proxy.js";
 import type { PreflightResult } from "./net/slp.js";
 import { formatSummary, writeReports } from "./report/summary.js";
 import { AuthorizationError, assertAuthorized } from "./safety/authorization.js";
@@ -159,6 +160,13 @@ async function runCommand(opts: Record<string, unknown>): Promise<void> {
   }
 
   if (config.proxies.auto) {
+    if (isLocalHost(config.target.host)) {
+      process.stderr.write(
+        `Warning: ${config.target.host} is a local/private address. Proxies connect from their own\n` +
+          "         machine, so they cannot reach a server on your LAN; validation will find 0 usable.\n" +
+          "         Auto-proxies only works against a public server IP.\n",
+      );
+    }
     process.stdout.write("Fetching + validating free public proxies (untrusted third parties) ...\n");
     let lastLog = 0;
     config.proxies.list = await resolveAutoProxies(config.target, {
@@ -177,6 +185,13 @@ async function runCommand(opts: Record<string, unknown>): Promise<void> {
       },
     });
     process.stdout.write(`\nUsing ${config.proxies.list.length} free proxies.\n`);
+    // Running direct after asking for proxies would send the real IP; refuse instead.
+    if (config.proxies.list.length === 0) {
+      throw new Error(
+        "No usable proxies found, refusing to run direct (that would expose your real IP). " +
+          "Target a public server the proxies can reach, or remove proxies.auto to run without proxies.",
+      );
+    }
   }
 
   if (config.shards > 1) {
