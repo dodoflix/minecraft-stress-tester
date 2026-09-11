@@ -7,7 +7,7 @@ interface Entry {
 }
 
 /**
- * Owns the live bots and their reconnect bookkeeping. The engine — not the bot —
+ * Owns the live bots and their reconnect bookkeeping. The engine - not the bot -
  * reads specs from here to respawn, so host/port/account are always known. This is
  * the inversion that removes the old circular-require + `undefined:undefined` bug.
  */

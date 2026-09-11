@@ -16,12 +16,12 @@ npm run test:integration   # downloads + boots a real Paper server; needs a JDK 
 can speak, caches the jar under `.mcst-cache/`, boots it offline on a flat world,
 and runs real bots against it. It self-skips when no `java` is on PATH.
 
-**Package manager:** npm (with a committed `package-lock.json` — run `npm ci` in CI).
+**Package manager:** npm (with a committed `package-lock.json` - run `npm ci` in CI).
 
 ## Tooling
 
 - **Biome** does lint + format (`npm run lint`, `npm run lint:fix`, `npm run format`).
-  Rules are strict and enforced in CI (`biome ci`) — a lint or format error fails the build.
+  Rules are strict and enforced in CI (`biome ci`) - a lint or format error fails the build.
 - **lefthook** git hooks run automatically:
   - *pre-commit*: Biome fixes staged files.
   - *pre-push*: typecheck + the full unit suite.
@@ -50,16 +50,16 @@ See [docs/architecture.md](docs/architecture.md). New drivers implement the
 ## Commits & releases
 
 Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`,
-`docs:`, `ci:`, `refactor:`, `chore:`, …). They drive **release-please**, which keeps a
+`docs:`, `ci:`, `refactor:`, `chore:`, ...). They drive **release-please**, which keeps a
 standing "release" PR that bumps the version and updates `CHANGELOG.md`. Merging that PR
 tags the version and cuts the GitHub release (and publishes to npm when `NPM_TOKEN` is set).
 Don't hand-edit the version or the released changelog sections.
 
 Repo secrets that make it fully automatic:
 
-- `RELEASE_PLEASE_TOKEN` — a PAT so the release PR triggers the required CI checks under
+- `RELEASE_PLEASE_TOKEN` - a PAT so the release PR triggers the required CI checks under
   branch protection (falls back to `GITHUB_TOKEN`, whose PRs don't trigger other workflows).
-- `NPM_TOKEN` — enables npm publishing; skipped when unset.
+- `NPM_TOKEN` - enables npm publishing; skipped when unset.
 
 ## Safety
 

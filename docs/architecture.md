@@ -14,7 +14,7 @@ CLI/config ─▶ Engine ─▶ Ramp scheduler ─▶ Driver (LightBot) ─┐
 | Path | Responsibility |
 |------|----------------|
 | `cli.ts` | Parse flags, load config, run the engine. |
-| `config/schema.ts` | Zod schema for the run config — the typed source of truth. |
+| `config/schema.ts` | Zod schema for the run config - the typed source of truth. |
 | `config/load.ts` | Merge file (YAML/JSON) + CLI overrides, validate. |
 | `safety/authorization.ts` | Hard consent gate. Refuses to run unauthorized. |
 | `net/slp.ts` | Server-list-ping preflight (reachability, version, players, RTT). |
@@ -31,8 +31,8 @@ CLI/config ─▶ Engine ─▶ Ramp scheduler ─▶ Driver (LightBot) ─┐
 
 The old tool had each bot reconnect itself, reading `bot.host`/`bot.port` off the
 mineflayer object (which don't exist) via a circular `require` of the entry point.
-Here the **Registry holds each bot's full spec**, and the **Engine** — on a bot's
-`end`/`kick` event — respawns from that spec with backoff. Drivers only *emit* events;
+Here the **Registry holds each bot's full spec**, and the **Engine** - on a bot's
+`end`/`kick` event - respawns from that spec with backoff. Drivers only *emit* events;
 nothing imports the entry point. One dependency direction, no phantom fields.
 
 ## Adding a driver
@@ -43,7 +43,7 @@ realistic game-logic load behind the same interface, selected by `driver: full`.
 
 ## Scaling
 
-`LightBot` skips world/chunk parsing, so one process handles ~1–2k bots. Past that,
-shard across **child processes** (one per core) over IPC — protocol crypto and packet
+`LightBot` skips world/chunk parsing, so one process handles ~1-2k bots. Past that,
+shard across **child processes** (one per core) over IPC - protocol crypto and packet
 parsing are CPU-bound, so separate event loops beat worker threads. Not yet built;
 single-process already far exceeds the old tool.

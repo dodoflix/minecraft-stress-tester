@@ -7,7 +7,7 @@ import { AuthorizationError } from "./safety/authorization.js";
 const program = new Command();
 program
   .name("mcst")
-  .description("Minecraft server stress tester — authorized testing only.")
+  .description("Minecraft server stress tester - authorized testing only.")
   .option("-c, --config <path>", "config file (.yaml or .json)")
   .option("-H, --host <host>", "target host")
   .option("-p, --port <port>", "target port", (v) => parseInt(v, 10))

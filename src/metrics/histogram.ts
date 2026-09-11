@@ -1,7 +1,7 @@
 /**
  * Percentiles via a plain sorted array. No dependency: at run-report volumes
  * (tens/hundreds of thousands of samples) this is fine.
- * ponytail: known ceiling is memory, not correctness — swap for hdr-histogram-js
+ * ponytail: known ceiling is memory, not correctness - swap for hdr-histogram-js
  * only if a run must hold millions of live samples.
  */
 export class Histogram {

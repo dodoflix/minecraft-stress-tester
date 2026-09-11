@@ -19,7 +19,7 @@ export interface BotEventMap {
   login: []; // join-game received
   spawned: []; // first position / in-world
   packet: [name: string, bytesIn: number];
-  time: [worldAge: bigint]; // clientbound update_time — drives TPS
+  time: [worldAge: bigint]; // clientbound update_time - drives TPS
   latency: [pingMs: number]; // server-perceived ping (player_info)
   kicked: [reason: string];
   error: [err: Error];
@@ -28,7 +28,7 @@ export interface BotEventMap {
 
 export type BotEvent = keyof BotEventMap;
 
-/** Minimal typed EventEmitter — avoids the untyped stock `.on/.emit`. */
+/** Minimal typed EventEmitter - avoids the untyped stock `.on/.emit`. */
 export class TypedEmitter<M extends { [K in keyof M]: unknown[] }> {
   private readonly ee = new EventEmitter();
   on<E extends keyof M>(e: E, l: (...a: M[E]) => void): this {

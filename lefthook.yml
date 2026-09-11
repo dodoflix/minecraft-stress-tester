@@ -1,6 +1,6 @@
 # Git hooks (installed via `lefthook install`, run automatically by `npm install`).
-# pre-commit: fast — lint/format only the staged files.
-# pre-push:   heavier — typecheck + the full unit suite before code leaves the machine.
+# pre-commit: fast - lint/format only the staged files.
+# pre-push:   heavier - typecheck + the full unit suite before code leaves the machine.
 pre-commit:
   commands:
     biome:

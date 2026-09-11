@@ -6,10 +6,10 @@ name: release-please
 # release, and this workflow then publishes to npm.
 #
 # Secrets:
-#   RELEASE_PLEASE_TOKEN  (optional but recommended) — a PAT so the release PR triggers
+#   RELEASE_PLEASE_TOKEN  (optional but recommended) - a PAT so the release PR triggers
 #                         the required CI checks under branch protection. Falls back to
 #                         GITHUB_TOKEN (whose PRs do NOT trigger other workflows).
-#   NPM_TOKEN             (optional) — enables npm publishing; skipped when unset.
+#   NPM_TOKEN             (optional) - enables npm publishing; skipped when unset.
 
 on:
   push:
