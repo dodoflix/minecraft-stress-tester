@@ -116,18 +116,6 @@ describe("loadConfig branch coverage", () => {
     expect(c.target.host).toBe("ymlhost");
   });
 
-  it("does not migrate when target is already present", () => {
-    const c = loadConfig(write("mixed.json", JSON.stringify({ host: "ignore", target: { host: "real" } })));
-    expect(c.target.host).toBe("real");
-  });
-
-  it("legacy without a port keeps the default port", () => {
-    const c = loadConfig(write("config.json", JSON.stringify({ host: "legacy", count: 2 })));
-    expect(c.target.host).toBe("legacy");
-    expect(c.target.port).toBe(25565);
-    expect(c.ramp.count).toBe(2);
-  });
-
   it("applies driver and explicit authorized:false via CLI", () => {
     const c = loadConfig(write("run.json", JSON.stringify({ target: { host: "h" }, authorized: true })), {
       driver: "light",

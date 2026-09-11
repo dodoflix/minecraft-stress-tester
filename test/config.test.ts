@@ -34,32 +34,10 @@ describe("loadConfig", () => {
     expect(c.target.port).toBe(1111);
   });
 
-  it("migrates the legacy flat config.json shape", () => {
-    const legacy = {
-      host: "legacy",
-      port: "25566",
-      count: 7,
-      prefix: "old",
-      authenticationEnabled: true,
-      password: "pw",
-      loginCommand: "/login {password}",
-      registerCommand: "/reg {password} {password}",
-      chatSpamEnabled: true,
-      chatSpamMessage: "spam",
-      chatSpamDelay: 500,
-      antiAfkEnabled: false,
-    };
-    const c = loadConfig(tmpFile("config.json", JSON.stringify(legacy)));
-    expect(c.target.host).toBe("legacy");
-    expect(c.target.port).toBe(25566);
-    expect(c.ramp.count).toBe(7);
-    expect(c.accounts.usernamePrefix).toBe("old");
-    expect(c.behaviors.auth.enabled).toBe(true);
-    expect(c.behaviors.auth.password).toBe("pw");
-    expect(c.behaviors.chatSpam.enabled).toBe(true);
-    expect(c.behaviors.chatSpam.message).toBe("spam");
-    expect(c.behaviors.chatSpam.delayMs).toBe(500);
-    expect(c.behaviors.antiAfk.enabled).toBe(false);
+  it("falls back to defaults for an empty config file", () => {
+    const c = loadConfig(tmpFile("empty.yaml", ""), { host: "h", authorized: true });
+    expect(c.target.host).toBe("h");
+    expect(c.target.port).toBe(25565);
   });
 
   it("CLI flags override the file", () => {

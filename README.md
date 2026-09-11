@@ -1,6 +1,8 @@
 # Minecraft Stress Tester
 
 [![CI](https://github.com/dodoflix/minecraft-stress-tester/actions/workflows/ci.yml/badge.svg)](https://github.com/dodoflix/minecraft-stress-tester/actions/workflows/ci.yml)
+[![coverage ≥95%](https://img.shields.io/badge/coverage-%E2%89%A595%25-brightgreen.svg)](.github/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/dodoflix/minecraft-stress-tester?label=release)](https://github.com/dodoflix/minecraft-stress-tester/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](package.json)
 
@@ -14,14 +16,6 @@ sockets.
 > written permission to test — anything else is a denial-of-service attack. The tool
 > refuses to start until you affirm authorization. See [SECURITY.md](SECURITY.md).
 
-## Why
-
-The old v0.x was a mineflayer loop that head-rotated and chat-spammed on a local offline
-server and reported nothing. v1 is a TypeScript rewrite built around **measurement and
-scale**: a lightweight raw-protocol driver that reaches thousands of bots per process,
-server-impact metrics derived entirely client-side, ramp control, and engine-owned
-reconnect — verified in CI against a **real, latest-version Paper server**.
-
 ## Features
 
 - **Server-impact metrics** — TPS estimate (from the `worldAge` tick counter), connection
@@ -31,8 +25,7 @@ reconnect — verified in CI against a **real, latest-version Paper server**.
 - **Ramp control** — connections/sec with ramp-up, hold, jitter, and exponential-backoff
   reconnect.
 - **Authorization gate** — no run without explicit consent.
-- **Preflight ping**, YAML/JSON config (auto-migrates the old `config.json`), CLI, live
-  console view, and a JSON run report.
+- **Preflight ping**, YAML/JSON config, CLI, live console view, and a JSON run report.
 - **Real-server tested** — the integration suite downloads and boots the newest supported
   Paper build and runs actual bots against it.
 
@@ -83,7 +76,7 @@ Report written: ./reports/mcst-2026-09-11T....json
 ```bash
 npm run typecheck
 npm run test:unit          # fast
-npm run test:integration   # real Paper server; needs Java 21+
+npm run test:integration   # real Paper server; needs Java 25+
 ```
 
 ## License

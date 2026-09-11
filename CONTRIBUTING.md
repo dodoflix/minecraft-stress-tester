@@ -9,7 +9,7 @@ npm install                # also installs the git hooks (lefthook)
 npm run typecheck
 npm run lint               # Biome: lint + format check
 npm run test:unit          # fast, no server needed
-npm run test:integration   # downloads + boots a real Paper server; needs a JDK (Java 21+)
+npm run test:integration   # downloads + boots a real Paper server; needs a JDK (Java 25+)
 ```
 
 `test:integration` provisions the newest Paper release that `minecraft-protocol`

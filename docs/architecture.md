@@ -15,7 +15,7 @@ CLI/config ─▶ Engine ─▶ Ramp scheduler ─▶ Driver (LightBot) ─┐
 |------|----------------|
 | `cli.ts` | Parse flags, load config, run the engine. |
 | `config/schema.ts` | Zod schema for the run config — the typed source of truth. |
-| `config/load.ts` | Merge file (YAML/JSON) + CLI + legacy `config.json`, validate. |
+| `config/load.ts` | Merge file (YAML/JSON) + CLI overrides, validate. |
 | `safety/authorization.ts` | Hard consent gate. Refuses to run unauthorized. |
 | `net/slp.ts` | Server-list-ping preflight (reachability, version, players, RTT). |
 | `engine/engine.ts` | Orchestrator: preflight, spawn, reconnect, shutdown. |

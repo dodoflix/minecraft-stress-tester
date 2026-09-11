@@ -40,8 +40,7 @@ Flags override the config file.
 
 ## Config
 
-See [`examples/local.yaml`](../examples/local.yaml) for every field. The old flat
-`config.json` from v0.x is auto-migrated, so an existing config keeps working.
+See [`examples/local.yaml`](../examples/local.yaml) for every field.
 
 ## Version selection
 
@@ -57,4 +56,4 @@ Don't have a spare server? The integration test provisions one for you:
 npm run test:integration   # downloads latest supported Paper, boots it, runs bots
 ```
 
-Needs a JDK (Java 21+) on PATH.
+Needs a JDK (Java 25+) on PATH.

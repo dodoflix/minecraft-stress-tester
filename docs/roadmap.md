@@ -4,9 +4,9 @@ Phased so each step ships something usable. Done items land in the [CHANGELOG](.
 
 ## ✅ Phase 1 — core (shipped)
 
-LightBot, ramp scheduler, engine-owned reconnect, authorization gate, config +
-legacy migration, SLP preflight, connection/TPS/throughput metrics, console live view,
-JSON report, real-server integration test, CI/CD.
+LightBot, ramp scheduler, engine-owned reconnect, authorization gate, config loader,
+SLP preflight, connection/TPS/throughput metrics, console live view, JSON report,
+real-server integration test, CI/CD.
 
 ## Phase 2 — observability
 
