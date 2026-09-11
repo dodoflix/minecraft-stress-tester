@@ -89,6 +89,33 @@ never a second engine.
 
 **Depends on.** The UI; the blueprint model (shipped).
 
+### Behaviors as composable script pipelines
+
+**Goal.** Once scripts and blueprints are first-class, the built-in behavior toggles (`auth`,
+`movement`, `antiAfk`, `chatSpam`, `commands`) are redundant. Replace them with a small library
+of ready-made scripts/blueprints, composed per bot into an **ordered pipeline** where each stage
+gates the next on success.
+
+**Scope.**
+
+- Reimplement each current behavior as a shipped example script/blueprint (a standard library),
+  and **remove the hardcoded `behaviors.*` system**. A bot's behavior becomes an ordered list of
+  script/blueprint references, not config flags.
+- Give a script/blueprint a **completion signal** (succeeded / failed / done) so stages can be
+  sequenced, not just fire in parallel on events like today's blueprints.
+- A **pipeline runner**: run stages in order, advancing to the next only when the current one
+  succeeds; on failure, stop or retry per policy. Example: an `auth` stage runs first, and only
+  after it reports success does the `chat-spam` stage start.
+- Config: the per-bot pipeline is an ordered list of scripts/blueprints (with per-stage options).
+
+**Best practices.** One canonical Bot API and blueprint model; the standard-library scripts get
+no special-casing, they are just scripts. The pipeline is data (order + gating); the runner stays
+small. This is a breaking config change, so document the equivalent pipeline for each removed
+behavior.
+
+**Depends on.** The blueprint model (shipped); the sandboxed-scripts work (for arbitrary-JS
+stages); the Bot API (shipped).
+
 ### Deeper security recon and advisory data
 
 **Goal.** Detect and match more, while staying defensive and honest.
