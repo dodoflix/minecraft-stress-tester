@@ -1,5 +1,5 @@
-import type { Behavior } from "../drivers/driver.js";
 import type { Config } from "../config/schema.js";
+import type { Behavior } from "../drivers/driver.js";
 
 export function chatSpam(cfg: Config["behaviors"]["chatSpam"]): Behavior {
   return (bot) => {

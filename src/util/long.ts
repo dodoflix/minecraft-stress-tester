@@ -8,7 +8,7 @@ export function longToBigInt(v: unknown): bigint {
   if (typeof v === "number") return BigInt(Math.trunc(v));
   if (Array.isArray(v) && v.length === 2) {
     const [high, low] = v as [number, number];
-    return (BigInt(high) << 32n) | (BigInt(low >>> 0));
+    return (BigInt(high) << 32n) | BigInt(low >>> 0);
   }
   if (v && typeof v === "object") {
     const o = v as { low?: number; high?: number };

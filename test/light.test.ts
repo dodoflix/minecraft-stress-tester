@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock minecraft-protocol so the driver's packet/chat/lifecycle wiring can be exercised
 // without a socket. createClient returns a controllable EventEmitter recorded in `holder`.
@@ -27,8 +27,8 @@ vi.mock("minecraft-protocol", () => {
   };
 });
 
-import { LightBot } from "../src/drivers/light.js";
 import type { BotSpec } from "../src/drivers/driver.js";
+import { LightBot } from "../src/drivers/light.js";
 
 const spec = (over: Partial<BotSpec> = {}): BotSpec => ({
   id: 1,
@@ -44,10 +44,26 @@ const spec = (over: Partial<BotSpec> = {}): BotSpec => ({
 function connectBot() {
   const bot = new LightBot(spec());
   const events: Record<string, unknown[]> = {};
-  const record = (name: string) => (...args: unknown[]) => (events[name] ??= []).push(args.length <= 1 ? args[0] : args);
-  (["connecting", "connected", "login", "spawned", "time", "packet", "kicked", "error", "end"] as const).forEach((e) =>
-    bot.on(e, record(e) as any),
-  );
+  const record =
+    (name: string) =>
+    (...args: unknown[]) => {
+      const value = args.length <= 1 ? args[0] : args;
+      const list = events[name];
+      if (list) list.push(value);
+      else events[name] = [value];
+    };
+  const names = [
+    "connecting",
+    "connected",
+    "login",
+    "spawned",
+    "time",
+    "packet",
+    "kicked",
+    "error",
+    "end",
+  ] as const;
+  for (const e of names) bot.on(e, record(e) as any);
   bot.connect();
   return { bot, client: holder.last, events };
 }

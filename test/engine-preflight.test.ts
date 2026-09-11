@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 // Mock the SLP preflight so the engine's real preflight path (ping + log + version
 // negotiation) is exercised without a network / Java, keeping coverage Java-independent.
@@ -14,8 +14,8 @@ const preflightMock = vi.hoisted(() => ({
 }));
 vi.mock("../src/net/slp.js", () => ({ preflight: preflightMock.fn }));
 
-import { Engine } from "../src/engine/engine.js";
 import { configSchema } from "../src/config/schema.js";
+import { Engine } from "../src/engine/engine.js";
 import { FakeBot } from "./helpers/fakeBot.js";
 
 afterEach(() => vi.useRealTimers());

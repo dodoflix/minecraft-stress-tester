@@ -1,4 +1,4 @@
-import { TypedEmitter, type BotDriver, type BotEventMap, type BotSpec } from "../../src/drivers/driver.js";
+import { type BotDriver, type BotEventMap, type BotSpec, TypedEmitter } from "../../src/drivers/driver.js";
 
 /**
  * In-memory BotDriver for testing the engine/collector/behaviors against the driver

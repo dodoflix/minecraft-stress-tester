@@ -1,7 +1,7 @@
-import { describe, it, expect, afterAll, beforeAll } from "vitest";
-import { Engine } from "../src/engine/engine.js";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { configSchema } from "../src/config/schema.js";
-import { startRealServer, javaAvailable, type RealServer } from "./helpers/realServer.js";
+import { Engine } from "../src/engine/engine.js";
+import { javaAvailable, type RealServer, startRealServer } from "./helpers/realServer.js";
 
 // Runs against a REAL, latest-version Paper server (downloaded + cached on first run).
 // Skips only when Java is absent so contributors without a JDK still get a green suite;

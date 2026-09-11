@@ -1,8 +1,8 @@
 import mc from "minecraft-protocol";
-import { TypedEmitter, type BotDriver, type BotEventMap, type BotSpec } from "./driver.js";
+import { chatPacket } from "../util/chat.js";
 import { longToBigInt } from "../util/long.js";
 import { stringifyReason } from "../util/reason.js";
-import { chatPacket } from "../util/chat.js";
+import { type BotDriver, type BotEventMap, type BotSpec, TypedEmitter } from "./driver.js";
 
 /**
  * Lightweight raw-protocol bot. No world/chunk parsing — just the login handshake,
@@ -22,8 +22,8 @@ export class LightBot extends TypedEmitter<BotEventMap> implements BotDriver {
   connect(): void {
     this.emit("connecting");
     // `version: false` = auto-negotiate from the server ping. minecraft-protocol's
-    // types omit the `false` literal, so build options loosely.
-    const options: any = {
+    // types omit the `false` literal, so cast at the boundary rather than widen to any.
+    const options = {
       host: this.spec.host,
       port: this.spec.port,
       username: this.spec.username,
@@ -31,7 +31,7 @@ export class LightBot extends TypedEmitter<BotEventMap> implements BotDriver {
       version: this.spec.version,
       keepAlive: true,
     };
-    const client = mc.createClient(options);
+    const client = mc.createClient(options as unknown as Parameters<typeof mc.createClient>[0]);
     this.client = client;
 
     client.on("connect", () => this.emit("connected"));

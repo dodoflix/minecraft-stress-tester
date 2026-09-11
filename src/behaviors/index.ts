@@ -1,7 +1,7 @@
-import type { Behavior } from "../drivers/driver.js";
 import type { Config } from "../config/schema.js";
-import { chatSpam } from "./chatSpam.js";
+import type { Behavior } from "../drivers/driver.js";
 import { auth } from "./auth.js";
+import { chatSpam } from "./chatSpam.js";
 
 /**
  * Assemble the enabled behaviors for a run.

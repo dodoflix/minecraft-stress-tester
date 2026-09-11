@@ -33,21 +33,27 @@ export const reconnectSchema = z.object({
 });
 
 export const behaviorsSchema = z.object({
-  antiAfk: z.object({
-    enabled: z.boolean().default(true),
-    intervalMs: z.number().int().min(200).default(3000),
-  }).prefault({}),
-  chatSpam: z.object({
-    enabled: z.boolean().default(false),
-    message: z.string().default("minecraft-stress-tester"),
-    delayMs: z.number().int().min(50).default(3000),
-  }).prefault({}),
-  auth: z.object({
-    enabled: z.boolean().default(false),
-    password: z.string().default(""),
-    loginCommand: z.string().default("/login {password}"),
-    registerCommand: z.string().default("/register {password} {password}"),
-  }).prefault({}),
+  antiAfk: z
+    .object({
+      enabled: z.boolean().default(true),
+      intervalMs: z.number().int().min(200).default(3000),
+    })
+    .prefault({}),
+  chatSpam: z
+    .object({
+      enabled: z.boolean().default(false),
+      message: z.string().default("minecraft-stress-tester"),
+      delayMs: z.number().int().min(50).default(3000),
+    })
+    .prefault({}),
+  auth: z
+    .object({
+      enabled: z.boolean().default(false),
+      password: z.string().default(""),
+      loginCommand: z.string().default("/login {password}"),
+      registerCommand: z.string().default("/register {password} {password}"),
+    })
+    .prefault({}),
 });
 
 export const accountsSchema = z.object({
@@ -64,11 +70,13 @@ export const configSchema = z.object({
   reconnect: reconnectSchema.prefault({}),
   behaviors: behaviorsSchema.prefault({}),
   accounts: accountsSchema.prefault({}),
-  report: z.object({
-    dir: z.string().default("./reports"),
-    json: z.boolean().default(true),
-    csv: z.boolean().default(false),
-  }).prefault({}),
+  report: z
+    .object({
+      dir: z.string().default("./reports"),
+      json: z.boolean().default(true),
+      csv: z.boolean().default(false),
+    })
+    .prefault({}),
 });
 
 export type Config = z.infer<typeof configSchema>;

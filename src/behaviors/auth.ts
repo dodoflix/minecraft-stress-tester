@@ -1,5 +1,5 @@
-import type { Behavior } from "../drivers/driver.js";
 import type { Config } from "../config/schema.js";
+import type { Behavior } from "../drivers/driver.js";
 
 /**
  * Sends /register then /login on spawn (offline-mode auth plugins). Ported from the

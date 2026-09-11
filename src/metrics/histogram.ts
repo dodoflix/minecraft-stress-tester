@@ -21,7 +21,15 @@ export class Histogram {
     return sorted[idx]!;
   }
 
-  summary(): { count: number; min: number; max: number; mean: number; p50: number; p95: number; p99: number } {
+  summary(): {
+    count: number;
+    min: number;
+    max: number;
+    mean: number;
+    p50: number;
+    p95: number;
+    p99: number;
+  } {
     const n = this.samples.length;
     if (n === 0) return { count: 0, min: 0, max: 0, mean: 0, p50: 0, p95: 0, p99: 0 };
     const sorted = [...this.samples].sort((a, b) => a - b);

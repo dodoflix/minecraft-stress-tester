@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { MetricsCollector } from "../src/metrics/collector.js";
 import { FakeBot } from "./helpers/fakeBot.js";
 
@@ -21,7 +21,7 @@ describe("MetricsCollector", () => {
     const a = new FakeBot();
     const b = new FakeBot();
     const d = new FakeBot();
-    [a, b, d].forEach((bot) => c.track(bot));
+    for (const bot of [a, b, d]) c.track(bot);
     a.reachSpawn(); // connected, login, spawned
     b.reachSpawn();
     d.emit("connected"); // connects but never spawns
@@ -53,7 +53,7 @@ describe("MetricsCollector", () => {
   it("buckets kick reasons into a histogram", () => {
     const c = new MetricsCollector();
     const bots = [new FakeBot(), new FakeBot(), new FakeBot()];
-    bots.forEach((b) => c.track(b));
+    for (const b of bots) c.track(b);
     bots[0]!.emit("kicked", "antibot");
     bots[1]!.emit("kicked", "antibot");
     bots[2]!.emit("kicked", "server full");

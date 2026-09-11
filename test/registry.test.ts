@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Registry } from "../src/engine/registry.js";
 import { FakeBot } from "./helpers/fakeBot.js";
 
@@ -46,6 +46,11 @@ describe("Registry", () => {
     const r = new Registry();
     r.add(new FakeBot({ id: 5 }), spec(5));
     r.add(new FakeBot({ id: 6 }), spec(6));
-    expect(r.all().map((e) => e.spec.id).sort()).toEqual([5, 6]);
+    expect(
+      r
+        .all()
+        .map((e) => e.spec.id)
+        .sort(),
+    ).toEqual([5, 6]);
   });
 });

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { chatPacket, SIGNED_CHAT_PROTOCOL } from "../src/util/chat.js";
 
 describe("chatPacket", () => {

@@ -1,10 +1,10 @@
-import { describe, it, expect } from "vitest";
-import { jittered, buildSpawnSchedule } from "../src/engine/ramp.js";
-import { longToBigInt } from "../src/util/long.js";
-import { parsePing } from "../src/net/slp.js";
-import { Histogram } from "../src/metrics/histogram.js";
+import { describe, expect, it } from "vitest";
 import { buildBehaviors } from "../src/behaviors/index.js";
 import { configSchema } from "../src/config/schema.js";
+import { buildSpawnSchedule, jittered } from "../src/engine/ramp.js";
+import { Histogram } from "../src/metrics/histogram.js";
+import { parsePing } from "../src/net/slp.js";
+import { longToBigInt } from "../src/util/long.js";
 
 describe("jittered", () => {
   it("returns the exact delay when jitter is 0", () => {

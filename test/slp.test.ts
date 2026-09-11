@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import { parsePing, preflight } from "../src/net/slp.js";
 
 describe("preflight", () => {

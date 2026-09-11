@@ -1,13 +1,20 @@
-import { describe, it, expect } from "vitest";
-import { buildSpawnSchedule, runDurationMs, backoffMs } from "../src/engine/ramp.js";
+import { describe, expect, it } from "vitest";
+import { configSchema } from "../src/config/schema.js";
+import { backoffMs, buildSpawnSchedule, runDurationMs } from "../src/engine/ramp.js";
 import { Histogram } from "../src/metrics/histogram.js";
 import { TpsEstimator } from "../src/metrics/tps.js";
+import { AuthorizationError, assertAuthorized } from "../src/safety/authorization.js";
 import { longToBigInt } from "../src/util/long.js";
 import { makeUsername } from "../src/util/names.js";
-import { configSchema } from "../src/config/schema.js";
-import { assertAuthorized, AuthorizationError } from "../src/safety/authorization.js";
 
-const baseRamp = { count: 10, connectRate: 5, rampUpSeconds: 0, holdSeconds: 60, rampDownSeconds: 0, jitter: 0.2 };
+const baseRamp = {
+  count: 10,
+  connectRate: 5,
+  rampUpSeconds: 0,
+  holdSeconds: 60,
+  rampDownSeconds: 0,
+  jitter: 0.2,
+};
 
 describe("ramp", () => {
   it("schedules `count` bots, monotonic, at 1/rate spacing", () => {

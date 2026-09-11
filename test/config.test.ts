@@ -1,7 +1,7 @@
-import { describe, it, expect, afterEach } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
 import { loadConfig } from "../src/config/load.js";
 
 let dir: string | undefined;
@@ -63,7 +63,10 @@ describe("loadConfig", () => {
   });
 
   it("CLI flags override the file", () => {
-    const p = tmpFile("run.json", JSON.stringify({ target: { host: "filehost", port: 100 }, ramp: { count: 1 } }));
+    const p = tmpFile(
+      "run.json",
+      JSON.stringify({ target: { host: "filehost", port: 100 }, ramp: { count: 1 } }),
+    );
     const c = loadConfig(p, { host: "clihost", port: 200, count: 9, authorized: true, version: "1.20.4" });
     expect(c.target.host).toBe("clihost");
     expect(c.target.port).toBe(200);

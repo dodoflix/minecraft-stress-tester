@@ -35,7 +35,7 @@ main()
   .then(() => process.exit(0))
   .catch((err) => {
     if (err instanceof AuthorizationError) {
-      process.stderr.write("\n" + err.message + "\n");
+      process.stderr.write(`\n${err.message}\n`);
       process.exit(2);
     }
     process.stderr.write(`\nError: ${err?.message ?? err}\n`);

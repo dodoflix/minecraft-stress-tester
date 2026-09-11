@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { MetricsCollector } from "../src/metrics/collector.js";
 import { formatLine, startConsoleReporter } from "../src/report/console.js";
 import { writeJsonReport } from "../src/report/export.js";
-import { MetricsCollector } from "../src/metrics/collector.js";
 import { FakeBot } from "./helpers/fakeBot.js";
 
 afterEach(() => vi.useRealTimers());

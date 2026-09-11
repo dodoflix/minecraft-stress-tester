@@ -1,17 +1,17 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { formatLine } from "../src/report/console.js";
-import type { MetricsSnapshot } from "../src/metrics/collector.js";
-import { MetricsCollector } from "../src/metrics/collector.js";
-import { parsePing } from "../src/net/slp.js";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { chatSpam } from "../src/behaviors/chatSpam.js";
-import { Histogram } from "../src/metrics/histogram.js";
 import { loadConfig } from "../src/config/load.js";
+import { configSchema } from "../src/config/schema.js";
 import { buildSpawnSchedule, runDurationMs } from "../src/engine/ramp.js";
 import { Registry } from "../src/engine/registry.js";
-import { configSchema } from "../src/config/schema.js";
+import type { MetricsSnapshot } from "../src/metrics/collector.js";
+import { MetricsCollector } from "../src/metrics/collector.js";
+import { Histogram } from "../src/metrics/histogram.js";
+import { parsePing } from "../src/net/slp.js";
+import { formatLine } from "../src/report/console.js";
 import { FakeBot } from "./helpers/fakeBot.js";
 
 afterEach(() => vi.useRealTimers());
@@ -19,10 +19,25 @@ afterEach(() => vi.useRealTimers());
 const emptySummary = { count: 0, min: 0, max: 0, mean: 0, p50: 0, p95: 0, p99: 0 };
 function snap(over: Partial<MetricsSnapshot> = {}): MetricsSnapshot {
   return {
-    elapsedMs: 1000, attempted: 1, connected: 1, loggedIn: 1, spawned: 1, active: 1,
-    ended: 0, kicked: 0, errors: 0, connectSuccessRate: 1, packetsIn: 0, bytesIn: 0,
-    packetsPerSec: 0, bytesPerSec: 0, tps: 20, timeToConnectMs: emptySummary,
-    timeToSpawnMs: emptySummary, kickReasons: {}, ...over,
+    elapsedMs: 1000,
+    attempted: 1,
+    connected: 1,
+    loggedIn: 1,
+    spawned: 1,
+    active: 1,
+    ended: 0,
+    kicked: 0,
+    errors: 0,
+    connectSuccessRate: 1,
+    packetsIn: 0,
+    bytesIn: 0,
+    packetsPerSec: 0,
+    bytesPerSec: 0,
+    tps: 20,
+    timeToConnectMs: emptySummary,
+    timeToSpawnMs: emptySummary,
+    kickReasons: {},
+    ...over,
   };
 }
 
@@ -138,7 +153,10 @@ describe("ramp steady phase after ramp-up", () => {
 
 describe("runDurationMs with an empty schedule", () => {
   it("is just hold + ramp-down when no bots are scheduled", () => {
-    const ramp = configSchema.parse({ target: { host: "h" }, ramp: { holdSeconds: 60, rampDownSeconds: 5 } }).ramp;
+    const ramp = configSchema.parse({
+      target: { host: "h" },
+      ramp: { holdSeconds: 60, rampDownSeconds: 5 },
+    }).ramp;
     expect(runDurationMs(ramp, [])).toBe(65 * 1000);
   });
 });

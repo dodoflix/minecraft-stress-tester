@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
 import { mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Engine } from "../src/engine/engine.js";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { configSchema } from "../src/config/schema.js";
+import { Engine } from "../src/engine/engine.js";
 import { AuthorizationError } from "../src/safety/authorization.js";
 import { FakeBot } from "./helpers/fakeBot.js";
 
@@ -11,7 +11,12 @@ afterEach(() => vi.useRealTimers());
 
 function engineWith(configPatch: Record<string, unknown>) {
   const created: FakeBot[] = [];
-  const config = configSchema.parse({ authorized: true, target: { host: "h" }, report: { json: false }, ...configPatch });
+  const config = configSchema.parse({
+    authorized: true,
+    target: { host: "h" },
+    report: { json: false },
+    ...configPatch,
+  });
   const engine = new Engine(config, {
     quiet: true,
     skipPreflight: true,
@@ -28,7 +33,9 @@ describe("Engine orchestration", () => {
   it("spawns exactly `count` bots, stays quiet, and returns a snapshot", async () => {
     vi.useFakeTimers();
     const writeSpy = vi.spyOn(process.stdout, "write").mockReturnValue(true);
-    const { engine, created } = engineWith({ ramp: { count: 3, connectRate: 50, holdSeconds: 0, jitter: 0 } });
+    const { engine, created } = engineWith({
+      ramp: { count: 3, connectRate: 50, holdSeconds: 0, jitter: 0 },
+    });
 
     const p = engine.run();
     await vi.advanceTimersByTimeAsync(500);

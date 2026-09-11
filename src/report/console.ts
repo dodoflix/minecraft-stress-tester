@@ -22,7 +22,7 @@ export function formatLine(s: MetricsSnapshot): string {
 /** Periodic one-line console summary. Returns a stop fn. */
 export function startConsoleReporter(collector: MetricsCollector, intervalMs = 1000): () => void {
   const timer = setInterval(() => {
-    process.stdout.write(formatLine(collector.snapshot()) + "\n");
+    process.stdout.write(`${formatLine(collector.snapshot())}\n`);
   }, intervalMs);
   return () => clearInterval(timer);
 }

@@ -1,15 +1,15 @@
-import type { Config } from "../config/schema.js";
-import type { BotDriver, BotSpec, Behavior } from "../drivers/driver.js";
-import { LightBot } from "../drivers/light.js";
 import { buildBehaviors } from "../behaviors/index.js";
+import type { Config } from "../config/schema.js";
+import type { Behavior, BotDriver, BotSpec } from "../drivers/driver.js";
+import { LightBot } from "../drivers/light.js";
 import { MetricsCollector, type MetricsSnapshot } from "../metrics/collector.js";
-import { assertAuthorized } from "../safety/authorization.js";
-import { preflight, type PreflightResult } from "../net/slp.js";
-import { buildSpawnSchedule, runDurationMs, jittered, backoffMs } from "./ramp.js";
-import { Registry } from "./registry.js";
-import { makeUsername } from "../util/names.js";
+import { type PreflightResult, preflight } from "../net/slp.js";
 import { startConsoleReporter } from "../report/console.js";
 import { writeJsonReport } from "../report/export.js";
+import { assertAuthorized } from "../safety/authorization.js";
+import { makeUsername } from "../util/names.js";
+import { backoffMs, buildSpawnSchedule, jittered, runDurationMs } from "./ramp.js";
+import { Registry } from "./registry.js";
 
 type DriverFactory = (spec: BotSpec) => BotDriver;
 
@@ -35,7 +35,10 @@ export class Engine {
   private readonly quiet: boolean;
   private readonly skipPreflight: boolean;
 
-  constructor(private readonly config: Config, options: EngineOptions = {}) {
+  constructor(
+    private readonly config: Config,
+    options: EngineOptions = {},
+  ) {
     this.quiet = options.quiet ?? false;
     this.skipPreflight = options.skipPreflight ?? false;
     if (options.driverFactory) {
@@ -185,5 +188,5 @@ function printSummary(s: ReturnType<MetricsCollector["snapshot"]>): void {
     lines.push("kick reasons:");
     for (const [reason, n] of Object.entries(s.kickReasons)) lines.push(`  ${n}x  ${reason}`);
   }
-  process.stdout.write(lines.join("\n") + "\n");
+  process.stdout.write(`${lines.join("\n")}\n`);
 }

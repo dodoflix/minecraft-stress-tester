@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { extname } from "node:path";
 import { load as loadYaml } from "js-yaml";
-import { configSchema, type Config } from "./schema.js";
+import { type Config, configSchema } from "./schema.js";
 
 /** Raw CLI overrides that map onto the config before validation. */
 export interface CliOverrides {
@@ -27,7 +27,7 @@ function readConfigFile(path: string): unknown {
  */
 function migrateLegacy(obj: Record<string, unknown>): Record<string, unknown> {
   if (obj.target || obj.host === undefined) return obj;
-  const g = obj as Record<string, any>;
+  const g = obj as Record<string, unknown>;
   return {
     target: { host: g.host, port: g.port ? Number(g.port) : undefined, version: g.version },
     ramp: { count: g.count },

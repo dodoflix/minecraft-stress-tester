@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, afterEach } from "vitest";
-import { chatSpam } from "../src/behaviors/chatSpam.js";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { auth } from "../src/behaviors/auth.js";
+import { chatSpam } from "../src/behaviors/chatSpam.js";
 import { buildBehaviors } from "../src/behaviors/index.js";
 import { configSchema } from "../src/config/schema.js";
 import { FakeBot } from "./helpers/fakeBot.js";
