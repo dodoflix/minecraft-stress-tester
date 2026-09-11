@@ -78,6 +78,12 @@ describe("LightBot lifecycle", () => {
     expect(client.opts).toMatchObject({ host: "h", port: 25565, username: "bot", keepAlive: true });
   });
 
+  it("sets a socks connect handler when a proxy is assigned", () => {
+    const bot = new LightBot(spec({ proxy: "socks5://1.2.3.4:1080" }));
+    bot.connect();
+    expect(typeof holder.last.opts.connect).toBe("function");
+  });
+
   it("maps connect/login client events", () => {
     const { client, events } = connectBot();
     client.emit("connect");

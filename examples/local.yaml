@@ -41,6 +41,14 @@ behaviors:
 accounts:
   mode: offline        # offline | microsoft
   usernamePrefix: mcst
+  microsoftAccounts: []           # emails to rotate over when mode: microsoft
+  profilesFolder: ./.mcst-accounts
+
+proxies:
+  list: []             # e.g. ["socks5://user:pass@host:1080", "host:1080"]
+  maxPerProxy: 50      # simultaneous bots per proxy (spreads source IPs)
+
+# scenario: join-flood   # optional preset: join-flood | sustained-load | chat-flood | chunk-thrash
 
 report:
   dir: ./reports

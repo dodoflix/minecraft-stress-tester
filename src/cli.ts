@@ -20,6 +20,7 @@ program
   .option("-d, --driver <driver>", "bot driver: light | full")
   .option("-s, --shards <n>", "run across N worker processes (>2k bots)", (v) => parseInt(v, 10))
   .option("--mc-version <ver>", "force Minecraft version (default: auto-detect)")
+  .option("--scenario <name>", "load profile: join-flood | sustained-load | chat-flood | chunk-thrash")
   .option("--tui", "full-screen live dashboard instead of console lines")
   .option("--csv", "also write a CSV report")
   .option("--html", "also write an HTML report")
@@ -44,6 +45,7 @@ async function main(): Promise<void> {
     count: opts.count,
     driver: opts.driver,
     version: opts.mcVersion,
+    scenario: opts.scenario,
     tui: opts.tui,
     csv: opts.csv,
     html: opts.html,
