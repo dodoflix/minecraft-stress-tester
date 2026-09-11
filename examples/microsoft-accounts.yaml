@@ -8,6 +8,7 @@ target:
   port: 25565
 
 driver: full
+shards: 1              # limited by account count; one process is plenty
 
 ramp:
   count: 3              # limited by how many accounts you have

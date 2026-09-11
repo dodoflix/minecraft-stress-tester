@@ -6,6 +6,7 @@ target:
   port: 25565
 
 driver: light
+shards: 2              # worker processes to spread across cores
 
 ramp:
   count: 300

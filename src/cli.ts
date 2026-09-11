@@ -52,6 +52,7 @@ async function main(): Promise<void> {
     driver: opts.driver,
     version: opts.mcVersion,
     viewDistance: opts.viewDistance,
+    shards: opts.shards,
     scenario: opts.scenario,
     tui: opts.tui,
     web: opts.web,
@@ -63,7 +64,7 @@ async function main(): Promise<void> {
 
   // Big single-process runs are CPU-bound: minecraft-protocol fully parses every inbound
   // packet on one thread. Nudge toward sharding across cores.
-  if (config.ramp.count >= 500 && !(opts.shards > 1)) {
+  if (config.ramp.count >= 500 && config.shards <= 1) {
     const n = Math.max(2, cpus().length);
     process.stderr.write(
       `Tip: ${config.ramp.count} bots in one process is CPU-bound (the client parses every packet).\n` +
@@ -71,8 +72,8 @@ async function main(): Promise<void> {
     );
   }
 
-  if (opts.shards && opts.shards > 1) {
-    const snapshot = await runSharded(config, opts.shards);
+  if (config.shards > 1) {
+    const snapshot = await runSharded(config, config.shards);
     process.stdout.write(`${formatSummary(snapshot)}\n`);
     const preflight: PreflightResult | null = null; // per-shard; aggregate report omits it
     for (const path of writeReports(
