@@ -16,6 +16,7 @@ export default defineConfig({
         "src/engine/sharded.ts",
         "src/net/socksConnect.ts",
         "src/report/web.ts",
+        "src/server/httpServer.ts",
       ],
       thresholds: {
         lines: 95,
