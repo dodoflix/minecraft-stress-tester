@@ -50,11 +50,11 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.13",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^22.20.2",
+    "@types/node": "^26.5.0",
     "@vitest/coverage-v8": "^5.0.0",
     "lefthook": "^2.1.12",
     "tsx": "^4.23.13",
-    "typescript": "^5.9.3",
+    "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   }
 }
