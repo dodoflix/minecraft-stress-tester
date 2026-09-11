@@ -37,7 +37,7 @@ const spec = (over: Partial<BotSpec> = {}): BotSpec => ({
   port: 25565,
   version: false,
   auth: "offline",
-  config: {} as BotSpec["config"],
+  config: { viewDistance: 2 } as BotSpec["config"],
   ...over,
 });
 
@@ -90,6 +90,13 @@ describe("LightBot lifecycle", () => {
     client.emit("login");
     expect(events.connected).toHaveLength(1);
     expect(events.login).toHaveLength(1);
+  });
+
+  it("requests a low view distance via client settings on login", () => {
+    const { client } = connectBot();
+    client.emit("login");
+    const settings = client.writes.find((w: { name: string }) => w.name === "settings");
+    expect(settings?.params.viewDistance).toBe(2);
   });
 
   it("emits time from update_time and counts packet bytes", () => {

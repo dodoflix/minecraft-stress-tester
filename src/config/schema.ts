@@ -86,6 +86,9 @@ export const configSchema = z.object({
   authorized: z.boolean().default(false),
   target: targetSchema,
   driver: z.enum(["light", "full"]).default("light"),
+  // Chunk view distance each bot requests. Low (2) keeps the client light: the server
+  // sends far fewer chunk packets per bot. Raise it to stress chunk loading.
+  viewDistance: z.number().int().min(2).max(32).default(2),
   ramp: rampSchema.prefault({}),
   reconnect: reconnectSchema.prefault({}),
   behaviors: behaviorsSchema.prefault({}),

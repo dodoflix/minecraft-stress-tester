@@ -27,6 +27,7 @@ const SCENARIO_OVERLAYS: Record<ScenarioName, Record<string, unknown>> = {
   // Realistic movement to churn chunk loading and physics (FullBot).
   "chunk-thrash": {
     driver: "full",
+    viewDistance: 8, // actually load chunks (the point of this scenario)
     ramp: { count: 40, connectRate: 4, holdSeconds: 120 },
     behaviors: { antiAfk: { enabled: true }, movement: { enabled: true, intervalMs: 500 } },
   },
