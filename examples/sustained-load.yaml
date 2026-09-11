@@ -1,0 +1,23 @@
+# Steady population held for ten minutes, ramped up gently. Watch TPS/latency over time.
+authorized: true
+
+target:
+  host: 127.0.0.1
+  port: 25565
+
+driver: light
+
+ramp:
+  count: 300
+  connectRate: 15
+  rampUpSeconds: 20     # climb to full rate over 20s instead of all at once
+  holdSeconds: 600
+
+behaviors:
+  antiAfk:
+    enabled: true       # keep bots from being AFK-kicked over the long hold
+
+report:
+  mode: tui             # full-screen live dashboard
+  json: true
+  html: true            # also write a shareable HTML report at the end

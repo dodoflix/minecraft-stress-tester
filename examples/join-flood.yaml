@@ -1,0 +1,26 @@
+# Connection flood: many bots, fast, brief. Stresses the login / netty path and antibot.
+# Only run against servers you own or are permitted to test.
+authorized: true
+
+target:
+  host: 127.0.0.1
+  port: 25565
+
+driver: light
+
+ramp:
+  count: 800
+  connectRate: 80       # 80 new connections per second
+  rampUpSeconds: 0
+  holdSeconds: 10
+
+reconnect:
+  enabled: false        # let kicked bots stay down; measure the flood, not recovery
+
+behaviors:
+  antiAfk:
+    enabled: false
+
+report:
+  mode: console
+  json: true
