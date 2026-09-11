@@ -3,6 +3,8 @@ dist/
 coverage/
 reports/
 .mcst-cache/
+.dev-server/
+.mcst-accounts/
 .idea/
 .vscode/
 *.log

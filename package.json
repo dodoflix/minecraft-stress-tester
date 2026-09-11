@@ -20,6 +20,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "tsx src/cli.ts",
     "mcst": "tsx src/cli.ts",
+    "server": "node scripts/dev-server.mjs",
     "test": "vitest run",
     "test:unit": "vitest run --exclude '**/integration.test.ts'",
     "test:integration": "vitest run test/integration.test.ts --testTimeout=200000",

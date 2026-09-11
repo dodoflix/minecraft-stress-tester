@@ -8,6 +8,21 @@ cd minecraft-stress-tester
 npm install
 ```
 
+## Local test server
+
+Don't have a server to point at? Spin up a throwaway Paper server (offline mode, flat
+world, room for 1000 bots) - it downloads on first run into `./.dev-server` (gitignored):
+
+```bash
+npm run server                 # needs a JDK (Java 25+); Ctrl+C to stop
+```
+
+Then, in another terminal, point the tool at it:
+
+```bash
+npm start -- --host 127.0.0.1 --port 25565 --count 50 --i-am-authorized
+```
+
 ## Run
 
 With a config file:
