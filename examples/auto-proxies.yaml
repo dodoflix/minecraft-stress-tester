@@ -21,13 +21,13 @@ ramp:
 proxies:
   auto: true            # fetch + validate free socks5/socks4 proxies before the run
   autoValidate: true    # keep only proxies a Minecraft server actually answers through
-  autoMax: 50           # target number of working proxies to use
-  autoOverfetch: 2      # validate + keep up to autoMax * this, as a buffer against proxies dying mid-run
+  autoMax: 200          # target bots to keep proxied. Proxies found = ceil(autoMax/maxPerProxy) * autoOverfetch
+  autoOverfetch: 2      # buffer multiplier on the proxies found, against ones that die mid-run
   # autoMaxProbes: 1000 # unset = probe the whole pool until the buffer is filled (slower). Set to cap.
   # autoConcurrency: 100
   # autoTimeoutMs: 4000
-  maxPerProxy: 20      # bots per proxy. For one unique proxy per bot: maxPerProxy 1 and set
-                        # autoMax >= count (free proxies rarely yield that many, though).
+  maxPerProxy: 1        # bots per proxy. maxPerProxy 1 = each bot gets a unique proxy. Bots left
+                        # without a proxy fail (never connect direct), so the real IP is never used.
 
 report:
   json: true

@@ -174,8 +174,10 @@ export interface ResolveOptions {
   timeoutMs?: number;
   /** Cap on how many fetched proxies to health-check (they are shuffled first). */
   maxProbes?: number;
-  /** Find (and keep) up to max * overfetch working proxies, as a buffer against flaky ones. */
+  /** Find (and keep) a buffer of max/perProxy * overfetch working proxies against flaky ones. */
   overfetch?: number;
+  /** Bots each proxy will carry (maxPerProxy). Fewer proxies are needed when this is higher. */
+  perProxy?: number;
   fetchImpl?: typeof fetch;
   validator?: (proxy: string) => Promise<ProxyCheck>;
   onProgress?: (p: { checked: number; total: number; ok: number }) => void;
@@ -192,13 +194,14 @@ export async function resolveAutoProxies(
 ): Promise<string[]> {
   const providers = opts.providers?.length ? opts.providers : DEFAULT_PROVIDERS;
   const max = opts.max ?? 50;
-  // Over-validate a buffer: keep more working proxies than strictly needed, since free proxies
-  // that pass validation often die by the time bots use them.
-  const target_ = Math.ceil(max * (opts.overfetch ?? 2));
+  // Proxies needed = bots to proxy / bots-per-proxy, then over-validate a buffer since free
+  // proxies that pass validation often die by the time bots use them.
+  const perProxy = opts.perProxy ?? 1;
+  const target_ = Math.max(1, Math.ceil((max / perProxy) * (opts.overfetch ?? 2)));
   const fetched = await fetchFreeProxies(providers, opts.fetchImpl);
   if (!fetched.length) return [];
 
-  if (opts.validate === false) return fetched.slice(0, max);
+  if (opts.validate === false) return fetched.slice(0, Math.max(1, Math.ceil(max / perProxy)));
 
   const timeoutMs = opts.timeoutMs ?? 4000;
   const validator = opts.validator ?? ((proxy) => probeProxy(proxy, target.host, target.port, timeoutMs));

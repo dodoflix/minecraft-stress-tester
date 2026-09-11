@@ -174,6 +174,7 @@ async function runCommand(opts: Record<string, unknown>): Promise<void> {
       validate: config.proxies.autoValidate,
       max: config.proxies.autoMax,
       overfetch: config.proxies.autoOverfetch,
+      perProxy: config.proxies.maxPerProxy,
       maxProbes: config.proxies.autoMaxProbes,
       concurrency: config.proxies.autoConcurrency,
       timeoutMs: config.proxies.autoTimeoutMs,

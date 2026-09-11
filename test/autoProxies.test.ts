@@ -166,6 +166,21 @@ describe("resolveAutoProxies", () => {
     expect(calls).toBeLessThan(50); // stopped once the buffer was full
   });
 
+  it("needs fewer proxies when maxPerProxy is higher", async () => {
+    const validator = async (proxy: string): Promise<ProxyCheck> => ({ proxy, ok: true, latencyMs: 1 });
+    // ceil(100 / 20) * 2 = 10 proxies for 100 proxied bots at 20 per proxy.
+    const result = await resolveAutoProxies(target, {
+      providers: ["X"],
+      fetchImpl: fetchN(50),
+      validator,
+      max: 100,
+      perProxy: 20,
+      overfetch: 2,
+      concurrency: 20,
+    });
+    expect(result).toHaveLength(10);
+  });
+
   it("probes the whole pool when maxProbes is unset", async () => {
     let calls = 0;
     const validator = async (proxy: string): Promise<ProxyCheck> => {
