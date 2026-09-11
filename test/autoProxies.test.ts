@@ -147,6 +147,23 @@ describe("resolveAutoProxies", () => {
     expect(calls).toBeLessThan(50); // did not probe the whole list
   });
 
+  it("probes the whole pool when maxProbes is unset", async () => {
+    let calls = 0;
+    const validator = async (proxy: string): Promise<ProxyCheck> => {
+      calls++;
+      return { proxy, ok: true, latencyMs: 1 };
+    };
+    // max never reached, no maxProbes -> every fetched proxy is probed.
+    const result = await resolveAutoProxies(target, {
+      providers: ["X"],
+      fetchImpl: fetchN(50),
+      validator,
+      max: 999,
+    });
+    expect(calls).toBe(50);
+    expect(result).toHaveLength(50);
+  });
+
   it("caps how many proxies it probes (maxProbes)", async () => {
     let calls = 0;
     const validator = async (proxy: string): Promise<ProxyCheck> => {

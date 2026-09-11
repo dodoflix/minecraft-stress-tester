@@ -85,8 +85,9 @@ export const proxiesSchema = z.object({
   autoValidate: z.boolean().default(true),
   /** Cap how many validated free proxies to keep (stops probing once this many are found). */
   autoMax: z.number().int().min(1).default(50),
-  /** How many fetched proxies to health-check at most. Higher = probe more of the pool, slower. */
-  autoMaxProbes: z.number().int().min(1).default(1000),
+  /** How many fetched proxies to health-check at most. Unset = probe the whole pool until autoMax
+   *  usable are found (slower, but finds the most proxies). Set a number to cap it (faster). */
+  autoMaxProbes: z.number().int().min(1).optional(),
   /** Simultaneous health-checks. */
   autoConcurrency: z.number().int().min(1).default(100),
   /** Per-proxy health-check timeout (ms). */

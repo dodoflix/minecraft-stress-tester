@@ -197,9 +197,10 @@ export async function resolveAutoProxies(
 
   const timeoutMs = opts.timeoutMs ?? 4000;
   const validator = opts.validator ?? ((proxy) => probeProxy(proxy, target.host, target.port, timeoutMs));
-  // Health-checking every fetched proxy (thousands, mostly dead, one timeout each) takes many
-  // minutes. Shuffle, cap the pool, probe with high concurrency, and stop once we have `max`.
-  const candidates = shuffle(fetched).slice(0, opts.maxProbes ?? 400);
+  // Shuffle, then probe with high concurrency, stopping once we have `max` usable. `maxProbes`
+  // caps how much of the pool we touch (probing all of it, mostly dead, is slow); unset means
+  // probe the whole pool until `max` are found.
+  const candidates = shuffle(fetched).slice(0, opts.maxProbes ?? fetched.length);
   const ok = await probeUntil(candidates, validator, max, opts.concurrency ?? 100, opts.onProgress);
   return pickValidated(ok, max);
 }

@@ -1,11 +1,14 @@
 # Fetch free public proxies automatically (no registration, no payment) and spread the
 # load across them. WARNING: free proxies are run by unknown third parties. Your traffic
 # and your target's IP pass through them; only use this against a server you are authorized
-# to test. The tool over-fetches and health-checks, keeping only the reachable proxies.
+# to test. The tool over-fetches and health-checks, keeping only the proxies a Minecraft
+# server actually answers through.
 authorized: true
 
 target:
-  host: 127.0.0.1
+  # Must be a PUBLIC address you are authorized to test. Proxies connect from their own
+  # machines, so they cannot reach a server on localhost/your LAN (127.0.0.1 won't work).
+  host: play.example.com
   port: 25565
 
 driver: light
@@ -16,14 +19,14 @@ ramp:
   holdSeconds: 60
 
 proxies:
-  auto: true            # fetch + validate free proxies before the run
-  autoValidate: true    # keep only proxies that can actually reach the target
+  auto: true            # fetch + validate free socks5/socks4 proxies before the run
+  autoValidate: true    # keep only proxies a Minecraft server actually answers through
   autoMax: 50           # stop once this many working proxies are found
-  autoMaxProbes: 1000   # how many of the fetched pool to health-check (higher = more, slower)
-  # autoConcurrency: 100  # simultaneous health-checks
-  # autoTimeoutMs: 4000   # per-proxy probe timeout
-  # autoProviders: []   # empty = built-in free socks5/socks4 lists; or supply your own URLs
-  maxPerProxy: 20
+  # autoMaxProbes: 1000 # unset = probe the whole pool until autoMax are found (slower). Set to cap.
+  # autoConcurrency: 100
+  # autoTimeoutMs: 4000
+  maxPerProxy: 20       # bots per proxy. For one unique proxy per bot: maxPerProxy 1 and set
+                        # autoMax >= count (free proxies rarely yield that many, though).
 
 report:
   json: true
