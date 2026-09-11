@@ -12,8 +12,8 @@ export interface PreflightResult {
 /** Server-list-ping the target before any load: proves reachability and reports version/players/RTT. */
 export async function preflight(host: string, port: number, version?: string): Promise<PreflightResult> {
   const res: any = await new Promise((resolve, reject) => {
-    mc.ping({ host, port, version: version ?? false } as any, (err, result) => {
-      if (err) reject(err);
+    mc.ping({ host, port, version: version ?? false } as any, (err: any, result) => {
+      if (err) reject(new Error(`cannot reach ${host}:${port} — ${err.code || err.message || err}`));
       else resolve(result);
     });
   });

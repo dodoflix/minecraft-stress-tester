@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { extname } from "node:path";
-import yaml from "js-yaml";
+import { load as loadYaml } from "js-yaml";
 import { configSchema, type Config } from "./schema.js";
 
 /** Raw CLI overrides that map onto the config before validation. */
@@ -16,7 +16,7 @@ export interface CliOverrides {
 function readConfigFile(path: string): unknown {
   const raw = readFileSync(path, "utf8");
   const ext = extname(path).toLowerCase();
-  if (ext === ".yaml" || ext === ".yml") return yaml.load(raw);
+  if (ext === ".yaml" || ext === ".yml") return loadYaml(raw);
   return JSON.parse(raw);
 }
 
