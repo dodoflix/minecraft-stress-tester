@@ -5,7 +5,6 @@
 
 ### Features
 
-* local dev server script (npm run server) ([7ccea09](https://github.com/dodoflix/minecraft-stress-tester/commit/7ccea09cd864c2bd14f0c97cdb61c522c2d95e58))
 * local dev server script (npm run server) ([3817440](https://github.com/dodoflix/minecraft-stress-tester/commit/38174400841d0fe7a45076fedff50dcb9efd41fa))
 
 ## [1.1.0](https://github.com/dodoflix/minecraft-stress-tester/compare/v1.0.1...v1.1.0) (2026-09-11)
