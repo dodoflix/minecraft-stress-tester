@@ -1,6 +1,8 @@
 import mc from "minecraft-protocol";
 import { TypedEmitter, type BotDriver, type BotEventMap, type BotSpec } from "./driver.js";
 import { longToBigInt } from "../util/long.js";
+import { stringifyReason } from "../util/reason.js";
+import { chatPacket } from "../util/chat.js";
 
 /**
  * Lightweight raw-protocol bot. No world/chunk parsing — just the login handshake,
@@ -64,25 +66,16 @@ export class LightBot extends TypedEmitter<BotEventMap> implements BotDriver {
     client.on("end", (reason: string) => this.emit("end", reason ?? "end"));
   }
 
+  // stringifyReason lives in util/reason.ts so the parsing logic is unit-tested in isolation.
+
   disconnect(reason = "client_quit"): void {
     this.client?.end(reason);
     this.client = null;
   }
 
   chat(message: string): void {
-    const isCommand = message.startsWith("/");
-    // ponytail: pre-1.19 (protocol < 759) plain chat is reliable; signed chat / chat_command
-    // on 1.19+ needs signing that only FullBot (mineflayer) does properly. Best-effort here.
-    const proto = this.client?.protocolVersion ?? 0;
-    if (proto >= 759) {
-      if (isCommand) {
-        this.safeWrite("chat_command", { command: message.slice(1), timestamp: BigInt(Date.now()), salt: 0n, argumentSignatures: [], messageCount: 0, acknowledged: Buffer.alloc(3) });
-      } else {
-        this.safeWrite("chat_message", { message });
-      }
-    } else {
-      this.safeWrite("chat", { message });
-    }
+    const { name, params } = chatPacket(this.client?.protocolVersion ?? 0, message);
+    this.safeWrite(name, params);
   }
 
   /** Writes throw if the packet shape is wrong for this version; swallow so one bot can't crash the run. */
@@ -93,20 +86,4 @@ export class LightBot extends TypedEmitter<BotEventMap> implements BotDriver {
       this.emit("error", err instanceof Error ? err : new Error(String(err)));
     }
   }
-}
-
-function stringifyReason(reason: unknown): string {
-  if (reason == null) return "unknown";
-  if (typeof reason === "string") {
-    try {
-      const parsed = JSON.parse(reason);
-      return stringifyReason(parsed);
-    } catch {
-      return reason;
-    }
-  }
-  const r = reason as Record<string, unknown>;
-  if (typeof r.text === "string") return r.text || "unknown";
-  if (typeof r.translate === "string") return r.translate;
-  return JSON.stringify(reason);
 }

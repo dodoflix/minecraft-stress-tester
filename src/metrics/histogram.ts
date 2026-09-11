@@ -15,9 +15,8 @@ export class Histogram {
     return this.samples.length;
   }
 
-  /** p in [0,1]. Nearest-rank on the sorted copy. */
+  /** p in [0,1]. Nearest-rank on the sorted copy. Only called on a non-empty set (see summary). */
   private quantile(sorted: number[], p: number): number {
-    if (sorted.length === 0) return 0;
     const idx = Math.min(sorted.length - 1, Math.max(0, Math.ceil(p * sorted.length) - 1));
     return sorted[idx]!;
   }

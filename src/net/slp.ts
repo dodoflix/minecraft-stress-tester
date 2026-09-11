@@ -17,18 +17,20 @@ export async function preflight(host: string, port: number, version?: string): P
       else resolve(result);
     });
   });
+  return parsePing(res);
+}
 
-  const desc = res.description;
-  const motd =
-    typeof desc === "string" ? desc : desc?.text ?? extractText(desc) ?? "";
-
+/** Pure parse of a raw status-ping response into our normalized shape. Unit-tested. */
+export function parsePing(res: any): PreflightResult {
+  const desc = res?.description;
+  const motd = typeof desc === "string" ? desc : extractText(desc);
   return {
     motd: String(motd).replace(/§[0-9a-fk-or]/gi, "").trim(),
-    versionName: res.version?.name ?? "unknown",
-    protocol: Number(res.version?.protocol ?? 0),
-    online: Number(res.players?.online ?? 0),
-    max: Number(res.players?.max ?? 0),
-    latencyMs: Number(res.latency ?? 0),
+    versionName: res?.version?.name ?? "unknown",
+    protocol: Number(res?.version?.protocol ?? 0),
+    online: Number(res?.players?.online ?? 0),
+    max: Number(res?.players?.max ?? 0),
+    latencyMs: Number(res?.latency ?? 0),
   };
 }
 

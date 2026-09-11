@@ -13,9 +13,13 @@ import { writeJsonReport } from "../report/export.js";
 
 type DriverFactory = (spec: BotSpec) => BotDriver;
 
-/** quiet: suppress live console output (used by tests / programmatic runs). */
 export interface EngineOptions {
+  /** Suppress live console output (tests / programmatic runs). */
   quiet?: boolean;
+  /** Override the bot driver (custom drivers, or a fake for testing). */
+  driverFactory?: DriverFactory;
+  /** Skip the SLP preflight (when the caller already knows the target is reachable). */
+  skipPreflight?: boolean;
 }
 
 export class Engine {
@@ -29,13 +33,18 @@ export class Engine {
   private shuttingDown = false;
   private resolveRun: ((s: MetricsSnapshot) => void) | null = null;
   private readonly quiet: boolean;
+  private readonly skipPreflight: boolean;
 
   constructor(private readonly config: Config, options: EngineOptions = {}) {
     this.quiet = options.quiet ?? false;
-    if (config.driver === "full") {
+    this.skipPreflight = options.skipPreflight ?? false;
+    if (options.driverFactory) {
+      this.factory = options.driverFactory;
+    } else if (config.driver === "full") {
       throw new Error("The 'full' (mineflayer) driver is not implemented yet — use driver: light.");
+    } else {
+      this.factory = (spec) => new LightBot(spec);
     }
-    this.factory = (spec) => new LightBot(spec);
   }
 
   private log(line: string): void {
@@ -46,12 +55,14 @@ export class Engine {
     assertAuthorized(this.config);
     const { host, port } = this.config.target;
 
-    this.log(`Preflight ping ${host}:${port} ...\n`);
-    this.preflightResult = await preflight(host, port, this.config.target.version);
-    const p = this.preflightResult;
-    this.log(
-      `  ${p.versionName} (protocol ${p.protocol}) | players ${p.online}/${p.max} | ping ${p.latencyMs}ms | "${p.motd}"\n`,
-    );
+    if (!this.skipPreflight) {
+      this.log(`Preflight ping ${host}:${port} ...\n`);
+      this.preflightResult = await preflight(host, port, this.config.target.version);
+      const p = this.preflightResult;
+      this.log(
+        `  ${p.versionName} (protocol ${p.protocol}) | players ${p.online}/${p.max} | ping ${p.latencyMs}ms | "${p.motd}"\n`,
+      );
+    }
     // Auto-negotiate by default: minecraft-protocol maps the server's protocol number
     // to a client version it supports (handles patch releases like 26.1.2 -> 26.1).
     // ponytail: auto-negotiate costs one extra status ping per bot — pin
