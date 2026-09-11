@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { antiAfk } from "../src/behaviors/antiAfk.js";
 import { auth } from "../src/behaviors/auth.js";
 import { chatSpam } from "../src/behaviors/chatSpam.js";
+import { commands } from "../src/behaviors/commands.js";
 import { buildBehaviors } from "../src/behaviors/index.js";
 import { movement } from "../src/behaviors/movement.js";
 import { configSchema } from "../src/config/schema.js";
@@ -82,6 +83,33 @@ describe("auth behavior", () => {
     cleanup();
     vi.advanceTimersByTime(2000);
     expect(bot.chats).toEqual([]); // nothing sent
+  });
+});
+
+describe("commands behavior", () => {
+  it("runs the list once after the first spawn, staggered, and not on a later spawn", () => {
+    vi.useFakeTimers();
+    const bot = new FakeBot();
+    commands({ enabled: true, list: ["/survival", "/kit start"], delayMs: 1000 })(bot);
+    bot.emit("spawned");
+    expect(bot.chats).toEqual([]); // waits for the delay
+    vi.advanceTimersByTime(1000);
+    expect(bot.chats).toEqual(["/survival"]);
+    vi.advanceTimersByTime(1000);
+    expect(bot.chats).toEqual(["/survival", "/kit start"]);
+    bot.emit("spawned"); // transfer/respawn: not re-run
+    vi.advanceTimersByTime(5000);
+    expect(bot.chats).toEqual(["/survival", "/kit start"]);
+  });
+
+  it("cleans up pending commands when the bot leaves", () => {
+    vi.useFakeTimers();
+    const bot = new FakeBot();
+    const cleanup = commands({ enabled: true, list: ["/survival"], delayMs: 1000 })(bot);
+    bot.emit("spawned");
+    cleanup();
+    vi.advanceTimersByTime(2000);
+    expect(bot.chats).toEqual([]);
   });
 });
 

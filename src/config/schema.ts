@@ -64,6 +64,16 @@ export const behaviorsSchema = z.object({
       delayMs: z.number().int().min(0).default(1000),
     })
     .prefault({}),
+  // Run one-shot commands once the bot spawns into the world, e.g. ["/survival"] to leave the
+  // hub after auth. Fires once per bot, on the first spawn (already authed on limbo networks).
+  commands: z
+    .object({
+      enabled: z.boolean().default(false),
+      list: z.array(z.string()).default([]),
+      /** Wait after spawn before sending, and stagger between commands. */
+      delayMs: z.number().int().min(0).default(2000),
+    })
+    .prefault({}),
 });
 
 export const accountsSchema = z.object({
