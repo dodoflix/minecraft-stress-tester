@@ -68,7 +68,14 @@ export class Engine {
     assertAuthorized(this.config);
     const { host, port } = this.config.target;
 
-    if (!this.skipPreflight) {
+    if (this.skipPreflight) {
+      // caller opted out
+    } else if (this.proxies.enabled) {
+      // The preflight ping is a direct TCP connection from the real IP. With proxies on, that
+      // would leak the very IP the proxies exist to hide, so skip it entirely; bots detect the
+      // version through their proxies (auto-negotiation uses the same proxied connect).
+      this.log("Proxies enabled: skipping the direct preflight so the real IP is never used.\n");
+    } else {
       this.log(`Preflight ping ${host}:${port} ...\n`);
       try {
         this.preflightResult = await preflight(host, port, this.config.target.version);
@@ -77,8 +84,8 @@ export class Engine {
           `  ${p.versionName} (protocol ${p.protocol}) | players ${p.online}/${p.max} | ping ${p.latencyMs}ms | "${p.motd}"\n`,
         );
       } catch (err) {
-        // Not fatal: the server may be throttling the probe, or blocking our direct IP while we
-        // proxy the bots. Bots still connect (auto-negotiating the version), so warn and go on.
+        // Not fatal: the server may be throttling the probe. Bots still connect (auto-negotiating
+        // the version), so warn and go on.
         this.log(`  preflight failed: ${err instanceof Error ? err.message : String(err)} (continuing)\n`);
         this.preflightResult = null;
       }

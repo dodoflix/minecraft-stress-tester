@@ -71,4 +71,30 @@ describe("Engine with preflight enabled", () => {
       writeSpy.mockRestore();
     }
   });
+
+  it("never pings directly when proxies are enabled", async () => {
+    vi.useFakeTimers();
+    const writeSpy = vi.spyOn(process.stdout, "write").mockReturnValue(true);
+    try {
+      preflightMock.fn.mockClear();
+      const config = configSchema.parse({
+        authorized: true,
+        target: { host: "example.test", port: 25565 },
+        proxies: { list: ["socks5://p:1080"], maxPerProxy: 5 },
+        ramp: { count: 1, connectRate: 50, holdSeconds: 0, jitter: 0 },
+        report: { json: false },
+      });
+      const engine = new Engine(config, { driverFactory: (s) => new FakeBot(s) });
+
+      const p = engine.run();
+      await vi.advanceTimersByTimeAsync(500);
+      await p;
+
+      expect(preflightMock.fn).not.toHaveBeenCalled(); // no direct ping
+      const out = writeSpy.mock.calls.map((c) => String(c[0])).join("");
+      expect(out).toContain("skipping the direct preflight");
+    } finally {
+      writeSpy.mockRestore();
+    }
+  });
 });
