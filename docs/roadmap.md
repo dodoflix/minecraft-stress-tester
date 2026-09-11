@@ -23,20 +23,136 @@ web UI, and blueprints all as clients of it.
 
 ## What's next
 
-Deferred enhancements, in rough priority order:
+The v2 platform is functional but each capability shipped its smallest useful slice. The work
+below turns those slices into the full product, in dependency order. Every item builds on the
+seams already in place (the control-plane API, the Bot API, the blueprint model, the zod
+schema), so none of it reaches into engine internals.
 
-- **Richer web UI.** Replace the self-contained control-panel page with a React + Vite +
-  Tailwind + shadcn/ui build (likely an npm-workspaces monorepo: `core` / `server` / `ui`),
-  including the debug console and the visual script editor as panels. The API it speaks to is
-  already in place.
-- **Sandboxed user scripts + visual node editor.** Run arbitrary user TypeScript/JavaScript
-  against the Bot API inside a real isolate (a locked-down worker exposing only the Bot API,
-  never an in-process `eval`), and add an Unreal-style node graph (e.g. React Flow) that
-  compiles to the same Bot API as today's blueprints.
-- **Deeper security recon + advisory data.** Broaden plugin detection and grow the advisory
-  matching beyond the curated set as reliable data sources allow. Best-effort by design.
-- **WebSocket transport.** The metrics stream is SSE today; add WebSocket if bidirectional
-  control (e.g. the remote debug console) needs it.
+### Monorepo split (`core` / `server` / `ui`)
+
+**Goal.** Restructure into an npm-workspaces monorepo so the UI can grow without tangling the
+engine.
+
+**Scope.** `core` = today's `src/` (engine, drivers, metrics, config), published as the library
+plus the `mcst` CLI. `server` = the control-plane API wrapping `core`. `ui` = the React app,
+built to static assets the `server` serves. Keep the CLI, the `mcst` bin, and the public API
+stable across the move.
+
+**Best practices.** Do the split before the UI grows, not after. One build graph; `core` stays
+importable and headless.
+
+**Depends on.** Nothing new; it is the enabler for the full UI.
+
+### Full web UI (React + Vite + Tailwind + shadcn/ui)
+
+**Goal.** Replace the self-contained control-panel page with a real single-page app that does
+everything from the browser.
+
+**Scope.** A runs dashboard (live metrics off the existing stream, ramp/scenario controls); a
+config editor with both a Monaco/CodeMirror YAML view **and** an interactive form generated
+from the zod schema, with live validation; a history browser that reuses the HTML report
+renderer as a React view; theme-aware, responsive. Bundled by Vite into static assets served by
+`server`, with **no external CDNs** (strict CSP). Ship the built assets in the package.
+
+**Best practices.** Generate the config form from the schema so the UI never drifts from the
+CLI. One report renderer shared by web and file.
+
+**Depends on.** The monorepo split; the control-plane API (shipped).
+
+### Sandboxed user scripts
+
+**Goal.** Let users author arbitrary TypeScript/JavaScript per bot, run safely, next to today's
+data-only blueprints.
+
+**Scope.** An in-UI Monaco code editor writing against the Bot API; execution inside a **real
+isolate** (a locked-down worker thread, or `isolated-vm`) that exposes only the Bot API over
+message passing, with CPU/memory/time limits. Import/export scripts as files. The headless
+runner can land before the editor.
+
+**Best practices.** This is a hard security boundary: treat user code as hostile, never
+`eval` in-process, expose no `fs`/`net`/`env` beyond the Bot API surface, and cap resources.
+One canonical Bot API, already defined.
+
+**Depends on.** The Bot API (shipped); the UI (for the editor).
+
+### Visual node editor
+
+**Goal.** Author blueprints visually, Unreal-style.
+
+**Scope.** A node graph (e.g. React Flow) of event nodes (onSpawn, onChat, onDeath), action
+nodes (move, chat, wait, goto, stop), and control flow, that **compiles to the same blueprint
+model and Bot API** today's JSON blueprints and `mcst script eject` use. Import/export graphs as
+JSON; eject a graph to editable code; blueprints round-trip to and from the graph.
+
+**Best practices.** The graph is a code generator over the one canonical blueprint/Bot API,
+never a second engine.
+
+**Depends on.** The UI; the blueprint model (shipped).
+
+### Behaviors as composable script pipelines
+
+**Goal.** Once scripts and blueprints are first-class, the built-in behavior toggles (`auth`,
+`movement`, `antiAfk`, `chatSpam`, `commands`) are redundant. Replace them with a small library
+of ready-made scripts/blueprints, composed per bot into an **ordered pipeline** where each stage
+gates the next on success.
+
+**Scope.**
+
+- Reimplement each current behavior as a shipped example script/blueprint (a standard library),
+  and **remove the hardcoded `behaviors.*` system**. A bot's behavior becomes an ordered list of
+  script/blueprint references, not config flags.
+- Give a script/blueprint a **completion signal** (succeeded / failed / done) so stages can be
+  sequenced, not just fire in parallel on events like today's blueprints.
+- A **pipeline runner**: run stages in order, advancing to the next only when the current one
+  succeeds; on failure, stop or retry per policy. Example: an `auth` stage runs first, and only
+  after it reports success does the `chat-spam` stage start.
+- Config: the per-bot pipeline is an ordered list of scripts/blueprints (with per-stage options).
+
+**Best practices.** One canonical Bot API and blueprint model; the standard-library scripts get
+no special-casing, they are just scripts. The pipeline is data (order + gating); the runner stays
+small. This is a breaking config change, so document the equivalent pipeline for each removed
+behavior.
+
+**Depends on.** The blueprint model (shipped); the sandboxed-scripts work (for arbitrary-JS
+stages); the Bot API (shipped).
+
+### Deeper security recon and advisory data
+
+**Goal.** Detect and match more, while staying defensive and honest.
+
+**Scope.** Broaden plugin detection (more probes, plugin-channel fingerprints, response
+heuristics), add best-effort plugin-version detection to unlock CVE matching, and grow advisory
+matching by blending the curated rules with osv.dev and version-range checks as reliable data
+appears. Findings stay actionable and labeled by confidence.
+
+**Best practices.** Non-destructive checks only; report for patching; never ship exploits. See
+[Security & ethics](#security--ethics).
+
+**Depends on.** The scanner (shipped).
+
+### Bidirectional transport and remote control
+
+**Goal.** Interactive, bidirectional control over the network, and driving a run from another
+machine.
+
+**Scope.** Add a WebSocket channel to the control-plane for the debug console and live script
+control (SSE stays for one-way metrics). Optionally, a distributed runner mode where shards run
+on several machines and report into one aggregate.
+
+**Best practices.** Keep localhost + token as the default; require an explicit opt-in for any
+non-local binding; version the API.
+
+**Depends on.** The control-plane API and Bot API (shipped).
+
+### Packaging and distribution
+
+**Goal.** Make it trivial to install and run.
+
+**Scope.** Publish `core` to npm (so `npx mcst` works), and provide a container image for
+`mcst serve` / `mcst gui`. Keep the authorization gate and localhost-by-default posture intact
+in every distribution.
+
+**Depends on.** The monorepo split (for a clean library boundary).
 
 ### Guiding principles
 
