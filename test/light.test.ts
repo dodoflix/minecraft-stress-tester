@@ -59,6 +59,7 @@ function connectBot() {
     "spawned",
     "time",
     "packet",
+    "latency",
     "kicked",
     "error",
     "end",
@@ -102,6 +103,30 @@ describe("LightBot lifecycle", () => {
     const { client, events } = connectBot();
     client.emit("packet", {}, { name: "update_time" }, null, Buffer.alloc(9));
     expect(events.time).toBeUndefined();
+  });
+
+  it("emits latency from player_info for our own name", () => {
+    const { client, events } = connectBot();
+    client.emit(
+      "packet",
+      { data: [{ name: "bot", ping: 55 }] },
+      { name: "player_info" },
+      null,
+      Buffer.alloc(2),
+    );
+    expect(events.latency).toEqual([55]);
+  });
+
+  it("ignores player_info without our own ping", () => {
+    const { client, events } = connectBot();
+    client.emit(
+      "packet",
+      { data: [{ name: "someone", ping: 5 }] },
+      { name: "player_info" },
+      null,
+      Buffer.alloc(2),
+    );
+    expect(events.latency).toBeUndefined();
   });
 
   it("confirms a teleport and marks spawned once on position", () => {

@@ -11,6 +11,9 @@ export interface CliOverrides {
   driver?: "light" | "full";
   authorized?: boolean;
   version?: string;
+  tui?: boolean;
+  csv?: boolean;
+  html?: boolean;
 }
 
 function readConfigFile(path: string): unknown {
@@ -42,6 +45,12 @@ export function loadConfig(filePath: string | undefined, cli: CliOverrides = {})
     ramp: {
       ...(base.ramp as object),
       ...(cli.count ? { count: cli.count } : {}),
+    },
+    report: {
+      ...(base.report as object),
+      ...(cli.tui ? { mode: "tui" } : {}),
+      ...(cli.csv ? { csv: true } : {}),
+      ...(cli.html ? { html: true } : {}),
     },
   };
 

@@ -95,6 +95,27 @@ describe("Engine orchestration", () => {
     expect(created).toHaveLength(0);
   });
 
+  it("draws the TUI dashboard when report.mode is tui", async () => {
+    vi.useFakeTimers();
+    const writeSpy = vi.spyOn(process.stdout, "write").mockReturnValue(true);
+    try {
+      const config = configSchema.parse({
+        authorized: true,
+        target: { host: "h" },
+        ramp: { count: 1, connectRate: 50, holdSeconds: 0, jitter: 0 },
+        report: { json: false, mode: "tui" },
+      });
+      const engine = new Engine(config, { skipPreflight: true, driverFactory: (s) => new FakeBot(s) });
+      const p = engine.run();
+      await vi.advanceTimersByTimeAsync(500);
+      await p;
+      const out = writeSpy.mock.calls.map((c) => String(c[0])).join("");
+      expect(out).toContain("Minecraft Stress Tester");
+    } finally {
+      writeSpy.mockRestore();
+    }
+  });
+
   it("throws for the unimplemented full driver when no factory is supplied", () => {
     const config = configSchema.parse({ target: { host: "h" }, driver: "full" });
     expect(() => new Engine(config)).toThrow(/full/);

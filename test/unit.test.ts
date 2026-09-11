@@ -81,6 +81,13 @@ describe("tps estimator", () => {
     expect(v).toBeGreaterThan(9);
     expect(v).toBeLessThan(11);
   });
+
+  it("ignores sub-100ms and non-advancing samples", () => {
+    const t = new TpsEstimator();
+    t.record(0n, 0);
+    expect(t.record(20n, 50)).toBe(20); // 50ms < 100ms guard: prior kept
+    expect(t.record(0n, 2000)).toBe(20); // no tick advance: prior kept
+  });
 });
 
 describe("longToBigInt", () => {

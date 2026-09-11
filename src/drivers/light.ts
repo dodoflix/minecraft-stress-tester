@@ -1,6 +1,7 @@
 import mc from "minecraft-protocol";
 import { chatPacket } from "../util/chat.js";
 import { longToBigInt } from "../util/long.js";
+import { extractOwnPing } from "../util/playerPing.js";
 import { stringifyReason } from "../util/reason.js";
 import { type BotDriver, type BotEventMap, type BotSpec, TypedEmitter } from "./driver.js";
 
@@ -44,6 +45,10 @@ export class LightBot extends TypedEmitter<BotEventMap> implements BotDriver {
       this.emit("packet", meta.name, fullBuffer?.length ?? 0);
       if (meta.name === "update_time" && data?.age !== undefined) {
         this.emit("time", longToBigInt(data.age));
+      }
+      if (meta.name === "player_info" || meta.name === "player_info_update") {
+        const ping = extractOwnPing(data, this.spec.username);
+        if (ping !== undefined) this.emit("latency", ping);
       }
       // First position packet = in-world. Confirm the teleport or the server parks us in limbo.
       if (meta.name === "position") {

@@ -71,6 +71,21 @@ describe("loadConfig", () => {
     expect(c.ramp.count).toBe(5);
   });
 
+  it("report defaults: json on, csv/html off, console mode", () => {
+    const c = loadConfig(undefined, { host: "h", authorized: true });
+    expect(c.report.json).toBe(true);
+    expect(c.report.csv).toBe(false);
+    expect(c.report.html).toBe(false);
+    expect(c.report.mode).toBe("console");
+  });
+
+  it("CLI --tui/--csv/--html map onto the report config", () => {
+    const c = loadConfig(undefined, { host: "h", authorized: true, tui: true, csv: true, html: true });
+    expect(c.report.mode).toBe("tui");
+    expect(c.report.csv).toBe(true);
+    expect(c.report.html).toBe(true);
+  });
+
   it("rejects an invalid config (missing host)", () => {
     const p = tmpFile("bad.json", JSON.stringify({ authorized: true, target: { port: 25565 } }));
     expect(() => loadConfig(p)).toThrow();

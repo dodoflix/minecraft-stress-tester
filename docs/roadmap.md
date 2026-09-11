@@ -8,11 +8,10 @@ LightBot, ramp scheduler, engine-owned reconnect, authorization gate, config loa
 SLP preflight, connection/TPS/throughput metrics, console live view, JSON report,
 real-server integration test, CI/CD.
 
-## Phase 2 - observability
+## ✅ Phase 2 - observability (shipped)
 
-- TUI dashboard (blessed-contrib): live TPS/latency/throughput charts and tables.
-- CSV + self-contained HTML report export.
-- In-session server-perceived ping via `player_info`.
+Full-screen TUI dashboard (`--tui`, dependency-free ANSI), CSV + self-contained HTML
+report export (`--csv` / `--html`), in-session server-perceived ping via `player_info`.
 
 ## Phase 3 - realism & scale
 
