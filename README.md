@@ -74,6 +74,7 @@ Report written: ./reports/mcst-2026-09-11T....json
 - [Usage & CLI](docs/usage.md)
 - [Control-plane API](docs/api.md) - drive runs over HTTP with `mcst serve`
 - [Debug mode & Bot API](docs/debug.md) - drive one bot interactively with `mcst debug`
+- [Security scan](docs/security-scan.md) - defensive `mcst scan` for servers you own
 - [Metrics explained](docs/metrics.md) - including how the TPS estimate works and its limits
 - [Architecture](docs/architecture.md)
 - [Roadmap](docs/roadmap.md)

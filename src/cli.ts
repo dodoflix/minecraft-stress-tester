@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { cpus } from "node:os";
+import { join } from "node:path";
 import { createInterface } from "node:readline";
 import { Command } from "commander";
 import { BotApi } from "./bot/botApi.js";
@@ -14,6 +15,8 @@ import { resolveAutoProxies } from "./net/autoProxies.js";
 import type { PreflightResult } from "./net/slp.js";
 import { formatSummary, writeReports } from "./report/summary.js";
 import { AuthorizationError, assertAuthorized } from "./safety/authorization.js";
+import { scan } from "./scan/scanner.js";
+import { formatScanReport } from "./scan/scanReport.js";
 import { startServer } from "./server/httpServer.js";
 
 const program = new Command();
@@ -59,6 +62,18 @@ program
   .option("--mc-version <ver>", "force Minecraft version (default: auto-detect)")
   .option("--i-am-authorized", "affirm you own or are permitted to test the target")
   .action(debugCommand);
+
+program
+  .command("scan")
+  .description("defensive best-effort security scan of a server you own (fingerprint + advisories)")
+  .option("-c, --config <path>", "config file (.yaml or .json)")
+  .option("-H, --host <host>", "target host")
+  .option("-p, --port <port>", "target port", (v) => parseInt(v, 10))
+  .option("--mc-version <ver>", "force Minecraft version (default: auto-detect)")
+  .option("--deep", "join one bot to detect plugins (brand + command tab-complete)")
+  .option("--json", "also write the report as JSON to the reports dir")
+  .option("--i-am-authorized", "affirm you own or are permitted to test the target")
+  .action(scanCommand);
 
 async function runCommand(opts: Record<string, unknown>): Promise<void> {
   // Shard-worker mode: run the given config quietly and hand the snapshot to the parent.
@@ -181,6 +196,43 @@ async function debugCommand(opts: Record<string, unknown>): Promise<void> {
     bot.disconnect();
     process.exit(0);
   });
+}
+
+async function scanCommand(opts: Record<string, unknown>): Promise<void> {
+  const config = loadConfig(opts.config as string | undefined, {
+    host: opts.host as string | undefined,
+    port: opts.port as number | undefined,
+    version: opts.mcVersion as string | undefined,
+    authorized: opts.iAmAuthorized ? true : undefined,
+  });
+  assertAuthorized(config);
+
+  const spec: BotSpec | undefined = opts.deep
+    ? {
+        id: 0,
+        username: `${config.accounts.usernamePrefix}-scan`,
+        host: config.target.host,
+        port: config.target.port,
+        version: config.target.version ?? false,
+        auth: config.accounts.mode,
+        profilesFolder: config.accounts.profilesFolder,
+        config,
+      }
+    : undefined;
+
+  process.stdout.write(`Scanning ${config.target.host}:${config.target.port} ...\n`);
+  const report = await scan(
+    { host: config.target.host, port: config.target.port, version: config.target.version },
+    { deep: Boolean(opts.deep), spec },
+  );
+  process.stdout.write(`${formatScanReport(report)}\n`);
+
+  if (opts.json) {
+    mkdirSync(config.report.dir, { recursive: true });
+    const path = join(config.report.dir, `mcst-scan-${report.scannedAt.replace(/[:.]/g, "-")}.json`);
+    writeFileSync(path, JSON.stringify(report, null, 2), "utf8");
+    process.stdout.write(`Report written: ${path}\n`);
+  }
 }
 
 program.parseAsync().catch((err) => {
