@@ -17,6 +17,7 @@ They target `127.0.0.1:25565` - spin up a throwaway server first with `npm run s
 | [`auto-proxies.yaml`](auto-proxies.yaml) | Fetch + validate free public proxies automatically. |
 | [`microsoft-accounts.yaml`](microsoft-accounts.yaml) | Online-mode server with a Microsoft account pool. |
 | [`scenario.yaml`](scenario.yaml) | Start from a named scenario, override a field. |
+| [`full-featured.yaml`](full-featured.yaml) | Everything at once: full driver, auto-proxies, register/login, movement, web dashboard. |
 | [`blueprints/greeter.json`](blueprints/greeter.json) | Programmable-bot blueprint (see [docs/scripting.md](../docs/scripting.md)). |
 
 See [docs/usage.md](../docs/usage.md) for all fields and CLI flags.

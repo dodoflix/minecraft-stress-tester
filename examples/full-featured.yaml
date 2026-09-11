@@ -1,0 +1,72 @@
+# Kitchen-sink example: every major feature at once. Realistic (mineflayer) bots that move and
+# load chunks, each routed through an auto-fetched free proxy, registering + logging in on join,
+# with a live web dashboard and all report formats.
+#
+# WARNING: only run against a server you own or have written permission to test. Auto-proxies
+# route your traffic through unknown third parties; use a PUBLIC target they can reach.
+
+authorized: true # hard consent gate; the tool refuses to start without this
+
+target:
+  host: play.example.com # a PUBLIC server (proxies can't reach localhost/your LAN)
+  port: 25565
+  # version: "1.21.1"    # omit to auto-detect from the server-list ping
+
+driver: full # mineflayer bots: real movement + chunk loading (tens to low hundreds, not thousands)
+viewDistance: 6 # chunks each bot loads; higher = more chunk-load stress (and more CPU per bot)
+shards: 2 # spread the run across N worker processes (full bots are CPU-heavy)
+
+ramp:
+  count: 40 # total bots (kept modest: full bots are ~50-150/process)
+  connectRate: 4 # new connections per second (slow, to avoid per-IP login rate limits)
+  rampUpSeconds: 15 # ease connections in over this window
+  holdSeconds: 120 # hold peak load
+  rampDownSeconds: 10
+  jitter: 0.2 # +/- randomization so spawns don't align
+
+reconnect:
+  enabled: true # respawn dropped bots with exponential backoff
+  maxRetries: 5
+  baseBackoffMs: 1000
+  maxBackoffMs: 30000
+
+behaviors:
+  auth: # register + login on join (servers with an AuthMe/nLogin-style plugin, offline mode)
+    enabled: true
+    password: "stress-test-pw"
+    registerCommand: "/register {password} {password}" # sent first if the account is new
+    loginCommand: "/login {password}" # then this to authenticate
+  movement: # random walk (full driver only): loads chunks, defeats no-movement kicks
+    enabled: true
+    intervalMs: 2000
+  antiAfk: # small look/jump so idle bots aren't kicked for inactivity
+    enabled: true
+    intervalMs: 3000
+  chatSpam: # periodic chat (keep it benign and slow to avoid mutes)
+    enabled: true
+    message: "load test in progress"
+    delayMs: 8000
+
+accounts:
+  mode: offline # offline usernames (register/login above handles auth). Use "microsoft" for online-mode.
+  usernamePrefix: "mcst"
+  # microsoftAccounts: ["you@example.com"]   # rotate real MS accounts when mode: microsoft
+  # profilesFolder: "./.mcst-accounts"       # where MS tokens are cached
+
+proxies:
+  auto: true # fetch + validate free socks5/socks4 proxies before the run
+  autoValidate: true # keep only proxies a Minecraft server actually answers through
+  autoMax: 40 # target bots to keep proxied (= count here). Proxies = ceil(autoMax/maxPerProxy)*autoOverfetch
+  autoOverfetch: 2 # buffer multiplier, against proxies that die mid-run
+  maxPerProxy: 1 # one bot per proxy (unique source IP each). Bots left without a proxy FAIL,
+  # never connect direct, so the real IP is never exposed.
+  # autoMaxProbes: 1000  # unset = probe the whole pool until the buffer is filled
+  # autoProviders: []    # empty = built-in free lists; or supply your own list URLs
+
+report:
+  mode: web # live dashboard at http://localhost:8787 during the run (or "tui" / "console")
+  webPort: 8787
+  dir: "./reports"
+  json: true
+  csv: true
+  html: true
