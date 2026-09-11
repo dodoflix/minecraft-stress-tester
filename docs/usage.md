@@ -24,6 +24,14 @@ npm start -- --host 127.0.0.1 --port 25565 --count 100 --i-am-authorized
 
 Once published: `npx mcst --config run.yaml`.
 
+## Docker
+
+```bash
+docker build -t mcst .
+docker run --rm mcst --host host.docker.internal --port 25565 --count 100 --i-am-authorized
+# persist reports:  -v "$PWD/reports:/app/reports"
+```
+
 ## CLI flags
 
 | Flag | Meaning |
@@ -37,6 +45,8 @@ Once published: `npx mcst --config run.yaml`.
 | `--scenario <name>` | Load profile: `join-flood`, `sustained-load`, `chat-flood`, `chunk-thrash`. |
 | `--mc-version <ver>` | Force a Minecraft version (default: auto-detect from ping). |
 | `--tui` | Full-screen live dashboard instead of console lines. |
+| `--web` | Serve a live web dashboard (default `http://localhost:8787`). |
+| `--web-port <port>` | Web dashboard port. |
 | `--csv` | Also write a CSV report. |
 | `--html` | Also write a self-contained HTML report. |
 | `--i-am-authorized` | Affirm you own / may test the target. |

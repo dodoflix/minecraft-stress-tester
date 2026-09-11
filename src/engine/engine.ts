@@ -11,6 +11,7 @@ import { startConsoleReporter } from "../report/console.js";
 import type { RunReport } from "../report/export.js";
 import { formatSummary, writeReports } from "../report/summary.js";
 import { startTuiReporter } from "../report/tui.js";
+import { startWebReporter } from "../report/web.js";
 import { assertAuthorized } from "../safety/authorization.js";
 import { backoffMs, buildSpawnSchedule, jittered, runDurationMs } from "./ramp.js";
 import { Registry } from "./registry.js";
@@ -182,17 +183,22 @@ export class Engine {
     this.resolveRun?.(snapshot);
   }
 
-  /** Pick the live view: nothing when quiet, otherwise the TUI dashboard or console lines. */
+  /** Pick the live view: nothing when quiet, otherwise TUI, web, or console. */
   private startReporter(count: number): () => void {
     if (this.quiet) return () => {};
-    if (this.config.report.mode === "tui") {
-      const version = this.version === false ? "auto" : this.version;
-      return startTuiReporter(this.collector, {
-        target: `${this.config.target.host}:${this.config.target.port}`,
-        version: this.preflightResult?.versionName ?? version,
-        count,
-      });
-    }
+    const mode = this.config.report.mode;
+    if (mode === "tui") return startTuiReporter(this.collector, this.dashboardContext(count));
+    if (mode === "web")
+      return startWebReporter(this.collector, this.config.report.webPort, this.dashboardContext(count));
     return startConsoleReporter(this.collector);
+  }
+
+  private dashboardContext(count: number) {
+    const version = this.version === false ? "auto" : this.version;
+    return {
+      target: `${this.config.target.host}:${this.config.target.port}`,
+      version: this.preflightResult?.versionName ?? version,
+      count,
+    };
   }
 }

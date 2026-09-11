@@ -97,8 +97,9 @@ export const configSchema = z.object({
       json: z.boolean().default(true),
       csv: z.boolean().default(false),
       html: z.boolean().default(false),
-      /** Live view during a run: plain console lines or a full-screen TUI dashboard. */
-      mode: z.enum(["console", "tui"]).default("console"),
+      /** Live view during a run: console lines, a full-screen TUI, or a local web page. */
+      mode: z.enum(["console", "tui", "web"]).default("console"),
+      webPort: z.number().int().min(1).max(65535).default(8787),
     })
     .prefault({}),
 });

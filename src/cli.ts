@@ -22,6 +22,8 @@ program
   .option("--mc-version <ver>", "force Minecraft version (default: auto-detect)")
   .option("--scenario <name>", "load profile: join-flood | sustained-load | chat-flood | chunk-thrash")
   .option("--tui", "full-screen live dashboard instead of console lines")
+  .option("--web", "serve a live web dashboard")
+  .option("--web-port <port>", "web dashboard port (default 8787)", (v) => parseInt(v, 10))
   .option("--csv", "also write a CSV report")
   .option("--html", "also write an HTML report")
   .option("--shard-config <path>", "internal: run one shard from a serialized config")
@@ -47,6 +49,8 @@ async function main(): Promise<void> {
     version: opts.mcVersion,
     scenario: opts.scenario,
     tui: opts.tui,
+    web: opts.web,
+    webPort: opts.webPort,
     csv: opts.csv,
     html: opts.html,
     authorized: opts.iAmAuthorized ? true : undefined,

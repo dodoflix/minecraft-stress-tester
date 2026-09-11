@@ -86,6 +86,12 @@ describe("loadConfig", () => {
     expect(c.report.html).toBe(true);
   });
 
+  it("CLI --web/--web-port select the web dashboard", () => {
+    const c = loadConfig(undefined, { host: "h", authorized: true, web: true, webPort: 9000 });
+    expect(c.report.mode).toBe("web");
+    expect(c.report.webPort).toBe(9000);
+  });
+
   it("rejects an invalid config (missing host)", () => {
     const p = tmpFile("bad.json", JSON.stringify({ authorized: true, target: { port: 25565 } }));
     expect(() => loadConfig(p)).toThrow();

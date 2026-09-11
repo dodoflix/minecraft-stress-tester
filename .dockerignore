@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+reports
+.mcst-cache
+.mcst-accounts
+.git
+test
+docs
+*.md

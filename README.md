@@ -28,13 +28,13 @@ sockets.
 - **Real-server ready** - SOCKS5 proxy pool (`proxies.list`) to spread source IPs, Microsoft
   account rotation (`accounts.mode: microsoft`), and named scenarios (`--scenario join-flood`).
 - **Authorization gate** - no run without explicit consent.
-- **Observability** - server-perceived ping (from `player_info`), a full-screen live TUI
-  dashboard (`--tui`), and JSON / CSV / HTML run reports.
+- **Observability** - server-perceived ping (from `player_info`), a full-screen TUI (`--tui`)
+  or local web (`--web`) live dashboard, and JSON / CSV / HTML run reports.
 - **Preflight ping**, YAML/JSON config, CLI.
 - **Real-server tested** - the integration suite downloads and boots the newest supported
   Paper build and runs actual bots against it.
 
-See the [roadmap](docs/roadmap.md) for the optional web dashboard and Docker image.
+All five roadmap phases are shipped - see the [roadmap](docs/roadmap.md).
 
 ## Quickstart
 
