@@ -34,10 +34,10 @@ export interface ItemInfo {
 }
 
 /**
- * The stable, single-bot programmatic interface. The debug REPL (phase 7) and the scripting
- * engine (phase 9) both drive a bot only through this surface, so it is defined once here
- * and kept small. BotApi is the mineflayer-backed implementation; tests drive the REPL
- * against a fake that implements this interface.
+ * The stable, single-bot programmatic interface. The debug REPL and the blueprint interpreter
+ * both drive a bot only through this surface, so it is defined once here and kept small. BotApi
+ * is the mineflayer-backed implementation; tests drive the REPL against a fake that implements
+ * this interface.
  */
 export interface DebugBot {
   chat(message: string): void;
