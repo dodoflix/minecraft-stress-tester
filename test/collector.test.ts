@@ -73,6 +73,17 @@ describe("MetricsCollector", () => {
     expect(s.bytesIn).toBe(20);
   });
 
+  it("records server-perceived ping from latency events", () => {
+    const c = new MetricsCollector();
+    const b = new FakeBot();
+    c.track(b);
+    b.emit("latency", 10);
+    b.emit("latency", 30);
+    const s = c.snapshot();
+    expect(s.serverPingMs.count).toBe(2);
+    expect(s.serverPingMs.p95).toBe(30);
+  });
+
   it("counts errors", () => {
     const c = new MetricsCollector();
     const b = new FakeBot();

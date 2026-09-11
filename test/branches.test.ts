@@ -36,6 +36,7 @@ function snap(over: Partial<MetricsSnapshot> = {}): MetricsSnapshot {
     tps: 20,
     timeToConnectMs: emptySummary,
     timeToSpawnMs: emptySummary,
+    serverPingMs: emptySummary,
     kickReasons: {},
     ...over,
   };

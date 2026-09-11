@@ -20,6 +20,7 @@ export interface MetricsSnapshot {
   tps: number;
   timeToConnectMs: ReturnType<Histogram["summary"]>;
   timeToSpawnMs: ReturnType<Histogram["summary"]>;
+  serverPingMs: ReturnType<Histogram["summary"]>;
   kickReasons: Record<string, number>;
 }
 
@@ -39,6 +40,7 @@ export class MetricsCollector {
 
   private readonly connectMs = new Histogram();
   private readonly spawnMs = new Histogram();
+  private readonly serverPing = new Histogram();
   private readonly kickReasons = new Map<string, number>();
   private readonly tps = new TpsEstimator();
 
@@ -65,6 +67,7 @@ export class MetricsCollector {
       this.bytesIn += bytes;
     });
     bot.on("time", (age) => this.tps.record(age, Date.now()));
+    bot.on("latency", (pingMs) => this.serverPing.record(pingMs));
     bot.on("kicked", (reason) => {
       this.kicked++;
       this.kickReasons.set(reason, (this.kickReasons.get(reason) ?? 0) + 1);
@@ -100,6 +103,7 @@ export class MetricsCollector {
       tps: this.tps.current(),
       timeToConnectMs: this.connectMs.summary(),
       timeToSpawnMs: this.spawnMs.summary(),
+      serverPingMs: this.serverPing.summary(),
       kickReasons: Object.fromEntries(this.kickReasons),
     };
   }

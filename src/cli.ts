@@ -14,6 +14,9 @@ program
   .option("-n, --count <n>", "number of bots", (v) => parseInt(v, 10))
   .option("-d, --driver <driver>", "bot driver: light | full")
   .option("--mc-version <ver>", "force Minecraft version (default: auto-detect)")
+  .option("--tui", "full-screen live dashboard instead of console lines")
+  .option("--csv", "also write a CSV report")
+  .option("--html", "also write an HTML report")
   .option("--i-am-authorized", "affirm you own or are permitted to test the target")
   .parse();
 
@@ -26,6 +29,9 @@ async function main(): Promise<void> {
     count: opts.count,
     driver: opts.driver,
     version: opts.mcVersion,
+    tui: opts.tui,
+    csv: opts.csv,
+    html: opts.html,
     authorized: opts.iAmAuthorized ? true : undefined,
   });
   await new Engine(config).run();

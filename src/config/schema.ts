@@ -75,6 +75,9 @@ export const configSchema = z.object({
       dir: z.string().default("./reports"),
       json: z.boolean().default(true),
       csv: z.boolean().default(false),
+      html: z.boolean().default(false),
+      /** Live view during a run: plain console lines or a full-screen TUI dashboard. */
+      mode: z.enum(["console", "tui"]).default("console"),
     })
     .prefault({}),
 });

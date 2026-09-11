@@ -25,12 +25,14 @@ sockets.
 - **Ramp control** - connections/sec with ramp-up, hold, jitter, and exponential-backoff
   reconnect.
 - **Authorization gate** - no run without explicit consent.
-- **Preflight ping**, YAML/JSON config, CLI, live console view, and a JSON run report.
+- **Observability** - server-perceived ping (from `player_info`), a full-screen live TUI
+  dashboard (`--tui`), and JSON / CSV / HTML run reports.
+- **Preflight ping**, YAML/JSON config, CLI.
 - **Real-server tested** - the integration suite downloads and boots the newest supported
   Paper build and runs actual bots against it.
 
 See the [roadmap](docs/roadmap.md) for the full mineflayer `FullBot`, proxy/account pools,
-TUI/web dashboards, and child-process sharding.
+a web dashboard, and child-process sharding.
 
 ## Quickstart
 

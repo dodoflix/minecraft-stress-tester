@@ -25,8 +25,9 @@ blocked main thread).
 ## Latency
 
 - **Preflight**: clean network RTT from the status ping.
-- In-session server-perceived ping (from `player_info`) is planned; a client can't cleanly
-  self-probe in-play RTT, so those two sources are what's used.
+- **In-session**: server-perceived ping, read from the `player_info` packet for the bot's own
+  entry, reported as `serverPingMs` (p50/p95/p99). A client can't cleanly self-probe in-play RTT,
+  so those two sources are what's used.
 
 ## Connection funnel
 
@@ -46,4 +47,4 @@ Disconnect reasons are bucketed and counted so you can tell an antibot kick from
 ## Report
 
 At run end a JSON report is written to `report.dir` with the preflight result and the
-full metrics snapshot. CSV and a self-contained HTML report are planned.
+full metrics snapshot. Add `--csv` or `--html` for a CSV or self-contained HTML report.

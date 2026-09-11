@@ -34,6 +34,9 @@ Once published: `npx mcst --config run.yaml`.
 | `-n, --count <n>` | Number of bots. |
 | `-d, --driver <light\|full>` | Bot driver (`full` is planned). |
 | `--mc-version <ver>` | Force a Minecraft version (default: auto-detect from ping). |
+| `--tui` | Full-screen live dashboard instead of console lines. |
+| `--csv` | Also write a CSV report. |
+| `--html` | Also write a self-contained HTML report. |
 | `--i-am-authorized` | Affirm you own / may test the target. |
 
 Flags override the config file.

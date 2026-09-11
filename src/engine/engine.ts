@@ -5,7 +5,8 @@ import { LightBot } from "../drivers/light.js";
 import { MetricsCollector, type MetricsSnapshot } from "../metrics/collector.js";
 import { type PreflightResult, preflight } from "../net/slp.js";
 import { startConsoleReporter } from "../report/console.js";
-import { writeJsonReport } from "../report/export.js";
+import { type RunReport, writeCsvReport, writeHtmlReport, writeJsonReport } from "../report/export.js";
+import { startTuiReporter } from "../report/tui.js";
 import { assertAuthorized } from "../safety/authorization.js";
 import { makeUsername } from "../util/names.js";
 import { backoffMs, buildSpawnSchedule, jittered, runDurationMs } from "./ramp.js";
@@ -75,9 +76,11 @@ export class Engine {
 
     const schedule = buildSpawnSchedule(this.config.ramp);
     const total = runDurationMs(this.config.ramp, schedule);
-    this.log(`Spawning ${schedule.length} bots (driver=light), run ~${(total / 1000).toFixed(0)}s\n`);
+    this.log(
+      `Spawning ${schedule.length} bots (driver=${this.config.driver}), run ~${(total / 1000).toFixed(0)}s\n`,
+    );
 
-    const stopReporter = this.quiet ? () => {} : startConsoleReporter(this.collector);
+    const stopReporter = this.startReporter(schedule.length);
     const onSigint = () => this.shutdown("SIGINT");
     process.once("SIGINT", onSigint);
 
@@ -157,16 +160,33 @@ export class Engine {
 
     const snapshot = this.collector.snapshot();
     if (!this.quiet) printSummary(snapshot);
-    if (this.config.report.json) {
-      const path = writeJsonReport(this.config.report.dir, {
-        finishedAt: new Date().toISOString(),
-        target: { host: this.config.target.host, port: this.config.target.port },
-        preflight: this.preflightResult,
-        metrics: snapshot,
-      });
-      this.log(`Report written: ${path}\n`);
-    }
+
+    const report: RunReport = {
+      finishedAt: new Date().toISOString(),
+      target: { host: this.config.target.host, port: this.config.target.port },
+      preflight: this.preflightResult,
+      metrics: snapshot,
+    };
+    const { dir, json, csv, html } = this.config.report;
+    if (json) this.log(`Report written: ${writeJsonReport(dir, report)}\n`);
+    if (csv) this.log(`Report written: ${writeCsvReport(dir, report)}\n`);
+    if (html) this.log(`Report written: ${writeHtmlReport(dir, report)}\n`);
+
     this.resolveRun?.(snapshot);
+  }
+
+  /** Pick the live view: nothing when quiet, otherwise the TUI dashboard or console lines. */
+  private startReporter(count: number): () => void {
+    if (this.quiet) return () => {};
+    if (this.config.report.mode === "tui") {
+      const version = this.version === false ? "auto" : this.version;
+      return startTuiReporter(this.collector, {
+        target: `${this.config.target.host}:${this.config.target.port}`,
+        version: this.preflightResult?.versionName ?? version,
+        count,
+      });
+    }
+    return startConsoleReporter(this.collector);
   }
 }
 
@@ -182,6 +202,9 @@ function printSummary(s: ReturnType<MetricsCollector["snapshot"]>): void {
     `est. server TPS: ${s.tps.toFixed(1)}`,
     `time-to-connect: p50=${s.timeToConnectMs.p50}ms p95=${s.timeToConnectMs.p95}ms p99=${s.timeToConnectMs.p99}ms`,
     `time-to-spawn:   p50=${s.timeToSpawnMs.p50}ms p95=${s.timeToSpawnMs.p95}ms p99=${s.timeToSpawnMs.p99}ms`,
+    s.serverPingMs.count
+      ? `server ping:     p50=${s.serverPingMs.p50}ms p95=${s.serverPingMs.p95}ms p99=${s.serverPingMs.p99}ms`
+      : "server ping:     n/a",
     `inbound total:   ${s.packetsIn} pkts / ${(s.bytesIn / 1024 / 1024).toFixed(2)} MB`,
   ];
   if (Object.keys(s.kickReasons).length) {
