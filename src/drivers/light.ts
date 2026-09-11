@@ -1,4 +1,5 @@
 import mc from "minecraft-protocol";
+import { makeSocksConnect } from "../net/socksConnect.js";
 import { chatPacket } from "../util/chat.js";
 import { longToBigInt } from "../util/long.js";
 import { extractOwnPing } from "../util/playerPing.js";
@@ -24,14 +25,16 @@ export class LightBot extends TypedEmitter<BotEventMap> implements BotDriver {
     this.emit("connecting");
     // `version: false` = auto-negotiate from the server ping. minecraft-protocol's
     // types omit the `false` literal, so cast at the boundary rather than widen to any.
-    const options = {
+    const options: Record<string, unknown> = {
       host: this.spec.host,
       port: this.spec.port,
       username: this.spec.username,
       auth: this.spec.auth,
       version: this.spec.version,
       keepAlive: true,
+      profilesFolder: this.spec.profilesFolder,
     };
+    if (this.spec.proxy) options.connect = makeSocksConnect(this.spec.proxy, this.spec.host, this.spec.port);
     const client = mc.createClient(options as unknown as Parameters<typeof mc.createClient>[0]);
     this.client = client;
 

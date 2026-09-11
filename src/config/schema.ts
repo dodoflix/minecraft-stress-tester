@@ -66,7 +66,20 @@ export const behaviorsSchema = z.object({
 export const accountsSchema = z.object({
   mode: z.enum(["offline", "microsoft"]).default("offline"),
   usernamePrefix: z.string().default("mcst"),
+  /** Microsoft/Xbox account identifiers (emails) to rotate over when mode is "microsoft". */
+  microsoftAccounts: z.array(z.string()).default([]),
+  /** Where prismarine-auth caches Microsoft tokens (one subfolder per account). */
+  profilesFolder: z.string().default("./.mcst-accounts"),
 });
+
+export const proxiesSchema = z.object({
+  /** SOCKS5 proxies, e.g. "socks5://user:pass@host:1080" or "host:1080". */
+  list: z.array(z.string()).default([]),
+  /** Max simultaneous bots per proxy (spreads source IPs past per-IP antibot limits). */
+  maxPerProxy: z.number().int().min(1).default(50),
+});
+
+export const SCENARIOS = ["join-flood", "sustained-load", "chat-flood", "chunk-thrash"] as const;
 
 export const configSchema = z.object({
   /** Trust gate: must be explicitly true. Named as an affirmation, not a toggle. */
@@ -77,6 +90,7 @@ export const configSchema = z.object({
   reconnect: reconnectSchema.prefault({}),
   behaviors: behaviorsSchema.prefault({}),
   accounts: accountsSchema.prefault({}),
+  proxies: proxiesSchema.prefault({}),
   report: z
     .object({
       dir: z.string().default("./reports"),

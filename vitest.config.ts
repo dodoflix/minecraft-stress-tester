@@ -9,7 +9,13 @@ export default defineConfig({
       include: ["src/**/*.ts"],
       // Thin I/O shims and networked drivers exercised by the integration test; their
       // pure logic (config loader, dashboard, shard math) is covered directly.
-      exclude: ["src/cli.ts", "src/report/tui.ts", "src/drivers/full.ts", "src/engine/sharded.ts"],
+      exclude: [
+        "src/cli.ts",
+        "src/report/tui.ts",
+        "src/drivers/full.ts",
+        "src/engine/sharded.ts",
+        "src/net/socksConnect.ts",
+      ],
       thresholds: {
         lines: 95,
         functions: 95,

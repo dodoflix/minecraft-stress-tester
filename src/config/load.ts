@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { extname } from "node:path";
 import { load as loadYaml } from "js-yaml";
+import { applyScenario, type ScenarioName } from "./scenarios.js";
 import { type Config, configSchema } from "./schema.js";
 
 /** Raw CLI overrides that map onto the config before validation. */
@@ -14,6 +15,7 @@ export interface CliOverrides {
   tui?: boolean;
   csv?: boolean;
   html?: boolean;
+  scenario?: ScenarioName;
 }
 
 function readConfigFile(path: string): unknown {
@@ -26,33 +28,44 @@ function readConfigFile(path: string): unknown {
   return JSON.parse(raw);
 }
 
+function isPlainObject(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+
+/** Recursive merge; `b` wins, nested plain objects merge (arrays/scalars replace). */
+function deepMerge(a: Record<string, unknown>, b: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...a };
+  for (const [k, v] of Object.entries(b)) {
+    const prev = out[k];
+    out[k] = isPlainObject(v) && isPlainObject(prev) ? deepMerge(prev, v) : v;
+  }
+  return out;
+}
+
 export function loadConfig(filePath: string | undefined, cli: CliOverrides = {}): Config {
-  let base: Record<string, unknown> = {};
-  if (filePath) base = (readConfigFile(filePath) ?? {}) as Record<string, unknown>;
+  const fileObj = filePath ? ((readConfigFile(filePath) ?? {}) as Record<string, unknown>) : {};
+
+  // Scenario is the lowest layer: an explicit config file and CLI flags override it.
+  const scenarioName = (cli.scenario ?? fileObj.scenario) as ScenarioName | undefined;
+  const base = scenarioName ? deepMerge(applyScenario(scenarioName), fileObj) : fileObj;
 
   // Only defined CLI values are spread in, so the merged object never carries
   // `undefined` - zod defaults apply for anything omitted.
-  const merged = {
-    ...base,
+  const merged = deepMerge(base, {
     ...(cli.authorized !== undefined ? { authorized: cli.authorized } : {}),
     ...(cli.driver ? { driver: cli.driver } : {}),
     target: {
-      ...(base.target as object),
       ...(cli.host ? { host: cli.host } : {}),
       ...(cli.port ? { port: cli.port } : {}),
       ...(cli.version ? { version: cli.version } : {}),
     },
-    ramp: {
-      ...(base.ramp as object),
-      ...(cli.count ? { count: cli.count } : {}),
-    },
+    ramp: { ...(cli.count ? { count: cli.count } : {}) },
     report: {
-      ...(base.report as object),
       ...(cli.tui ? { mode: "tui" } : {}),
       ...(cli.csv ? { csv: true } : {}),
       ...(cli.html ? { html: true } : {}),
     },
-  };
+  });
 
   return configSchema.parse(merged);
 }

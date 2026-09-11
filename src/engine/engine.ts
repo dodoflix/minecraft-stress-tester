@@ -4,13 +4,14 @@ import type { Behavior, BotDriver, BotSpec } from "../drivers/driver.js";
 import { FullBot } from "../drivers/full.js";
 import { LightBot } from "../drivers/light.js";
 import { MetricsCollector, type MetricsSnapshot } from "../metrics/collector.js";
+import { AccountManager } from "../net/accounts.js";
+import { ProxyPool } from "../net/proxy.js";
 import { type PreflightResult, preflight } from "../net/slp.js";
 import { startConsoleReporter } from "../report/console.js";
 import type { RunReport } from "../report/export.js";
 import { formatSummary, writeReports } from "../report/summary.js";
 import { startTuiReporter } from "../report/tui.js";
 import { assertAuthorized } from "../safety/authorization.js";
-import { makeUsername } from "../util/names.js";
 import { backoffMs, buildSpawnSchedule, jittered, runDurationMs } from "./ramp.js";
 import { Registry } from "./registry.js";
 
@@ -29,6 +30,8 @@ export class Engine {
   private readonly collector = new MetricsCollector();
   private readonly registry = new Registry();
   private readonly timers = new Set<NodeJS.Timeout>();
+  private readonly proxies: ProxyPool;
+  private readonly accounts: AccountManager;
   private behaviors: Behavior[] = [];
   private factory: DriverFactory;
   private version: string | false = false;
@@ -44,6 +47,8 @@ export class Engine {
   ) {
     this.quiet = options.quiet ?? false;
     this.skipPreflight = options.skipPreflight ?? false;
+    this.proxies = new ProxyPool(config.proxies.list, config.proxies.maxPerProxy);
+    this.accounts = new AccountManager(config.accounts);
     if (options.driverFactory) {
       this.factory = options.driverFactory;
     } else if (config.driver === "full") {
@@ -101,13 +106,16 @@ export class Engine {
   }
 
   private makeSpec(id: number): BotSpec {
+    const account = this.accounts.next(id);
     return {
       id,
-      username: makeUsername(this.config.accounts.usernamePrefix, id),
+      username: account.username,
       host: this.config.target.host,
       port: this.config.target.port,
       version: this.version,
-      auth: this.config.accounts.mode,
+      auth: account.auth,
+      proxy: this.proxies.acquire(),
+      profilesFolder: this.config.accounts.profilesFolder,
       config: this.config,
     };
   }

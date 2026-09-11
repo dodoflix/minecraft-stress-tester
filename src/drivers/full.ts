@@ -1,4 +1,5 @@
 import { type Bot, createBot } from "mineflayer";
+import { makeSocksConnect } from "../net/socksConnect.js";
 import { longToBigInt } from "../util/long.js";
 import { extractOwnPing } from "../util/playerPing.js";
 import { stringifyReason } from "../util/reason.js";
@@ -25,14 +26,16 @@ export class FullBot extends TypedEmitter<BotEventMap> implements BotDriver {
   connect(): void {
     this.emit("connecting");
     // mineflayer's options type omits version:false (auto-negotiate), so cast at the edge.
-    const options = {
+    const options: Record<string, unknown> = {
       host: this.spec.host,
       port: this.spec.port,
       username: this.spec.username,
       auth: this.spec.auth,
       version: this.spec.version,
       hideErrors: true,
+      profilesFolder: this.spec.profilesFolder,
     };
+    if (this.spec.proxy) options.connect = makeSocksConnect(this.spec.proxy, this.spec.host, this.spec.port);
     const bot = createBot(options as unknown as Parameters<typeof createBot>[0]);
     this.bot = bot;
 

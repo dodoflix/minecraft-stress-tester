@@ -34,6 +34,7 @@ Once published: `npx mcst --config run.yaml`.
 | `-n, --count <n>` | Number of bots. |
 | `-d, --driver <light\|full>` | `light` = raw protocol (scale); `full` = mineflayer (realistic movement/chunks). |
 | `-s, --shards <n>` | Run across N worker processes to get past the single-process ceiling. |
+| `--scenario <name>` | Load profile: `join-flood`, `sustained-load`, `chat-flood`, `chunk-thrash`. |
 | `--mc-version <ver>` | Force a Minecraft version (default: auto-detect from ping). |
 | `--tui` | Full-screen live dashboard instead of console lines. |
 | `--csv` | Also write a CSV report. |

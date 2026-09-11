@@ -9,6 +9,8 @@ export interface BotSpec {
   port: number;
   version: string | false; // false = auto-negotiate from server
   auth: "offline" | "microsoft";
+  proxy?: string; // SOCKS5 proxy for this bot's socket, if a pool is configured
+  profilesFolder?: string; // Microsoft token cache dir (auth: microsoft)
   config: Config;
 }
 

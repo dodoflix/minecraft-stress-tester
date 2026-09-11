@@ -22,11 +22,11 @@ sharding (`--shards N`) to get past the single-process ceiling.
 _Not yet:_ pathfinder-based navigation and block interaction (basic movement covers chunk
 load and no-movement kicks for now).
 
-## Phase 4 - real-world targets
+## ✅ Phase 4 - real-world targets (shipped)
 
-- SOCKS5/HTTP proxy pool with per-proxy concurrency caps (distribute source IPs).
-- Account manager: offline usernames or Microsoft/Xbox auth pool (`prismarine-auth`).
-- Named scenarios (join-flood, sustained-load, chunk-thrash, chat-flood).
+SOCKS5 proxy pool with per-proxy concurrency caps (`proxies.list`), Microsoft account
+rotation (`accounts.mode: microsoft`, device-code auth handled by mineflayer/minecraft-protocol),
+and named scenarios (`--scenario join-flood | sustained-load | chat-flood | chunk-thrash`).
 
 ## Phase 5 - polish
 

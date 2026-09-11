@@ -46,6 +46,7 @@
     "js-yaml": "^5.4.1",
     "minecraft-protocol": "^1.68.0",
     "mineflayer": "^4.39.0",
+    "socks": "^2.8.10",
     "zod": "^4.6.2"
   },
   "devDependencies": {
