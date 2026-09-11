@@ -16,10 +16,13 @@ ramp:
   holdSeconds: 60
 
 proxies:
-  auto: true            # fetch + validate free SOCKS5 proxies before the run
+  auto: true            # fetch + validate free proxies before the run
   autoValidate: true    # keep only proxies that can actually reach the target
-  autoMax: 50           # cap how many validated proxies to use
-  # autoProviders: []   # empty = built-in free SOCKS5 lists; or supply your own list URLs
+  autoMax: 50           # stop once this many working proxies are found
+  autoMaxProbes: 1000   # how many of the fetched pool to health-check (higher = more, slower)
+  # autoConcurrency: 100  # simultaneous health-checks
+  # autoTimeoutMs: 4000   # per-proxy probe timeout
+  # autoProviders: []   # empty = built-in free socks5/socks4/http lists; or supply your own URLs
   maxPerProxy: 20
 
 report:

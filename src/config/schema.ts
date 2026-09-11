@@ -79,12 +79,18 @@ export const proxiesSchema = z.object({
   maxPerProxy: z.number().int().min(1).default(50),
   /** Fetch free public proxies automatically (no registration). Untrusted third parties: see docs. */
   auto: z.boolean().default(false),
-  /** Provider list URLs (plain-text proxy lists). Empty = a built-in set of free SOCKS5 lists. */
+  /** Provider list URLs (plain-text proxy lists). Empty = a built-in set of free proxy lists. */
   autoProviders: z.array(z.string()).default([]),
   /** Health-check fetched proxies against the target and keep only the reachable ones. */
   autoValidate: z.boolean().default(true),
-  /** Cap how many validated free proxies to keep. */
+  /** Cap how many validated free proxies to keep (stops probing once this many are found). */
   autoMax: z.number().int().min(1).default(50),
+  /** How many fetched proxies to health-check at most. Higher = probe more of the pool, slower. */
+  autoMaxProbes: z.number().int().min(1).default(1000),
+  /** Simultaneous health-checks. */
+  autoConcurrency: z.number().int().min(1).default(100),
+  /** Per-proxy health-check timeout (ms). */
+  autoTimeoutMs: z.number().int().min(100).default(4000),
 });
 
 export const SCENARIOS = ["join-flood", "sustained-load", "chat-flood", "chunk-thrash"] as const;

@@ -165,6 +165,9 @@ async function runCommand(opts: Record<string, unknown>): Promise<void> {
       providers: config.proxies.autoProviders,
       validate: config.proxies.autoValidate,
       max: config.proxies.autoMax,
+      maxProbes: config.proxies.autoMaxProbes,
+      concurrency: config.proxies.autoConcurrency,
+      timeoutMs: config.proxies.autoTimeoutMs,
       onProgress: ({ checked, total, ok }) => {
         const now = Date.now();
         if (now - lastLog > 1000) {
