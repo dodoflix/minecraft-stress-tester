@@ -1,5 +1,5 @@
 import mc from "minecraft-protocol";
-import { makeSocksConnect } from "../net/socksConnect.js";
+import { makeProxyConnect } from "../net/proxyConnect.js";
 import { chatPacket } from "../util/chat.js";
 import { longToBigInt } from "../util/long.js";
 import { extractOwnPing } from "../util/playerPing.js";
@@ -34,7 +34,7 @@ export class LightBot extends TypedEmitter<BotEventMap> implements BotDriver {
       keepAlive: true,
       profilesFolder: this.spec.profilesFolder,
     };
-    if (this.spec.proxy) options.connect = makeSocksConnect(this.spec.proxy, this.spec.host, this.spec.port);
+    if (this.spec.proxy) options.connect = makeProxyConnect(this.spec.proxy, this.spec.host, this.spec.port);
     const client = mc.createClient(options as unknown as Parameters<typeof mc.createClient>[0]);
     this.client = client;
 

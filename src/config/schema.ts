@@ -73,10 +73,18 @@ export const accountsSchema = z.object({
 });
 
 export const proxiesSchema = z.object({
-  /** SOCKS5 proxies, e.g. "socks5://user:pass@host:1080" or "host:1080". */
+  /** SOCKS5/HTTP proxies, e.g. "socks5://user:pass@host:1080", "http://host:8080", "host:1080". */
   list: z.array(z.string()).default([]),
   /** Max simultaneous bots per proxy (spreads source IPs past per-IP antibot limits). */
   maxPerProxy: z.number().int().min(1).default(50),
+  /** Fetch free public proxies automatically (no registration). Untrusted third parties: see docs. */
+  auto: z.boolean().default(false),
+  /** Provider list URLs (plain-text proxy lists). Empty = a built-in set of free SOCKS5 lists. */
+  autoProviders: z.array(z.string()).default([]),
+  /** Health-check fetched proxies against the target and keep only the reachable ones. */
+  autoValidate: z.boolean().default(true),
+  /** Cap how many validated free proxies to keep. */
+  autoMax: z.number().int().min(1).default(50),
 });
 
 export const SCENARIOS = ["join-flood", "sustained-load", "chat-flood", "chunk-thrash"] as const;

@@ -10,6 +10,7 @@ import { configSchema } from "./config/schema.js";
 import type { BotSpec } from "./drivers/driver.js";
 import { Engine } from "./engine/engine.js";
 import { runSharded } from "./engine/sharded.js";
+import { resolveAutoProxies } from "./net/autoProxies.js";
 import type { PreflightResult } from "./net/slp.js";
 import { formatSummary, writeReports } from "./report/summary.js";
 import { AuthorizationError, assertAuthorized } from "./safety/authorization.js";
@@ -93,6 +94,16 @@ async function runCommand(opts: Record<string, unknown>): Promise<void> {
       `Tip: ${config.ramp.count} bots in one process is CPU-bound (the client parses every packet).\n` +
         `     For less client-side lag, spread across cores with --shards ${n}, and pin --mc-version.\n\n`,
     );
+  }
+
+  if (config.proxies.auto) {
+    process.stdout.write("Fetching free public proxies (untrusted third parties) ...\n");
+    config.proxies.list = await resolveAutoProxies(config.target, {
+      providers: config.proxies.autoProviders,
+      validate: config.proxies.autoValidate,
+      max: config.proxies.autoMax,
+    });
+    process.stdout.write(`Using ${config.proxies.list.length} free proxies.\n`);
   }
 
   if (config.shards > 1) {

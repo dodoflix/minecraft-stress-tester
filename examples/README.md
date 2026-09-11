@@ -14,6 +14,7 @@ They target `127.0.0.1:25565` - spin up a throwaway server first with `npm run s
 | [`sustained-load.yaml`](sustained-load.yaml) | Steady population held for minutes; TUI + HTML report. |
 | [`full-movement.yaml`](full-movement.yaml) | FullBot (mineflayer) walking + chunk loading; web dashboard. |
 | [`proxied.yaml`](proxied.yaml) | SOCKS5 proxy pool to spread source IPs. |
+| [`auto-proxies.yaml`](auto-proxies.yaml) | Fetch + validate free public proxies automatically. |
 | [`microsoft-accounts.yaml`](microsoft-accounts.yaml) | Online-mode server with a Microsoft account pool. |
 | [`scenario.yaml`](scenario.yaml) | Start from a named scenario, override a field. |
 
