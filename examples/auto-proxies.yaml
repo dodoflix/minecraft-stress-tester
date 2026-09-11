@@ -1,0 +1,26 @@
+# Fetch free public proxies automatically (no registration, no payment) and spread the
+# load across them. WARNING: free proxies are run by unknown third parties. Your traffic
+# and your target's IP pass through them; only use this against a server you are authorized
+# to test. The tool over-fetches and health-checks, keeping only the reachable proxies.
+authorized: true
+
+target:
+  host: 127.0.0.1
+  port: 25565
+
+driver: light
+
+ramp:
+  count: 200
+  connectRate: 20
+  holdSeconds: 60
+
+proxies:
+  auto: true            # fetch + validate free SOCKS5 proxies before the run
+  autoValidate: true    # keep only proxies that can actually reach the target
+  autoMax: 50           # cap how many validated proxies to use
+  # autoProviders: []   # empty = built-in free SOCKS5 lists; or supply your own list URLs
+  maxPerProxy: 20
+
+report:
+  json: true

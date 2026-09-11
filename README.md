@@ -25,7 +25,8 @@ sockets.
   Scale further across processes with `--shards N`.
 - **Ramp control** - connections/sec with ramp-up, hold, jitter, and exponential-backoff
   reconnect.
-- **Real-server ready** - SOCKS5 proxy pool (`proxies.list`) to spread source IPs, Microsoft
+- **Real-server ready** - SOCKS5/HTTP proxy pool (`proxies.list`, or `proxies.auto` to fetch
+  and validate free public proxies), to spread source IPs, Microsoft
   account rotation (`accounts.mode: microsoft`), and named scenarios (`--scenario join-flood`).
 - **Authorization gate** - no run without explicit consent.
 - **Observability** - server-perceived ping (from `player_info`), a full-screen TUI (`--tui`)

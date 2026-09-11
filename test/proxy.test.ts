@@ -4,15 +4,21 @@ import { type ParsedProxy, ProxyPool, parseProxy } from "../src/net/proxy.js";
 describe("parseProxy", () => {
   it("parses a full socks5 URL with credentials", () => {
     expect(parseProxy("socks5://user:pass@1.2.3.4:1080")).toEqual<ParsedProxy>({
+      scheme: "socks5",
       host: "1.2.3.4",
       port: 1080,
       userId: "user",
       password: "pass",
     });
   });
-  it("accepts a bare host:port and defaults the port", () => {
-    expect(parseProxy("10.0.0.1:9050")).toMatchObject({ host: "10.0.0.1", port: 9050 });
-    expect(parseProxy("10.0.0.1")).toMatchObject({ host: "10.0.0.1", port: 1080 });
+  it("accepts a bare host:port and defaults scheme + port", () => {
+    expect(parseProxy("10.0.0.1:9050")).toMatchObject({ scheme: "socks5", host: "10.0.0.1", port: 9050 });
+    expect(parseProxy("10.0.0.1")).toMatchObject({ scheme: "socks5", host: "10.0.0.1", port: 1080 });
+  });
+  it("recognizes http and socks4 schemes, falls back to socks5 on unknown", () => {
+    expect(parseProxy("http://1.2.3.4:8080").scheme).toBe("http");
+    expect(parseProxy("socks4://1.2.3.4:1080").scheme).toBe("socks4");
+    expect(parseProxy("ftp://1.2.3.4:21").scheme).toBe("socks5");
   });
 });
 
