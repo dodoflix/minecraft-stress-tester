@@ -38,14 +38,16 @@ describe("dedupeProxies", () => {
 });
 
 describe("pickValidated", () => {
-  it("keeps reachable proxies fastest-first, capped", () => {
+  it("keeps reachable proxies fastest-first, capped, latency-less last", () => {
     const checks: ProxyCheck[] = [
       { proxy: "slow", ok: true, latencyMs: 300 },
       { proxy: "dead", ok: false },
       { proxy: "fast", ok: true, latencyMs: 50 },
       { proxy: "mid", ok: true, latencyMs: 100 },
+      { proxy: "nolat", ok: true }, // no latency -> sorts last
     ];
-    expect(pickValidated(checks, 2)).toEqual(["fast", "mid"]);
+    expect(pickValidated(checks, 3)).toEqual(["fast", "mid", "slow"]);
+    expect(pickValidated(checks, 10)).toEqual(["fast", "mid", "slow", "nolat"]);
   });
 });
 
@@ -107,5 +109,14 @@ describe("resolveAutoProxies", () => {
   it("returns nothing when no proxies are fetched", async () => {
     const empty = (async () => ({ ok: true, text: async () => "" })) as unknown as typeof fetch;
     expect(await resolveAutoProxies(target, { providers: ["X"], fetchImpl: empty })).toEqual([]);
+  });
+
+  it("falls back to the built-in providers and default limits", async () => {
+    // No providers/max/concurrency given: exercises DEFAULT_PROVIDERS and the default caps.
+    const result = await resolveAutoProxies(target, {
+      fetchImpl,
+      validator: async (proxy) => ({ proxy, ok: true, latencyMs: 1 }),
+    });
+    expect(result).toEqual(["socks5://1.1.1.1:1080", "socks5://2.2.2.2:1080", "socks5://3.3.3.3:1080"]);
   });
 });
