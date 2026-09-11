@@ -22,8 +22,10 @@ each a full Engine on a slice of the bot budget, and merges their snapshots.
 | `config/scenarios.ts` | Named load profiles (join-flood, sustained-load, chat-flood, chunk-thrash). |
 | `safety/authorization.ts` | Hard consent gate. Refuses to run unauthorized. |
 | `net/slp.ts` | Server-list-ping preflight (reachability, version, players, RTT). |
-| `net/proxy.ts` | SOCKS5 proxy pool (round-robin + per-proxy caps) and proxy URL parsing. |
-| `net/socksConnect.ts` | Tunnels a bot's game socket through a SOCKS5 proxy. |
+| `net/proxy.ts` | SOCKS5/HTTP proxy pool (round-robin + per-proxy caps) and proxy URL parsing. |
+| `net/proxyConnect.ts` | Tunnels a bot's game socket through a SOCKS5/4 or HTTP CONNECT proxy. |
+| `net/autoProxies.ts` | Fetch + validate free public proxies (`proxies.auto`). |
+| `net/proxyProbe.ts` | Health-check one proxy against the target (used by autoProxies). |
 | `net/accounts.ts` | Offline username generation or Microsoft account rotation. |
 | `engine/engine.ts` | Orchestrator: preflight, spawn, reconnect, shutdown, reporter selection. |
 | `engine/ramp.ts` | Pure spawn schedule, jitter, exponential backoff. |
@@ -36,6 +38,11 @@ each a full Engine on a slice of the bot budget, and merges their snapshots.
 | `behaviors/` | `(bot) => cleanup` behaviors: auth, chatSpam, antiAfk, movement. |
 | `metrics/` | Collector, sorted-array percentiles, TPS estimator. |
 | `report/` | Console line, TUI dashboard, web (HTTP + SSE) dashboard, JSON/CSV/HTML export, summary. |
+| `server/` | Control-plane API (`mcst serve`): pure router + run manager + config/history stores, HTTP/SSE shell. |
+| `bot/` | Bot API (single-bot mineflayer surface) + the `mcst debug` REPL dispatcher. |
+| `scan/` | Defensive scanner (`mcst scan`): fingerprint, curated advisories, osv.dev, plugin inference. |
+| `script/` | Blueprint model, interpreter, and code compiler for programmable bots (`mcst script`). |
+| `ui/` | Self-contained web control panel page served by `server/` (`mcst gui`). |
 
 ## Why the engine owns reconnection
 
@@ -55,8 +62,9 @@ events), with optional `look`/`setControlState` for movement:
 - **FullBot** (mineflayer): parses the world, so it can move and load chunks (~tens to low
   hundreds per process). For realistic game-logic load. Selected with `driver: full`.
 
-A custom driver can be injected via the engine's `driverFactory` option. (Pathfinder-based
-navigation and block interaction are not implemented yet; basic movement covers chunk load.)
+A custom driver can be injected via the engine's `driverFactory` option. The **Bot API**
+(`bot/botApi.ts`) wraps a single FullBot with a stable surface (pathfinding via
+mineflayer-pathfinder, world/entity/inventory queries) for the debug console and blueprints.
 
 ## Scaling
 
