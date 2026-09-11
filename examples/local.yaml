@@ -11,7 +11,7 @@ driver: light          # light = raw protocol (scale) | full = mineflayer (reali
 viewDistance: 2        # chunks each bot requests; low keeps the client light (raise for chunk-load tests)
 
 ramp:
-  count: 900            # bots to reach
+  count: 50            # bots to reach
   connectRate: 10      # new connections per second
   rampUpSeconds: 5     # climb from ~0 to connectRate over this window
   holdSeconds: 60      # keep them connected this long

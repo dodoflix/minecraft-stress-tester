@@ -9,8 +9,8 @@ target:
 driver: full            # mineflayer
 
 ramp:
-  count: 900
-  connectRate: 10
+  count: 40
+  connectRate: 4
   holdSeconds: 180
 
 behaviors:
