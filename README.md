@@ -4,7 +4,7 @@
 [![coverage ≥95%](https://img.shields.io/badge/coverage-%E2%89%A595%25-brightgreen.svg)](.github/workflows/ci.yml)
 [![release](https://img.shields.io/github/v/release/dodoflix/minecraft-stress-tester?label=release)](https://github.com/dodoflix/minecraft-stress-tester/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](package.json)
+[![Node](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)](package.json)
 
 A detailed, open-source load tester for Minecraft servers. It connects a swarm of bots and
 **measures what the load does to the server** (estimated TPS, connection funnel, latency,
