@@ -16,6 +16,16 @@ describe("MetricsCollector", () => {
     expect(new MetricsCollector().snapshot().connectSuccessRate).toBe(0);
   });
 
+  it("counts an unavailable-proxy skip as a failed attempt", () => {
+    const c = new MetricsCollector();
+    c.recordUnavailableProxy();
+    c.recordUnavailableProxy();
+    const s = c.snapshot();
+    expect(s.attempted).toBe(2);
+    expect(s.errors).toBe(2);
+    expect(s.spawned).toBe(0);
+  });
+
   it("aggregates the connection funnel and success rate", () => {
     const c = new MetricsCollector();
     const a = new FakeBot();

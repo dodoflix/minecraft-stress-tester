@@ -47,6 +47,22 @@ describe("Engine orchestration", () => {
     writeSpy.mockRestore();
   });
 
+  it("fails bots with no free proxy instead of connecting direct", async () => {
+    vi.useFakeTimers();
+    const { engine, created } = engineWith({
+      ramp: { count: 3, connectRate: 50, holdSeconds: 0, jitter: 0 },
+      proxies: { list: ["socks5://p:1080"], maxPerProxy: 1 }, // one proxy, one slot
+    });
+
+    const p = engine.run();
+    await vi.advanceTimersByTimeAsync(500);
+    const snap = await p;
+
+    expect(created).toHaveLength(1); // only the bot that got the single proxy launched
+    expect(snap.attempted).toBe(3); // the other two counted as failed attempts
+    expect(snap.errors).toBeGreaterThanOrEqual(2);
+  });
+
   it("respawns a dropped bot with backoff, up to maxRetries, then gives up", async () => {
     vi.useFakeTimers();
     const { engine, created } = engineWith({

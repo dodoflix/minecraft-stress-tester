@@ -38,6 +38,7 @@ export class Engine {
   private version: string | false = false;
   private preflightResult: PreflightResult | null = null;
   private shuttingDown = false;
+  private noProxySkipped = 0;
   private resolveRun: ((s: MetricsSnapshot) => void) | null = null;
   private readonly quiet: boolean;
   private readonly skipPreflight: boolean;
@@ -133,7 +134,15 @@ export class Engine {
 
   private spawn(id: number): void {
     if (this.shuttingDown) return;
-    this.launch(this.makeSpec(id), true);
+    const spec = this.makeSpec(id);
+    // Proxies configured but none free (all at maxPerProxy): fail this bot rather than connect
+    // with the real IP. Using a proxy pool is a privacy boundary; never silently bypass it.
+    if (this.proxies.enabled && !spec.proxy) {
+      this.noProxySkipped++;
+      this.collector.recordUnavailableProxy();
+      return;
+    }
+    this.launch(spec, true);
   }
 
   private launch(spec: BotSpec, fresh: boolean): void {
@@ -178,6 +187,13 @@ export class Engine {
     for (const t of this.timers) clearTimeout(t);
     this.timers.clear();
     for (const e of this.registry.all()) e.bot.disconnect("run_complete");
+
+    if (this.noProxySkipped > 0) {
+      this.log(
+        `${this.noProxySkipped} bots not launched: no free proxy (all at maxPerProxy). ` +
+          "Not connected direct, so the real IP was never exposed.\n",
+      );
+    }
 
     const snapshot = this.collector.snapshot();
     if (!this.quiet) this.log(`${formatSummary(snapshot)}\n`);
