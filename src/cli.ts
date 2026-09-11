@@ -1,14 +1,18 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
 import { cpus } from "node:os";
+import { createInterface } from "node:readline";
 import { Command } from "commander";
+import { BotApi } from "./bot/botApi.js";
+import { dispatch } from "./bot/repl.js";
 import { loadConfig } from "./config/load.js";
 import { configSchema } from "./config/schema.js";
+import type { BotSpec } from "./drivers/driver.js";
 import { Engine } from "./engine/engine.js";
 import { runSharded } from "./engine/sharded.js";
 import type { PreflightResult } from "./net/slp.js";
 import { formatSummary, writeReports } from "./report/summary.js";
-import { AuthorizationError } from "./safety/authorization.js";
+import { AuthorizationError, assertAuthorized } from "./safety/authorization.js";
 import { startServer } from "./server/httpServer.js";
 
 const program = new Command();
@@ -44,6 +48,16 @@ program
   .option("--reports-dir <dir>", "run history directory (default ./reports)")
   .option("--configs-dir <dir>", "config store directory (default ./configs)")
   .action(serveCommand);
+
+program
+  .command("debug")
+  .description("attach one bot and drive it from an interactive console (develop against a server)")
+  .option("-c, --config <path>", "config file (.yaml or .json)")
+  .option("-H, --host <host>", "target host")
+  .option("-p, --port <port>", "target port", (v) => parseInt(v, 10))
+  .option("--mc-version <ver>", "force Minecraft version (default: auto-detect)")
+  .option("--i-am-authorized", "affirm you own or are permitted to test the target")
+  .action(debugCommand);
 
 async function runCommand(opts: Record<string, unknown>): Promise<void> {
   // Shard-worker mode: run the given config quietly and hand the snapshot to the parent.
@@ -110,6 +124,51 @@ async function serveCommand(opts: Record<string, unknown>): Promise<void> {
   process.stdout.write("Pass it as `Authorization: Bearer <token>` or `?token=<token>`.\n");
   process.once("SIGINT", () => {
     void handle.close().then(() => process.exit(0));
+  });
+}
+
+async function debugCommand(opts: Record<string, unknown>): Promise<void> {
+  const config = loadConfig(opts.config as string | undefined, {
+    host: opts.host as string | undefined,
+    port: opts.port as number | undefined,
+    version: opts.mcVersion as string | undefined,
+    authorized: opts.iAmAuthorized ? true : undefined,
+  });
+  assertAuthorized(config);
+
+  const spec: BotSpec = {
+    id: 0,
+    username: `${config.accounts.usernamePrefix}-debug`,
+    host: config.target.host,
+    port: config.target.port,
+    version: config.target.version ?? false,
+    auth: config.accounts.mode,
+    profilesFolder: config.accounts.profilesFolder,
+    config,
+  };
+
+  process.stdout.write(`Connecting to ${spec.host}:${spec.port} ...\n`);
+  const bot = await BotApi.connect(spec);
+  process.stdout.write('Spawned. Type "help" for commands.\n');
+
+  const rl = createInterface({ input: process.stdin, output: process.stdout, prompt: "mcst> " });
+  bot.on("chat", ({ username, message }) => process.stdout.write(`\n[chat] <${username}> ${message}\n`));
+  bot.on("kicked", (reason) => process.stdout.write(`\n[kicked] ${reason}\n`));
+  bot.on("end", () => {
+    process.stdout.write("\n[disconnected]\n");
+    rl.close();
+  });
+
+  rl.prompt();
+  rl.on("line", async (line) => {
+    const result = await dispatch(line, bot);
+    if (result.text) process.stdout.write(`${result.text}\n`);
+    if (result.done) rl.close();
+    else rl.prompt();
+  });
+  rl.on("close", () => {
+    bot.disconnect();
+    process.exit(0);
   });
 }
 
