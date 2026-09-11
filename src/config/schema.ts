@@ -59,6 +59,9 @@ export const behaviorsSchema = z.object({
       password: z.string().default(""),
       loginCommand: z.string().default("/login {password}"),
       registerCommand: z.string().default("/register {password} {password}"),
+      /** Wait this long after joining before sending the commands, so the server's login prompt
+       *  is ready. Fires on every join, so limbo/auth servers and post-transfer real servers both work. */
+      delayMs: z.number().int().min(0).default(1000),
     })
     .prefault({}),
 });

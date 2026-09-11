@@ -40,16 +40,48 @@ describe("chatSpam behavior", () => {
 });
 
 describe("auth behavior", () => {
-  it("sends register then login on spawn with the password substituted", () => {
+  const authCfg = {
+    enabled: true,
+    password: "s3cret",
+    loginCommand: "/login {password}",
+    registerCommand: "/register {password} {password}",
+    delayMs: 1000,
+  };
+
+  it("sends register then login on join, after the delay, password substituted", () => {
+    vi.useFakeTimers();
     const bot = new FakeBot();
-    auth({
-      enabled: true,
-      password: "s3cret",
-      loginCommand: "/login {password}",
-      registerCommand: "/register {password} {password}",
-    })(bot);
-    bot.emit("spawned");
+    auth(authCfg)(bot);
+    bot.emit("login");
+    expect(bot.chats).toEqual([]); // waits for the delay
+    vi.advanceTimersByTime(1000);
     expect(bot.chats).toEqual(["/register s3cret s3cret", "/login s3cret"]);
+  });
+
+  it("re-authenticates on a second join (limbo -> real server transfer)", () => {
+    vi.useFakeTimers();
+    const bot = new FakeBot();
+    auth(authCfg)(bot);
+    bot.emit("login"); // limbo
+    vi.advanceTimersByTime(1000);
+    bot.emit("login"); // transferred to the real server
+    vi.advanceTimersByTime(1000);
+    expect(bot.chats).toEqual([
+      "/register s3cret s3cret",
+      "/login s3cret",
+      "/register s3cret s3cret",
+      "/login s3cret",
+    ]);
+  });
+
+  it("cleans up a pending send when the bot leaves before the delay", () => {
+    vi.useFakeTimers();
+    const bot = new FakeBot();
+    const cleanup = auth(authCfg)(bot);
+    bot.emit("login");
+    cleanup();
+    vi.advanceTimersByTime(2000);
+    expect(bot.chats).toEqual([]); // nothing sent
   });
 });
 
