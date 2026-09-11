@@ -72,6 +72,7 @@ Report written: ./reports/mcst-2026-09-11T....json
 ## Docs
 
 - [Usage & CLI](docs/usage.md)
+- [Web control panel](docs/gui.md) - run everything from the browser with `mcst gui`
 - [Control-plane API](docs/api.md) - drive runs over HTTP with `mcst serve`
 - [Debug mode & Bot API](docs/debug.md) - drive one bot interactively with `mcst debug`
 - [Security scan](docs/security-scan.md) - defensive `mcst scan` for servers you own

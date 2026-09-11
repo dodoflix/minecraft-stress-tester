@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { renderUiPage } from "../ui/page.js";
 import { ConfigStore } from "./configStore.js";
 import { type ApiContext, type ApiRequest, handleRequest } from "./router.js";
 import { RunManager } from "./runManager.js";
@@ -67,6 +68,11 @@ export function startServer(opts: ServeOptions = {}): Promise<ServeHandle> {
 
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? "/", `http://${host}`);
+    if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html")) {
+      res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+      res.end(renderUiPage(token));
+      return;
+    }
     if (streamMetrics(req, res, url, ctx)) return;
     void serve(req, res, url, ctx);
   });
