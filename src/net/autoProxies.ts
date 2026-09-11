@@ -53,28 +53,57 @@ export interface ProxyCheck {
   latencyMs?: number;
 }
 
-/** Keep the reachable proxies, fastest first, capped at max. Pure. */
+/**
+ * Keep the reachable proxies, fastest first, capped at max. Ties break on the proxy string so
+ * the result is deterministic regardless of the order probes finished in. Pure.
+ */
 export function pickValidated(checks: ProxyCheck[], max: number): string[] {
   return checks
     .filter((c) => c.ok)
-    .sort((a, b) => (a.latencyMs ?? Infinity) - (b.latencyMs ?? Infinity))
+    .sort((a, b) => (a.latencyMs ?? Infinity) - (b.latencyMs ?? Infinity) || a.proxy.localeCompare(b.proxy))
     .slice(0, max)
     .map((c) => c.proxy);
 }
 
-/** Run an async worker over items with bounded concurrency. */
-async function mapLimit<T, R>(items: T[], limit: number, worker: (item: T) => Promise<R>): Promise<R[]> {
-  const results: R[] = new Array(items.length);
+/** Fisher-Yates shuffle (copy). Spreads probing across the list instead of the dead head. */
+export function shuffle<T>(items: T[], rng: () => number = Math.random): T[] {
+  const a = [...items];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j] as T, a[i] as T];
+  }
+  return a;
+}
+
+/**
+ * Probe candidates with bounded concurrency, collecting the reachable ones, and stop early once
+ * `need` have been found. Free proxies are mostly dead, so probing all of them would take many
+ * minutes; this caps the work. `onProgress` reports periodically so a run never looks stuck.
+ */
+async function probeUntil(
+  candidates: string[],
+  validator: (proxy: string) => Promise<ProxyCheck>,
+  need: number,
+  limit: number,
+  onProgress?: (p: { checked: number; total: number; ok: number }) => void,
+): Promise<ProxyCheck[]> {
+  const ok: ProxyCheck[] = [];
   let next = 0;
-  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (true) {
+  let checked = 0;
+  let done = false;
+  const worker = async () => {
+    while (!done) {
       const i = next++;
-      if (i >= items.length) return;
-      results[i] = await worker(items[i] as T);
+      if (i >= candidates.length) return;
+      const res = await validator(candidates[i] as string);
+      checked++;
+      if (res.ok) ok.push(res);
+      onProgress?.({ checked, total: candidates.length, ok: ok.length });
+      if (ok.length >= need) done = true;
     }
-  });
-  await Promise.all(runners);
-  return results;
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, candidates.length) }, worker));
+  return ok;
 }
 
 /** Fetch and parse every provider, tolerating individual failures. Dedupes the union. */
@@ -85,11 +114,12 @@ export async function fetchFreeProxies(
   const lists = await Promise.all(
     providers.map(async (url) => {
       try {
-        const res = await fetchImpl(url);
+        // A provider that hangs must not stall the whole run; bound each fetch.
+        const res = await fetchImpl(url, { signal: AbortSignal.timeout(10000) });
         if (!res.ok) return [];
         return parseProxyList(await res.text());
       } catch {
-        return []; // a dead provider must not sink the whole fetch
+        return []; // a dead/slow provider must not sink the whole fetch
       }
     }),
   );
@@ -101,8 +131,13 @@ export interface ResolveOptions {
   validate?: boolean;
   max?: number;
   concurrency?: number;
+  /** Per-proxy health-check timeout (ms). */
+  timeoutMs?: number;
+  /** Cap on how many fetched proxies to health-check (they are shuffled first). */
+  maxProbes?: number;
   fetchImpl?: typeof fetch;
   validator?: (proxy: string) => Promise<ProxyCheck>;
+  onProgress?: (p: { checked: number; total: number; ok: number }) => void;
 }
 
 /**
@@ -121,7 +156,11 @@ export async function resolveAutoProxies(
 
   if (opts.validate === false) return fetched.slice(0, max);
 
-  const validator = opts.validator ?? ((proxy) => probeProxy(proxy, target.host, target.port));
-  const checks = await mapLimit(fetched, opts.concurrency ?? 50, validator);
-  return pickValidated(checks, max);
+  const timeoutMs = opts.timeoutMs ?? 4000;
+  const validator = opts.validator ?? ((proxy) => probeProxy(proxy, target.host, target.port, timeoutMs));
+  // Health-checking every fetched proxy (thousands, mostly dead, one timeout each) takes many
+  // minutes. Shuffle, cap the pool, probe with high concurrency, and stop once we have `max`.
+  const candidates = shuffle(fetched).slice(0, opts.maxProbes ?? 400);
+  const ok = await probeUntil(candidates, validator, max, opts.concurrency ?? 100, opts.onProgress);
+  return pickValidated(ok, max);
 }

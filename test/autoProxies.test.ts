@@ -6,7 +6,15 @@ import {
   parseProxyList,
   pickValidated,
   resolveAutoProxies,
+  shuffle,
 } from "../src/net/autoProxies.js";
+
+/** A fake fetch returning n bare proxies "10.0.0.<i>:1080". */
+const fetchN = (n: number): typeof fetch =>
+  (async () => ({
+    ok: true,
+    text: async () => Array.from({ length: n }, (_, i) => `10.0.0.${i + 1}:1080`).join("\n"),
+  })) as unknown as typeof fetch;
 
 describe("parseProxyList", () => {
   it("normalizes bare and schemed lines, skipping junk", () => {
@@ -118,5 +126,60 @@ describe("resolveAutoProxies", () => {
       validator: async (proxy) => ({ proxy, ok: true, latencyMs: 1 }),
     });
     expect(result).toEqual(["socks5://1.1.1.1:1080", "socks5://2.2.2.2:1080", "socks5://3.3.3.3:1080"]);
+  });
+
+  it("stops probing early once max reachable proxies are found", async () => {
+    let calls = 0;
+    const validator = async (proxy: string): Promise<ProxyCheck> => {
+      calls++;
+      return { proxy, ok: true, latencyMs: 1 };
+    };
+    const result = await resolveAutoProxies(target, {
+      fetchImpl: fetchN(50),
+      validator,
+      max: 2,
+      concurrency: 2,
+    });
+    expect(result).toHaveLength(2);
+    expect(calls).toBeLessThan(50); // did not probe the whole list
+  });
+
+  it("caps how many proxies it probes (maxProbes)", async () => {
+    let calls = 0;
+    const validator = async (proxy: string): Promise<ProxyCheck> => {
+      calls++;
+      return { proxy, ok: true, latencyMs: 1 };
+    };
+    const result = await resolveAutoProxies(target, {
+      fetchImpl: fetchN(50),
+      validator,
+      max: 100, // never reached, so early-stop does not interfere
+      maxProbes: 3,
+      concurrency: 5,
+    });
+    expect(calls).toBe(3);
+    expect(result).toHaveLength(3);
+  });
+
+  it("reports progress", async () => {
+    const events: { checked: number; total: number; ok: number }[] = [];
+    const result = await resolveAutoProxies(target, {
+      fetchImpl: fetchN(4),
+      validator: async (proxy) => ({ proxy, ok: true, latencyMs: 1 }),
+      max: 100,
+      onProgress: (p) => events.push(p),
+    });
+    expect(events).toHaveLength(4);
+    expect(events.at(-1)).toEqual({ checked: 4, total: 4, ok: 4 });
+    expect(result).toHaveLength(4);
+  });
+});
+
+describe("shuffle", () => {
+  it("returns a permutation without mutating the input", () => {
+    const input = [1, 2, 3, 4, 5];
+    const out = shuffle(input, () => 0);
+    expect([...out].sort((a, b) => a - b)).toEqual([1, 2, 3, 4, 5]);
+    expect(input).toEqual([1, 2, 3, 4, 5]);
   });
 });

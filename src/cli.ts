@@ -159,13 +159,21 @@ async function runCommand(opts: Record<string, unknown>): Promise<void> {
   }
 
   if (config.proxies.auto) {
-    process.stdout.write("Fetching free public proxies (untrusted third parties) ...\n");
+    process.stdout.write("Fetching + validating free public proxies (untrusted third parties) ...\n");
+    let lastLog = 0;
     config.proxies.list = await resolveAutoProxies(config.target, {
       providers: config.proxies.autoProviders,
       validate: config.proxies.autoValidate,
       max: config.proxies.autoMax,
+      onProgress: ({ checked, total, ok }) => {
+        const now = Date.now();
+        if (now - lastLog > 1000) {
+          lastLog = now;
+          process.stdout.write(`  probed ${checked}/${total}, ${ok} usable\r`);
+        }
+      },
     });
-    process.stdout.write(`Using ${config.proxies.list.length} free proxies.\n`);
+    process.stdout.write(`\nUsing ${config.proxies.list.length} free proxies.\n`);
   }
 
   if (config.shards > 1) {
