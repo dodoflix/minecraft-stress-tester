@@ -9,6 +9,7 @@ import { runSharded } from "./engine/sharded.js";
 import type { PreflightResult } from "./net/slp.js";
 import { formatSummary, writeReports } from "./report/summary.js";
 import { AuthorizationError } from "./safety/authorization.js";
+import { startServer } from "./server/httpServer.js";
 
 const program = new Command();
 program
@@ -32,33 +33,41 @@ program
   .option("--html", "also write an HTML report")
   .option("--shard-config <path>", "internal: run one shard from a serialized config")
   .option("--i-am-authorized", "affirm you own or are permitted to test the target")
-  .parse();
+  .action(runCommand);
 
-const opts = program.opts();
+program
+  .command("serve")
+  .description("run the control-plane API daemon (REST + live metrics over SSE)")
+  .option("-p, --port <port>", "listen port (default 8080)", (v) => parseInt(v, 10))
+  .option("--host <host>", "bind address (default 127.0.0.1; localhost only by default)")
+  .option("--token <token>", "fixed API token (default: generate a random one)")
+  .option("--reports-dir <dir>", "run history directory (default ./reports)")
+  .option("--configs-dir <dir>", "config store directory (default ./configs)")
+  .action(serveCommand);
 
-async function main(): Promise<void> {
+async function runCommand(opts: Record<string, unknown>): Promise<void> {
   // Shard-worker mode: run the given config quietly and hand the snapshot to the parent.
   if (opts.shardConfig) {
-    const config = configSchema.parse(JSON.parse(readFileSync(opts.shardConfig, "utf8")));
+    const config = configSchema.parse(JSON.parse(readFileSync(opts.shardConfig as string, "utf8")));
     const snapshot = await new Engine(config, { quiet: true }).run();
     process.send?.(snapshot);
     return;
   }
 
-  const config = loadConfig(opts.config, {
-    host: opts.host,
-    port: opts.port,
-    count: opts.count,
-    driver: opts.driver,
-    version: opts.mcVersion,
-    viewDistance: opts.viewDistance,
-    shards: opts.shards,
-    scenario: opts.scenario,
-    tui: opts.tui,
-    web: opts.web,
-    webPort: opts.webPort,
-    csv: opts.csv,
-    html: opts.html,
+  const config = loadConfig(opts.config as string | undefined, {
+    host: opts.host as string | undefined,
+    port: opts.port as number | undefined,
+    count: opts.count as number | undefined,
+    driver: opts.driver as "light" | "full" | undefined,
+    version: opts.mcVersion as string | undefined,
+    viewDistance: opts.viewDistance as number | undefined,
+    shards: opts.shards as number | undefined,
+    scenario: opts.scenario as never,
+    tui: opts.tui as boolean | undefined,
+    web: opts.web as boolean | undefined,
+    webPort: opts.webPort as number | undefined,
+    csv: opts.csv as boolean | undefined,
+    html: opts.html as boolean | undefined,
     authorized: opts.iAmAuthorized ? true : undefined,
   });
 
@@ -88,13 +97,27 @@ async function main(): Promise<void> {
   await new Engine(config).run();
 }
 
-main()
-  .then(() => process.exit(0))
-  .catch((err) => {
-    if (err instanceof AuthorizationError) {
-      process.stderr.write(`\n${err.message}\n`);
-      process.exit(2);
-    }
-    process.stderr.write(`\nError: ${err?.message ?? err}\n`);
-    process.exit(1);
+async function serveCommand(opts: Record<string, unknown>): Promise<void> {
+  const handle = await startServer({
+    port: opts.port as number | undefined,
+    host: opts.host as string | undefined,
+    token: opts.token as string | undefined,
+    reportsDir: opts.reportsDir as string | undefined,
+    configsDir: opts.configsDir as string | undefined,
   });
+  process.stdout.write(`Control-plane API listening on ${handle.url}\n`);
+  process.stdout.write(`API token: ${handle.token}\n`);
+  process.stdout.write("Pass it as `Authorization: Bearer <token>` or `?token=<token>`.\n");
+  process.once("SIGINT", () => {
+    void handle.close().then(() => process.exit(0));
+  });
+}
+
+program.parseAsync().catch((err) => {
+  if (err instanceof AuthorizationError) {
+    process.stderr.write(`\n${err.message}\n`);
+    process.exit(2);
+  }
+  process.stderr.write(`\nError: ${err?.message ?? err}\n`);
+  process.exit(1);
+});
