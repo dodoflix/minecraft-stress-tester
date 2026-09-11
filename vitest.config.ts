@@ -17,6 +17,7 @@ export default defineConfig({
         "src/net/socksConnect.ts",
         "src/report/web.ts",
         "src/server/httpServer.ts",
+        "src/bot/botApi.ts",
       ],
       thresholds: {
         lines: 95,
