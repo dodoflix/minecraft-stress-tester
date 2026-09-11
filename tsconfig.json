@@ -1,18 +1,11 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "lib": ["ES2023"],
-    "outDir": "dist",
-    "rootDir": "src",
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "declaration": false,
-    "sourceMap": true,
-    "resolveJsonModule": true
+    "noEmit": true,
+    "paths": {
+      "minecraft-stress-tester": ["./packages/core/src/index.ts"],
+      "@mcst/server": ["./packages/server/src/index.ts"]
+    }
   },
-  "include": ["src/**/*.ts"]
+  "include": ["packages/*/src/**/*.ts"]
 }

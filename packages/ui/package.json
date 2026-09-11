@@ -1,0 +1,7 @@
+{
+  "name": "@mcst/ui",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Web UI for minecraft-stress-tester (React app; built assets served by @mcst/server).",
+  "type": "module"
+}

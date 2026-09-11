@@ -44,8 +44,8 @@ and runs real bots against it. It self-skips when no `java` is on PATH.
 ## Architecture
 
 See [docs/architecture.md](docs/architecture.md). New drivers implement the
-`BotDriver` interface in `src/drivers/driver.ts`; new behaviors are
-`(bot) => cleanup` functions in `src/behaviors/`; new metrics feed the collector.
+`BotDriver` interface in `packages/core/src/drivers/driver.ts`; new behaviors are
+`(bot) => cleanup` functions in `packages/core/src/behaviors/`; new metrics feed the collector.
 
 ## Commits & releases
 
@@ -63,5 +63,5 @@ Repo secrets that make it fully automatic:
 
 ## Safety
 
-Never weaken the authorization gate (`src/safety/authorization.ts`) or add a way
+Never weaken the authorization gate (`packages/core/src/safety/authorization.ts`) or add a way
 to bypass it. PRs that do will be closed.

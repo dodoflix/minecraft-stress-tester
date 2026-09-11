@@ -26,7 +26,16 @@ process-spawning capability: isolate the I/O in one excluded file, and unit-test
 that drives it (parsing, routing, orchestration, formatting) with injected fakes. Never lower the
 gate or exclude a file just to pass; only exclude genuine I/O shims.
 
-## Architecture map (`src/`)
+## Workspace layout
+
+An npm-workspaces monorepo: `packages/core` (`minecraft-stress-tester`, the engine library + `mcst`
+CLI, published to npm), `packages/server` (`@mcst/server`, the control-plane API + UI shell wrapping
+core), `packages/ui` (`@mcst/ui`, the web app). Dependencies point one way: server and ui depend on
+core; core depends on neither. `mcst serve`/`gui` load `@mcst/server` with a dynamic import so core
+has no build-time cycle. Root scripts (`npm run typecheck|lint|test:coverage|build`) span all
+workspaces; the 95% coverage gate is global in `vitest.config.ts`.
+
+## Architecture map (`packages/core/src/`, except server/ui which live in `@mcst/server`)
 
 - `cli.ts` (excluded): commander CLI, `enablePositionalOptions()`. Subcommands: default run,
   `serve`, `gui`, `debug`, `scan`, `script`.
@@ -42,13 +51,15 @@ gate or exclude a file just to pass; only exclude genuine I/O shims.
 - `net/`: `proxy.ts` (pool, `parseProxy`, `isLocalHost`), `proxyConnect.ts`/`proxyProbe.ts` (SOCKS5/4
   tunnel + MC-status validation, excluded), `autoProxies.ts` (fetch/parse/dedupe/pick/probe, tested),
   `slp.ts` (preflight), `accounts.ts`.
-- `server/`: control-plane API, pure `router.ts`/`runManager.ts`/`configStore.ts`/`history.ts` (tested)
-  + `httpServer.ts` (socket + SSE, serves the UI at `/`, excluded).
+- `@mcst/server` (`packages/server/src/`): control-plane API, pure `router.ts`/`runManager.ts`/
+  `configStore.ts`/`history.ts` (tested) + `httpServer.ts` (socket + SSE, serves the UI at `/`,
+  excluded) + `ui/page.ts` (the control-panel page). Imports core via `minecraft-stress-tester`.
 - `scan/`: defensive scanner (fingerprint, curated advisories, osv.dev, plugin inference; pure + tested;
   `recon.ts` excluded).
 - `script/`: `blueprint.ts` (zod model, event-triggered actions), `run.ts` (interpreter), `compile.ts`
   (eject to TS). Pure + tested.
-- `ui/page.ts`: self-contained web control panel (no build step), pure string builder, tested.
+- `@mcst/server`'s `ui/page.ts`: self-contained web control panel (no build step), pure string
+  builder, tested (moves to `@mcst/ui` when the React app lands).
 - `behaviors/`: built-in `auth`/`movement`/`antiAfk`/`chatSpam`/`commands`. A roadmap workstream
   removes this system in favor of composable script pipelines.
 

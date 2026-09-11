@@ -1,55 +1,33 @@
 {
-  "name": "minecraft-stress-tester",
+  "name": "minecraft-stress-tester-monorepo",
   "version": "1.2.0",
-  "description": "The most detailed open-source Minecraft server stress tester: scalable bot load generation with real server-impact metrics (TPS, latency, throughput).",
+  "private": true,
+  "description": "Monorepo for minecraft-stress-tester: core engine + CLI, control-plane server, and web UI.",
   "type": "module",
   "license": "MIT",
   "author": "dodo",
   "engines": {
     "node": ">=24"
   },
-  "bin": {
-    "mcst": "./dist/cli.js"
-  },
-  "files": [
-    "dist",
-    "examples",
-    "README.md"
+  "workspaces": [
+    "packages/core",
+    "packages/server",
+    "packages/ui"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "start": "tsx src/cli.ts",
-    "mcst": "tsx src/cli.ts",
+    "build": "npm run build --workspaces --if-present",
+    "start": "tsx packages/core/src/cli.ts",
+    "mcst": "tsx packages/core/src/cli.ts",
     "server": "node scripts/dev-server.mjs",
     "test": "vitest run",
     "test:unit": "vitest run --exclude '**/integration.test.ts'",
-    "test:integration": "vitest run test/integration.test.ts --testTimeout=200000",
+    "test:integration": "vitest run packages/core/test/integration.test.ts --testTimeout=200000",
     "test:coverage": "vitest run --coverage --exclude '**/integration.test.ts'",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "prepare": "lefthook install || true",
-    "prepublishOnly": "npm run build"
-  },
-  "keywords": [
-    "minecraft",
-    "stress-test",
-    "load-testing",
-    "mineflayer",
-    "minecraft-protocol",
-    "bots",
-    "benchmark",
-    "tps"
-  ],
-  "dependencies": {
-    "commander": "^15.0.0",
-    "js-yaml": "^5.4.1",
-    "minecraft-protocol": "^1.68.0",
-    "mineflayer": "^4.39.0",
-    "mineflayer-pathfinder": "^2.4.5",
-    "socks": "^2.8.10",
-    "zod": "^4.6.2"
+    "prepare": "lefthook install || true"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.13",

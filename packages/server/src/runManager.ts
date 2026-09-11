@@ -1,6 +1,5 @@
-import type { Config } from "../config/schema.js";
-import { Engine } from "../engine/engine.js";
-import type { MetricsSnapshot } from "../metrics/collector.js";
+import type { Config, MetricsSnapshot } from "minecraft-stress-tester";
+import { Engine } from "minecraft-stress-tester";
 
 export type RunStatus = "running" | "completed" | "failed" | "stopped";
 

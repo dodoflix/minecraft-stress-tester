@@ -1,7 +1,7 @@
+import type { MetricsSnapshot } from "minecraft-stress-tester";
+import { configSchema } from "minecraft-stress-tester";
 import { describe, expect, it } from "vitest";
-import { configSchema } from "../src/config/schema.js";
-import type { MetricsSnapshot } from "../src/metrics/collector.js";
-import { type RunEngine, RunManager } from "../src/server/runManager.js";
+import { type RunEngine, RunManager } from "../src/runManager.js";
 
 const config = configSchema.parse({ authorized: true, target: { host: "localhost" }, ramp: { count: 5 } });
 

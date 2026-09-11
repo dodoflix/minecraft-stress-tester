@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { RunReport } from "../report/export.js";
+import type { RunReport } from "minecraft-stress-tester";
 
 export interface RunHistoryEntry {
   file: string;

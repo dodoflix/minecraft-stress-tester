@@ -1,26 +1,13 @@
 import { randomBytes } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
-import { renderUiPage } from "../ui/page.js";
+import type { ServeHandle, ServeOptions, StartServer } from "minecraft-stress-tester";
 import { ConfigStore } from "./configStore.js";
 import { type ApiContext, type ApiRequest, handleRequest } from "./router.js";
 import { RunManager } from "./runManager.js";
+import { renderUiPage } from "./ui/page.js";
 
-export interface ServeOptions {
-  port?: number;
-  /** Bind address. Defaults to localhost so the API never listens on a public interface. */
-  host?: string;
-  /** Fixed API token; a random one is generated (and returned) when omitted. */
-  token?: string;
-  reportsDir?: string;
-  configsDir?: string;
-}
-
-export interface ServeHandle {
-  url: string;
-  token: string;
-  close: () => Promise<void>;
-}
+export type { ServeHandle, ServeOptions };
 
 function pkgVersion(): string {
   try {
@@ -54,7 +41,7 @@ async function readBody(req: IncomingMessage): Promise<unknown> {
  * pure router, and streams live run metrics over SSE. Socket/streaming I/O, excluded from
  * coverage; the routing logic lives in router.ts and is unit-tested.
  */
-export function startServer(opts: ServeOptions = {}): Promise<ServeHandle> {
+export const startServer: StartServer = (opts: ServeOptions = {}): Promise<ServeHandle> => {
   const host = opts.host ?? "127.0.0.1";
   const port = opts.port ?? 8080;
   const token = opts.token ?? randomBytes(24).toString("hex");
@@ -89,7 +76,7 @@ export function startServer(opts: ServeOptions = {}): Promise<ServeHandle> {
       });
     });
   });
-}
+};
 
 async function serve(req: IncomingMessage, res: ServerResponse, url: URL, ctx: ApiContext): Promise<void> {
   const query = url.searchParams;
