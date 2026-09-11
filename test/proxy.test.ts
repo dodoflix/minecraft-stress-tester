@@ -1,5 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { type ParsedProxy, ProxyPool, parseProxy } from "../src/net/proxy.js";
+import { isLocalHost, type ParsedProxy, ProxyPool, parseProxy } from "../src/net/proxy.js";
+
+describe("isLocalHost", () => {
+  it("flags loopback and private ranges, not public hosts", () => {
+    for (const h of [
+      "localhost",
+      "127.0.0.1",
+      "::1",
+      "10.1.2.3",
+      "192.168.0.5",
+      "172.16.0.1",
+      "172.31.9.9",
+    ]) {
+      expect(isLocalHost(h)).toBe(true);
+    }
+    for (const h of ["play.example.com", "1.2.3.4", "172.15.0.1", "172.32.0.1", "8.8.8.8"]) {
+      expect(isLocalHost(h)).toBe(false);
+    }
+  });
+});
 
 describe("parseProxy", () => {
   it("parses a full socks5 URL with credentials", () => {
@@ -15,9 +34,9 @@ describe("parseProxy", () => {
     expect(parseProxy("10.0.0.1:9050")).toMatchObject({ scheme: "socks5", host: "10.0.0.1", port: 9050 });
     expect(parseProxy("10.0.0.1")).toMatchObject({ scheme: "socks5", host: "10.0.0.1", port: 1080 });
   });
-  it("recognizes http and socks4 schemes, falls back to socks5 on unknown", () => {
-    expect(parseProxy("http://1.2.3.4:8080").scheme).toBe("http");
+  it("recognizes socks4, falls back to socks5 on any other scheme", () => {
     expect(parseProxy("socks4://1.2.3.4:1080").scheme).toBe("socks4");
+    expect(parseProxy("http://1.2.3.4:8080").scheme).toBe("socks5"); // http unsupported -> socks5
     expect(parseProxy("ftp://1.2.3.4:21").scheme).toBe("socks5");
   });
 });

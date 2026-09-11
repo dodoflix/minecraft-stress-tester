@@ -38,6 +38,7 @@ export class Engine {
   private version: string | false = false;
   private preflightResult: PreflightResult | null = null;
   private shuttingDown = false;
+  private noProxySkipped = 0;
   private resolveRun: ((s: MetricsSnapshot) => void) | null = null;
   private readonly quiet: boolean;
   private readonly skipPreflight: boolean;
@@ -67,13 +68,27 @@ export class Engine {
     assertAuthorized(this.config);
     const { host, port } = this.config.target;
 
-    if (!this.skipPreflight) {
+    if (this.skipPreflight) {
+      // caller opted out
+    } else if (this.proxies.enabled) {
+      // The preflight ping is a direct TCP connection from the real IP. With proxies on, that
+      // would leak the very IP the proxies exist to hide, so skip it entirely; bots detect the
+      // version through their proxies (auto-negotiation uses the same proxied connect).
+      this.log("Proxies enabled: skipping the direct preflight so the real IP is never used.\n");
+    } else {
       this.log(`Preflight ping ${host}:${port} ...\n`);
-      this.preflightResult = await preflight(host, port, this.config.target.version);
-      const p = this.preflightResult;
-      this.log(
-        `  ${p.versionName} (protocol ${p.protocol}) | players ${p.online}/${p.max} | ping ${p.latencyMs}ms | "${p.motd}"\n`,
-      );
+      try {
+        this.preflightResult = await preflight(host, port, this.config.target.version);
+        const p = this.preflightResult;
+        this.log(
+          `  ${p.versionName} (protocol ${p.protocol}) | players ${p.online}/${p.max} | ping ${p.latencyMs}ms | "${p.motd}"\n`,
+        );
+      } catch (err) {
+        // Not fatal: the server may be throttling the probe. Bots still connect (auto-negotiating
+        // the version), so warn and go on.
+        this.log(`  preflight failed: ${err instanceof Error ? err.message : String(err)} (continuing)\n`);
+        this.preflightResult = null;
+      }
     }
     // Auto-negotiate by default: minecraft-protocol maps the server's protocol number
     // to a client version it supports (handles patch releases like 26.1.2 -> 26.1).
@@ -133,7 +148,15 @@ export class Engine {
 
   private spawn(id: number): void {
     if (this.shuttingDown) return;
-    this.launch(this.makeSpec(id), true);
+    const spec = this.makeSpec(id);
+    // Proxies configured but none free (all at maxPerProxy): fail this bot rather than connect
+    // with the real IP. Using a proxy pool is a privacy boundary; never silently bypass it.
+    if (this.proxies.enabled && !spec.proxy) {
+      this.noProxySkipped++;
+      this.collector.recordUnavailableProxy();
+      return;
+    }
+    this.launch(spec, true);
   }
 
   private launch(spec: BotSpec, fresh: boolean): void {
@@ -178,6 +201,13 @@ export class Engine {
     for (const t of this.timers) clearTimeout(t);
     this.timers.clear();
     for (const e of this.registry.all()) e.bot.disconnect("run_complete");
+
+    if (this.noProxySkipped > 0) {
+      this.log(
+        `${this.noProxySkipped} bots not launched: no free proxy (all at maxPerProxy). ` +
+          "Not connected direct, so the real IP was never exposed.\n",
+      );
+    }
 
     const snapshot = this.collector.snapshot();
     if (!this.quiet) this.log(`${formatSummary(snapshot)}\n`);

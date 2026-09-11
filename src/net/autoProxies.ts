@@ -1,18 +1,51 @@
 import { probeProxy } from "./proxyProbe.js";
 
+/** A provider is a list URL plus the proxy scheme its bare lines carry (default socks5). */
+export type ProxyProvider = string | { url: string; scheme?: string };
+
 /**
  * Public free-proxy lists that need no registration or payment. Each is a plain-text list
- * (one proxy per line) hosted on GitHub raw. Free proxies are unreliable and untrustworthy,
- * so we over-fetch and validate hard (see resolveAutoProxies). SOCKS5 sources by default,
- * since HTTP CONNECT to arbitrary game ports is usually blocked on free HTTP proxies.
+ * (one `ip:port` or `scheme://ip:port` per line) hosted on GitHub raw or a keyless API. Free
+ * proxies are unreliable and untrustworthy, so we over-fetch across many sources and validate
+ * hard (see resolveAutoProxies). SOCKS5/SOCKS4 only: they tunnel arbitrary TCP, so they work for
+ * game ports, unlike free HTTP proxies which block CONNECT to non-443 ports.
  */
-export const DEFAULT_PROVIDERS = [
-  "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt",
-  "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt",
-  "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/socks5/data.txt",
+export const DEFAULT_PROVIDERS: ProxyProvider[] = [
+  // socks5
+  { url: "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt", scheme: "socks5" },
+  { url: "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt", scheme: "socks5" },
+  {
+    url: "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/socks5/data.txt",
+    scheme: "socks5",
+  },
+  { url: "https://raw.githubusercontent.com/hookzof/socks5_list/master/proxy.txt", scheme: "socks5" },
+  {
+    url: "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks5.txt",
+    scheme: "socks5",
+  },
+  {
+    url: "https://raw.githubusercontent.com/sunny9577/proxy-scraper/master/generated/socks5_proxies.txt",
+    scheme: "socks5",
+  },
+  { url: "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks5.txt", scheme: "socks5" },
+  {
+    url: "https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks5&timeout=10000&country=all",
+    scheme: "socks5",
+  },
+  // socks4
+  { url: "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt", scheme: "socks4" },
+  { url: "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks4.txt", scheme: "socks4" },
+  {
+    url: "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/socks4/data.txt",
+    scheme: "socks4",
+  },
+  {
+    url: "https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks4&timeout=10000&country=all",
+    scheme: "socks4",
+  },
 ];
 
-const LINE = /^(?:(socks5|socks4|http|https):\/\/)?([\w.-]+):(\d{1,5})$/;
+const LINE = /^(?:(socks5|socks4):\/\/)?([\w.-]+):(\d{1,5})$/;
 
 /**
  * Parse a proxy list into normalized `scheme://host:port` strings. Accepts bare `host:port`
@@ -53,43 +86,79 @@ export interface ProxyCheck {
   latencyMs?: number;
 }
 
-/** Keep the reachable proxies, fastest first, capped at max. Pure. */
+/**
+ * Keep the reachable proxies, fastest first, capped at max. Ties break on the proxy string so
+ * the result is deterministic regardless of the order probes finished in. Pure.
+ */
 export function pickValidated(checks: ProxyCheck[], max: number): string[] {
   return checks
     .filter((c) => c.ok)
-    .sort((a, b) => (a.latencyMs ?? Infinity) - (b.latencyMs ?? Infinity))
+    .sort((a, b) => (a.latencyMs ?? Infinity) - (b.latencyMs ?? Infinity) || a.proxy.localeCompare(b.proxy))
     .slice(0, max)
     .map((c) => c.proxy);
 }
 
-/** Run an async worker over items with bounded concurrency. */
-async function mapLimit<T, R>(items: T[], limit: number, worker: (item: T) => Promise<R>): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let next = 0;
-  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (true) {
-      const i = next++;
-      if (i >= items.length) return;
-      results[i] = await worker(items[i] as T);
-    }
-  });
-  await Promise.all(runners);
-  return results;
+/** Fisher-Yates shuffle (copy). Spreads probing across the list instead of the dead head. */
+export function shuffle<T>(items: T[], rng: () => number = Math.random): T[] {
+  const a = [...items];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [a[i], a[j]] = [a[j] as T, a[i] as T];
+  }
+  return a;
 }
 
-/** Fetch and parse every provider, tolerating individual failures. Dedupes the union. */
+/**
+ * Probe candidates with bounded concurrency, collecting the reachable ones, and stop early once
+ * `need` have been found. Free proxies are mostly dead, so probing all of them would take many
+ * minutes; this caps the work. `onProgress` reports periodically so a run never looks stuck.
+ */
+async function probeUntil(
+  candidates: string[],
+  validator: (proxy: string) => Promise<ProxyCheck>,
+  need: number,
+  limit: number,
+  onProgress?: (p: { checked: number; total: number; ok: number }) => void,
+): Promise<ProxyCheck[]> {
+  const ok: ProxyCheck[] = [];
+  let next = 0;
+  let checked = 0;
+  let done = false;
+  const worker = async () => {
+    while (!done) {
+      const i = next++;
+      if (i >= candidates.length) return;
+      const res = await validator(candidates[i] as string);
+      checked++;
+      if (res.ok) ok.push(res);
+      onProgress?.({ checked, total: candidates.length, ok: ok.length });
+      if (ok.length >= need) done = true;
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(limit, candidates.length) }, worker));
+  return ok;
+}
+
+function providerParts(p: ProxyProvider): { url: string; scheme: string } {
+  return typeof p === "string" ? { url: p, scheme: "socks5" } : { url: p.url, scheme: p.scheme ?? "socks5" };
+}
+
+/** Fetch and parse every provider (tagging bare lines with its scheme), tolerating individual
+ * failures. Dedupes the union. A plain-string provider defaults to the socks5 scheme. */
 export async function fetchFreeProxies(
-  providers: string[],
+  providers: ProxyProvider[],
   fetchImpl: typeof fetch = fetch,
 ): Promise<string[]> {
   const lists = await Promise.all(
-    providers.map(async (url) => {
+    providers.map(async (p) => {
+      const { url, scheme } = providerParts(p);
       try {
-        const res = await fetchImpl(url);
+        // A provider that hangs must not stall the whole run; bound each fetch.
+        const res = await fetchImpl(url, { signal: AbortSignal.timeout(10000) });
         if (!res.ok) return [];
-        return parseProxyList(await res.text());
+        return parseProxyList(await res.text(), scheme);
       } catch {
-        return []; // a dead provider must not sink the whole fetch
+        return []; // a dead/slow provider must not sink the whole fetch
       }
     }),
   );
@@ -101,8 +170,17 @@ export interface ResolveOptions {
   validate?: boolean;
   max?: number;
   concurrency?: number;
+  /** Per-proxy health-check timeout (ms). */
+  timeoutMs?: number;
+  /** Cap on how many fetched proxies to health-check (they are shuffled first). */
+  maxProbes?: number;
+  /** Find (and keep) a buffer of max/perProxy * overfetch working proxies against flaky ones. */
+  overfetch?: number;
+  /** Bots each proxy will carry (maxPerProxy). Fewer proxies are needed when this is higher. */
+  perProxy?: number;
   fetchImpl?: typeof fetch;
   validator?: (proxy: string) => Promise<ProxyCheck>;
+  onProgress?: (p: { checked: number; total: number; ok: number }) => void;
 }
 
 /**
@@ -116,12 +194,21 @@ export async function resolveAutoProxies(
 ): Promise<string[]> {
   const providers = opts.providers?.length ? opts.providers : DEFAULT_PROVIDERS;
   const max = opts.max ?? 50;
+  // Proxies needed = bots to proxy / bots-per-proxy, then over-validate a buffer since free
+  // proxies that pass validation often die by the time bots use them.
+  const perProxy = opts.perProxy ?? 1;
+  const target_ = Math.max(1, Math.ceil((max / perProxy) * (opts.overfetch ?? 2)));
   const fetched = await fetchFreeProxies(providers, opts.fetchImpl);
   if (!fetched.length) return [];
 
-  if (opts.validate === false) return fetched.slice(0, max);
+  if (opts.validate === false) return fetched.slice(0, Math.max(1, Math.ceil(max / perProxy)));
 
-  const validator = opts.validator ?? ((proxy) => probeProxy(proxy, target.host, target.port));
-  const checks = await mapLimit(fetched, opts.concurrency ?? 50, validator);
-  return pickValidated(checks, max);
+  const timeoutMs = opts.timeoutMs ?? 4000;
+  const validator = opts.validator ?? ((proxy) => probeProxy(proxy, target.host, target.port, timeoutMs));
+  // Shuffle, then probe with high concurrency, stopping once we have `target_` usable. `maxProbes`
+  // caps how much of the pool we touch (probing all of it, mostly dead, is slow); unset means
+  // probe the whole pool until `target_` are found.
+  const candidates = shuffle(fetched).slice(0, opts.maxProbes ?? fetched.length);
+  const ok = await probeUntil(candidates, validator, target_, opts.concurrency ?? 100, opts.onProgress);
+  return pickValidated(ok, target_);
 }

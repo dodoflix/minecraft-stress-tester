@@ -59,6 +59,19 @@ export const behaviorsSchema = z.object({
       password: z.string().default(""),
       loginCommand: z.string().default("/login {password}"),
       registerCommand: z.string().default("/register {password} {password}"),
+      /** Wait this long after joining before sending the commands, so the server's login prompt
+       *  is ready. Fires on every join, so limbo/auth servers and post-transfer real servers both work. */
+      delayMs: z.number().int().min(0).default(1000),
+    })
+    .prefault({}),
+  // Run one-shot commands once the bot spawns into the world, e.g. ["/survival"] to leave the
+  // hub after auth. Fires once per bot, on the first spawn (already authed on limbo networks).
+  commands: z
+    .object({
+      enabled: z.boolean().default(false),
+      list: z.array(z.string()).default([]),
+      /** Wait after spawn before sending, and stagger between commands. */
+      delayMs: z.number().int().min(0).default(2000),
     })
     .prefault({}),
 });
@@ -73,18 +86,27 @@ export const accountsSchema = z.object({
 });
 
 export const proxiesSchema = z.object({
-  /** SOCKS5/HTTP proxies, e.g. "socks5://user:pass@host:1080", "http://host:8080", "host:1080". */
+  /** SOCKS5/SOCKS4 proxies, e.g. "socks5://user:pass@host:1080", "socks4://host:1080", "host:1080". */
   list: z.array(z.string()).default([]),
   /** Max simultaneous bots per proxy (spreads source IPs past per-IP antibot limits). */
   maxPerProxy: z.number().int().min(1).default(50),
   /** Fetch free public proxies automatically (no registration). Untrusted third parties: see docs. */
   auto: z.boolean().default(false),
-  /** Provider list URLs (plain-text proxy lists). Empty = a built-in set of free SOCKS5 lists. */
+  /** Provider list URLs (plain-text proxy lists). Empty = a built-in set of free proxy lists. */
   autoProviders: z.array(z.string()).default([]),
   /** Health-check fetched proxies against the target and keep only the reachable ones. */
   autoValidate: z.boolean().default(true),
-  /** Cap how many validated free proxies to keep. */
+  /** Target number of bots to keep proxied. Proxies found = ceil(autoMax / maxPerProxy) * autoOverfetch. */
   autoMax: z.number().int().min(1).default(50),
+  /** Buffer multiplier on the proxies found, against proxies that die mid-run. */
+  autoOverfetch: z.number().min(1).default(2),
+  /** How many fetched proxies to health-check at most. Unset = probe the whole pool until autoMax
+   *  usable are found (slower, but finds the most proxies). Set a number to cap it (faster). */
+  autoMaxProbes: z.number().int().min(1).optional(),
+  /** Simultaneous health-checks. */
+  autoConcurrency: z.number().int().min(1).default(100),
+  /** Per-proxy health-check timeout (ms). */
+  autoTimeoutMs: z.number().int().min(100).default(4000),
 });
 
 export const SCENARIOS = ["join-flood", "sustained-load", "chat-flood", "chunk-thrash"] as const;

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { antiAfk } from "../src/behaviors/antiAfk.js";
 import { auth } from "../src/behaviors/auth.js";
 import { chatSpam } from "../src/behaviors/chatSpam.js";
+import { commands } from "../src/behaviors/commands.js";
 import { buildBehaviors } from "../src/behaviors/index.js";
 import { movement } from "../src/behaviors/movement.js";
 import { configSchema } from "../src/config/schema.js";
@@ -40,16 +41,75 @@ describe("chatSpam behavior", () => {
 });
 
 describe("auth behavior", () => {
-  it("sends register then login on spawn with the password substituted", () => {
+  const authCfg = {
+    enabled: true,
+    password: "s3cret",
+    loginCommand: "/login {password}",
+    registerCommand: "/register {password} {password}",
+    delayMs: 1000,
+  };
+
+  it("sends register then login on join, after the delay, password substituted", () => {
+    vi.useFakeTimers();
     const bot = new FakeBot();
-    auth({
-      enabled: true,
-      password: "s3cret",
-      loginCommand: "/login {password}",
-      registerCommand: "/register {password} {password}",
-    })(bot);
-    bot.emit("spawned");
+    auth(authCfg)(bot);
+    bot.emit("login");
+    expect(bot.chats).toEqual([]); // waits for the delay
+    vi.advanceTimersByTime(1000);
     expect(bot.chats).toEqual(["/register s3cret s3cret", "/login s3cret"]);
+  });
+
+  it("re-authenticates on a second join (limbo -> real server transfer)", () => {
+    vi.useFakeTimers();
+    const bot = new FakeBot();
+    auth(authCfg)(bot);
+    bot.emit("login"); // limbo
+    vi.advanceTimersByTime(1000);
+    bot.emit("login"); // transferred to the real server
+    vi.advanceTimersByTime(1000);
+    expect(bot.chats).toEqual([
+      "/register s3cret s3cret",
+      "/login s3cret",
+      "/register s3cret s3cret",
+      "/login s3cret",
+    ]);
+  });
+
+  it("cleans up a pending send when the bot leaves before the delay", () => {
+    vi.useFakeTimers();
+    const bot = new FakeBot();
+    const cleanup = auth(authCfg)(bot);
+    bot.emit("login");
+    cleanup();
+    vi.advanceTimersByTime(2000);
+    expect(bot.chats).toEqual([]); // nothing sent
+  });
+});
+
+describe("commands behavior", () => {
+  it("runs the list once after the first spawn, staggered, and not on a later spawn", () => {
+    vi.useFakeTimers();
+    const bot = new FakeBot();
+    commands({ enabled: true, list: ["/survival", "/kit start"], delayMs: 1000 })(bot);
+    bot.emit("spawned");
+    expect(bot.chats).toEqual([]); // waits for the delay
+    vi.advanceTimersByTime(1000);
+    expect(bot.chats).toEqual(["/survival"]);
+    vi.advanceTimersByTime(1000);
+    expect(bot.chats).toEqual(["/survival", "/kit start"]);
+    bot.emit("spawned"); // transfer/respawn: not re-run
+    vi.advanceTimersByTime(5000);
+    expect(bot.chats).toEqual(["/survival", "/kit start"]);
+  });
+
+  it("cleans up pending commands when the bot leaves", () => {
+    vi.useFakeTimers();
+    const bot = new FakeBot();
+    const cleanup = commands({ enabled: true, list: ["/survival"], delayMs: 1000 })(bot);
+    bot.emit("spawned");
+    cleanup();
+    vi.advanceTimersByTime(2000);
+    expect(bot.chats).toEqual([]);
   });
 });
 

@@ -44,6 +44,12 @@ export class MetricsCollector {
   private readonly kickReasons = new Map<string, number>();
   private readonly tps = new TpsEstimator();
 
+  /** A bot could not be launched because no proxy was free (proxies required). Counts as a failed attempt. */
+  recordUnavailableProxy(): void {
+    this.attempted++;
+    this.errors++;
+  }
+
   track(bot: BotDriver): void {
     const t0 = Date.now();
     this.attempted++;

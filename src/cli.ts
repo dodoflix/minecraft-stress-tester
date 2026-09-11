@@ -12,6 +12,7 @@ import type { BotSpec } from "./drivers/driver.js";
 import { Engine } from "./engine/engine.js";
 import { runSharded } from "./engine/sharded.js";
 import { resolveAutoProxies } from "./net/autoProxies.js";
+import { isLocalHost } from "./net/proxy.js";
 import type { PreflightResult } from "./net/slp.js";
 import { formatSummary, writeReports } from "./report/summary.js";
 import { AuthorizationError, assertAuthorized } from "./safety/authorization.js";
@@ -126,7 +127,9 @@ async function runCommand(opts: Record<string, unknown>): Promise<void> {
   // Shard-worker mode: run the given config quietly and hand the snapshot to the parent.
   if (opts.shardConfig) {
     const config = configSchema.parse(JSON.parse(readFileSync(opts.shardConfig as string, "utf8")));
-    const snapshot = await new Engine(config, { quiet: true }).run();
+    // Workers skip preflight: it would be N redundant direct pings from the real IP (defeating
+    // proxies), and bots auto-negotiate the version anyway.
+    const snapshot = await new Engine(config, { quiet: true, skipPreflight: true }).run();
     process.send?.(snapshot);
     return;
   }
@@ -159,13 +162,40 @@ async function runCommand(opts: Record<string, unknown>): Promise<void> {
   }
 
   if (config.proxies.auto) {
-    process.stdout.write("Fetching free public proxies (untrusted third parties) ...\n");
+    if (isLocalHost(config.target.host)) {
+      process.stderr.write(
+        `Warning: ${config.target.host} is a local/private address. Proxies connect from their own\n` +
+          "         machine, so they cannot reach a server on your LAN; validation will find 0 usable.\n" +
+          "         Auto-proxies only works against a public server IP.\n",
+      );
+    }
+    process.stdout.write("Fetching + validating free public proxies (untrusted third parties) ...\n");
+    let lastLog = 0;
     config.proxies.list = await resolveAutoProxies(config.target, {
       providers: config.proxies.autoProviders,
       validate: config.proxies.autoValidate,
       max: config.proxies.autoMax,
+      overfetch: config.proxies.autoOverfetch,
+      perProxy: config.proxies.maxPerProxy,
+      maxProbes: config.proxies.autoMaxProbes,
+      concurrency: config.proxies.autoConcurrency,
+      timeoutMs: config.proxies.autoTimeoutMs,
+      onProgress: ({ checked, total, ok }) => {
+        const now = Date.now();
+        if (now - lastLog > 1000) {
+          lastLog = now;
+          process.stdout.write(`  probed ${checked}/${total}, ${ok} usable\r`);
+        }
+      },
     });
-    process.stdout.write(`Using ${config.proxies.list.length} free proxies.\n`);
+    process.stdout.write(`\nUsing ${config.proxies.list.length} free proxies.\n`);
+    // Running direct after asking for proxies would send the real IP; refuse instead.
+    if (config.proxies.list.length === 0) {
+      throw new Error(
+        "No usable proxies found, refusing to run direct (that would expose your real IP). " +
+          "Target a public server the proxies can reach, or remove proxies.auto to run without proxies.",
+      );
+    }
   }
 
   if (config.shards > 1) {

@@ -1,4 +1,16 @@
-export type ProxyScheme = "socks5" | "socks4" | "http" | "https";
+export type ProxyScheme = "socks5" | "socks4";
+
+/**
+ * True for loopback/private addresses. A proxy connects from its own machine, so it can never
+ * reach a server on your LAN/localhost; auto-proxies against such a target is meaningless.
+ */
+export function isLocalHost(host: string): boolean {
+  const h = host.toLowerCase();
+  if (h === "localhost" || h === "::1" || h === "0.0.0.0") return true;
+  if (h.startsWith("127.") || h.startsWith("10.") || h.startsWith("192.168.")) return true;
+  const m = h.match(/^172\.(\d{1,3})\./);
+  return m ? Number(m[1]) >= 16 && Number(m[1]) <= 31 : false;
+}
 
 export interface ParsedProxy {
   scheme: ProxyScheme;
@@ -8,10 +20,10 @@ export interface ParsedProxy {
   password?: string;
 }
 
-const SCHEMES: ProxyScheme[] = ["socks5", "socks4", "http", "https"];
+const SCHEMES: ProxyScheme[] = ["socks5", "socks4"];
 
 /**
- * Parse "socks5://user:pass@host:1080", "http://host:8080", or bare "host:1080" (defaults to
+ * Parse "socks5://user:pass@host:1080", "socks4://host:1080", or bare "host:1080" (defaults to
  * socks5, port 1080). An unrecognized scheme falls back to socks5.
  */
 export function parseProxy(url: string): ParsedProxy {
