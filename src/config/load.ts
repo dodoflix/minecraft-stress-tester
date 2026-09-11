@@ -13,6 +13,8 @@ export interface CliOverrides {
   authorized?: boolean;
   version?: string;
   tui?: boolean;
+  web?: boolean;
+  webPort?: number;
   csv?: boolean;
   html?: boolean;
   scenario?: ScenarioName;
@@ -62,6 +64,8 @@ export function loadConfig(filePath: string | undefined, cli: CliOverrides = {})
     ramp: { ...(cli.count ? { count: cli.count } : {}) },
     report: {
       ...(cli.tui ? { mode: "tui" } : {}),
+      ...(cli.web ? { mode: "web" } : {}),
+      ...(cli.webPort ? { webPort: cli.webPort } : {}),
       ...(cli.csv ? { csv: true } : {}),
       ...(cli.html ? { html: true } : {}),
     },

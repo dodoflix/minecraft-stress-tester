@@ -28,7 +28,13 @@ SOCKS5 proxy pool with per-proxy concurrency caps (`proxies.list`), Microsoft ac
 rotation (`accounts.mode: microsoft`, device-code auth handled by mineflayer/minecraft-protocol),
 and named scenarios (`--scenario join-flood | sustained-load | chat-flood | chunk-thrash`).
 
-## Phase 5 - polish
+## ✅ Phase 5 - polish (shipped)
 
-- Optional local web dashboard.
-- Docker image, `npx mcst`, expanded docs.
+Local web dashboard (`--web`, built-in HTTP + Server-Sent Events, no dependency),
+Docker image, `npx mcst`, expanded docs. All five phases are complete.
+
+## Ideas beyond the roadmap
+
+- mineflayer-pathfinder navigation and block interaction.
+- HTTP(S) proxy support alongside SOCKS5.
+- Historical run comparison / CSV diffing.

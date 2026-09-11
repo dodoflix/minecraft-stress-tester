@@ -15,6 +15,7 @@ export default defineConfig({
         "src/drivers/full.ts",
         "src/engine/sharded.ts",
         "src/net/socksConnect.ts",
+        "src/report/web.ts",
       ],
       thresholds: {
         lines: 95,

@@ -55,4 +55,5 @@ report:
   json: true
   csv: false
   html: false
-  mode: console        # console | tui (full-screen live dashboard)
+  mode: console        # console | tui (full-screen) | web (local dashboard)
+  webPort: 8787
