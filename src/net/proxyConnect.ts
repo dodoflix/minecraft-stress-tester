@@ -4,30 +4,67 @@ import { SocksClient } from "socks";
 import { type ParsedProxy, parseProxy } from "./proxy.js";
 
 /**
+ * Hard timeout wrapper: guarantees the attempt settles within `ms`, whatever the underlying
+ * library does (SOCKS negotiations against a live-but-stalled proxy can otherwise hang past any
+ * per-connection timeout). A socket that arrives after we already timed out is destroyed so it
+ * doesn't leak an open handle.
+ */
+function withTimeout(attempt: Promise<Socket>, ms: number): Promise<Socket> {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        reject(new Error("proxy probe timed out"));
+      }
+    }, ms);
+    attempt.then(
+      (socket) => {
+        if (settled) {
+          socket.destroy();
+          return;
+        }
+        settled = true;
+        clearTimeout(timer);
+        resolve(socket);
+      },
+      (err: unknown) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        reject(err instanceof Error ? err : new Error(String(err)));
+      },
+    );
+  });
+}
+
+/**
  * Open a raw tunnel to host:port through a proxy (SOCKS5/4 or HTTP CONNECT). Socket I/O,
  * excluded from coverage; the proxy parsing and pool/auto-proxy logic are tested.
  */
-export async function openProxyTunnel(
+export function openProxyTunnel(
   proxy: string,
   host: string,
   port: number,
   timeoutMs = 8000,
 ): Promise<Socket> {
   const p = parseProxy(proxy);
-  if (p.scheme === "http" || p.scheme === "https") return httpConnect(p, host, port, timeoutMs);
-  const { socket } = await SocksClient.createConnection({
-    proxy: {
-      host: p.host,
-      port: p.port,
-      type: p.scheme === "socks4" ? 4 : 5,
-      userId: p.userId,
-      password: p.password,
-    },
-    command: "connect",
-    destination: { host, port },
-    timeout: timeoutMs,
-  });
-  return socket;
+  const attempt =
+    p.scheme === "http" || p.scheme === "https"
+      ? httpConnect(p, host, port, timeoutMs)
+      : SocksClient.createConnection({
+          proxy: {
+            host: p.host,
+            port: p.port,
+            type: p.scheme === "socks4" ? 4 : 5,
+            userId: p.userId,
+            password: p.password,
+          },
+          command: "connect",
+          destination: { host, port },
+          timeout: timeoutMs,
+        }).then((r) => r.socket);
+  return withTimeout(attempt, timeoutMs);
 }
 
 function httpConnect(p: ParsedProxy, host: string, port: number, timeoutMs: number): Promise<Socket> {
