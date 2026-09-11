@@ -1,5 +1,5 @@
 import { type Bot, createBot } from "mineflayer";
-import { makeSocksConnect } from "../net/socksConnect.js";
+import { makeProxyConnect } from "../net/proxyConnect.js";
 import { longToBigInt } from "../util/long.js";
 import { extractOwnPing } from "../util/playerPing.js";
 import { stringifyReason } from "../util/reason.js";
@@ -36,7 +36,7 @@ export class FullBot extends TypedEmitter<BotEventMap> implements BotDriver {
       profilesFolder: this.spec.profilesFolder,
       viewDistance: this.spec.config.viewDistance,
     };
-    if (this.spec.proxy) options.connect = makeSocksConnect(this.spec.proxy, this.spec.host, this.spec.port);
+    if (this.spec.proxy) options.connect = makeProxyConnect(this.spec.proxy, this.spec.host, this.spec.port);
     const bot = createBot(options as unknown as Parameters<typeof createBot>[0]);
     this.bot = bot;
 
