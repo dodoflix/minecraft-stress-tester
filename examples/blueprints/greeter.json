@@ -1,0 +1,23 @@
+{
+  "name": "greeter",
+  "rules": [
+    {
+      "on": "spawn",
+      "actions": [
+        { "type": "chat", "message": "hello from mcst" },
+        { "type": "look", "yaw": 1.57, "pitch": 0 }
+      ]
+    },
+    {
+      "on": "chat",
+      "actions": [{ "type": "command", "command": "list" }]
+    },
+    {
+      "on": "death",
+      "actions": [
+        { "type": "wait", "ms": 2000 },
+        { "type": "chat", "message": "respawned" }
+      ]
+    }
+  ]
+}
