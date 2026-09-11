@@ -1,20 +1,7 @@
 # Roadmap
 
-## Shipped - v1 (the CLI stress tester)
-
-A scalable, measured Minecraft load tester. Done items are in the [CHANGELOG](../CHANGELOG.md).
-
-- **Core**: LightBot (raw protocol) + FullBot (mineflayer) drivers, ramp scheduler,
-  engine-owned reconnect, authorization gate, YAML/JSON config, SLP preflight.
-- **Metrics**: TPS estimate, connection funnel (p50/p95/p99), throughput, server ping,
-  kick histogram. Console / TUI / web live views; JSON / CSV / HTML reports.
-- **Scale & realism**: child-process sharding (`--shards`), low per-bot view distance,
-  movement/antiAfk behaviors.
-- **Real-world**: SOCKS5 proxy pool, Microsoft account rotation, named scenarios.
-- **Ops**: Docker, `npx mcst`, CI (lint/type/unit/coverage + real-server integration),
-  release-please, Dependabot.
-
----
+The v1 CLI stress tester is complete (shipped history is in the [CHANGELOG](../CHANGELOG.md)).
+This roadmap is v2.
 
 ## v2 - from a CLI tool to a testing & development platform
 
