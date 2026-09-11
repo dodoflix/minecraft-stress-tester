@@ -23,7 +23,10 @@ rewrite focused on measurement and scale.
 - **SLP preflight**, config file (YAML/JSON) + CLI with legacy `config.json` migration,
   console live view + JSON run report.
 - **Real-server integration test** against the latest supported Paper version.
-- CI (typecheck + unit + real-server integration), release workflow, Dependabot.
+- **Behavioral test suite** (100+ tests) with a **95% coverage gate**.
+- **Biome** (strict lint + format) and **lefthook** git hooks (pre-commit lint, pre-push
+  typecheck + tests), both enforced in CI.
+- CI (lint + typecheck + unit + real-server integration + coverage), release workflow, Dependabot.
 
 ### Fixed
 

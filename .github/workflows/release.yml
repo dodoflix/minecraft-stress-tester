@@ -19,6 +19,7 @@ jobs:
           registry-url: https://registry.npmjs.org
           cache: npm
       - run: npm ci
+      - run: npx biome ci .
       - run: npm run typecheck
       - run: npm run test:unit
       - run: npm run build

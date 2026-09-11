@@ -5,8 +5,9 @@ Thanks for helping improve the stress tester. Keep changes small and tested.
 ## Setup
 
 ```bash
-npm install
+npm install                # also installs the git hooks (lefthook)
 npm run typecheck
+npm run lint               # Biome: lint + format check
 npm run test:unit          # fast, no server needed
 npm run test:integration   # downloads + boots a real Paper server; needs a JDK (Java 21+)
 ```
@@ -14,6 +15,18 @@ npm run test:integration   # downloads + boots a real Paper server; needs a JDK 
 `test:integration` provisions the newest Paper release that `minecraft-protocol`
 can speak, caches the jar under `.mcst-cache/`, boots it offline on a flat world,
 and runs real bots against it. It self-skips when no `java` is on PATH.
+
+**Package manager:** npm (with a committed `package-lock.json` — run `npm ci` in CI).
+
+## Tooling
+
+- **Biome** does lint + format (`npm run lint`, `npm run lint:fix`, `npm run format`).
+  Rules are strict and enforced in CI (`biome ci`) — a lint or format error fails the build.
+- **lefthook** git hooks run automatically:
+  - *pre-commit*: Biome fixes staged files.
+  - *pre-push*: typecheck + the full unit suite.
+- **Coverage** is gated at 95% (branches/functions/lines/statements) in its own CI job.
+  See `vitest.config.ts`. The real-server integration test runs in a separate job.
 
 ## Ground rules
 
