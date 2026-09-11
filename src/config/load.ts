@@ -12,6 +12,7 @@ export interface CliOverrides {
   driver?: "light" | "full";
   authorized?: boolean;
   version?: string;
+  viewDistance?: number;
   tui?: boolean;
   web?: boolean;
   webPort?: number;
@@ -56,6 +57,7 @@ export function loadConfig(filePath: string | undefined, cli: CliOverrides = {})
   const merged = deepMerge(base, {
     ...(cli.authorized !== undefined ? { authorized: cli.authorized } : {}),
     ...(cli.driver ? { driver: cli.driver } : {}),
+    ...(cli.viewDistance ? { viewDistance: cli.viewDistance } : {}),
     target: {
       ...(cli.host ? { host: cli.host } : {}),
       ...(cli.port ? { port: cli.port } : {}),

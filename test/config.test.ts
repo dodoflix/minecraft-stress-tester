@@ -71,6 +71,11 @@ describe("loadConfig", () => {
     expect(c.ramp.count).toBe(5);
   });
 
+  it("viewDistance defaults to 2 and takes a CLI override", () => {
+    expect(loadConfig(undefined, { host: "h", authorized: true }).viewDistance).toBe(2);
+    expect(loadConfig(undefined, { host: "h", authorized: true, viewDistance: 8 }).viewDistance).toBe(8);
+  });
+
   it("report defaults: json on, csv/html off, console mode", () => {
     const c = loadConfig(undefined, { host: "h", authorized: true });
     expect(c.report.json).toBe(true);

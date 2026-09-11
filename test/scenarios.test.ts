@@ -8,7 +8,7 @@ import { applyScenario } from "../src/config/scenarios.js";
 describe("applyScenario", () => {
   it("returns the expected overlay per name", () => {
     expect(applyScenario("join-flood")).toMatchObject({ driver: "light", reconnect: { enabled: false } });
-    expect(applyScenario("chunk-thrash")).toMatchObject({ driver: "full" });
+    expect(applyScenario("chunk-thrash")).toMatchObject({ driver: "full", viewDistance: 8 });
     expect(applyScenario("chat-flood")).toMatchObject({ behaviors: { chatSpam: { enabled: true } } });
   });
 });

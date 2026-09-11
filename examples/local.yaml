@@ -7,10 +7,11 @@ target:
   port: 25565
   # version: 1.20.4   # omit to auto-detect from the server ping
 
-driver: light          # light = raw protocol (scale) | full = mineflayer (realism, later phase)
+driver: light          # light = raw protocol (scale) | full = mineflayer (realism)
+viewDistance: 2        # chunks each bot requests; low keeps the client light (raise for chunk-load tests)
 
 ramp:
-  count: 50            # bots to reach
+  count: 900            # bots to reach
   connectRate: 10      # new connections per second
   rampUpSeconds: 5     # climb from ~0 to connectRate over this window
   holdSeconds: 60      # keep them connected this long

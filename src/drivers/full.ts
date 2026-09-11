@@ -34,6 +34,7 @@ export class FullBot extends TypedEmitter<BotEventMap> implements BotDriver {
       version: this.spec.version,
       hideErrors: true,
       profilesFolder: this.spec.profilesFolder,
+      viewDistance: this.spec.config.viewDistance,
     };
     if (this.spec.proxy) options.connect = makeSocksConnect(this.spec.proxy, this.spec.host, this.spec.port);
     const bot = createBot(options as unknown as Parameters<typeof createBot>[0]);

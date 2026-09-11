@@ -41,7 +41,21 @@ export class LightBot extends TypedEmitter<BotEventMap> implements BotDriver {
     client.on("connect", () => this.emit("connected"));
 
     // Join-game marks a successful login (state -> play).
-    client.on("login", () => this.emit("login"));
+    client.on("login", () => {
+      this.emit("login");
+      // Ask for a minimal view distance so the server stops flooding us with chunk
+      // packets we don't parse anyway - the single biggest per-bot bandwidth saving.
+      this.safeWrite("settings", {
+        locale: "en_us",
+        viewDistance: this.spec.config.viewDistance,
+        chatFlags: 0,
+        chatColors: true,
+        skinParts: 0,
+        mainHand: 1,
+        enableTextFiltering: false,
+        enableServerListing: false,
+      });
+    });
 
     // Every inbound packet: name for rate, fullBuffer length for byte throughput.
     client.on("packet", (data, meta, _buffer, fullBuffer) => {
