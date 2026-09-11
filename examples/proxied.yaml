@@ -1,0 +1,24 @@
+# Spread the source IP across a SOCKS5 proxy pool, to get past per-IP antibot limits.
+# Replace the proxies with your own; each bot's game socket is tunnelled through one.
+authorized: true
+
+target:
+  host: 127.0.0.1
+  port: 25565
+
+driver: light
+
+ramp:
+  count: 500
+  connectRate: 30
+  holdSeconds: 60
+
+proxies:
+  list:
+    - socks5://user:pass@proxy-a.example:1080
+    - socks5://user:pass@proxy-b.example:1080
+    - socks5://proxy-c.example:1080     # no auth
+  maxPerProxy: 100      # at most 100 bots per proxy before the next is used
+
+report:
+  json: true
