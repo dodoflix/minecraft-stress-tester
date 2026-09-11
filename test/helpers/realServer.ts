@@ -116,7 +116,8 @@ export async function startRealServer(opts: { readyTimeoutMs?: number } = {}): P
     throw e;
   });
 
-  await waitForPing(port, opts.readyTimeoutMs ?? 120000);
+  // Cold Paper boot on CI (JVM start + world gen) can exceed two minutes.
+  await waitForPing(port, opts.readyTimeoutMs ?? 240000);
 
   return {
     port,
