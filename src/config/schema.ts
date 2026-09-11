@@ -39,6 +39,13 @@ export const behaviorsSchema = z.object({
       intervalMs: z.number().int().min(200).default(3000),
     })
     .prefault({}),
+  // Random walk (FullBot only): loads chunks and defeats no-movement kicks.
+  movement: z
+    .object({
+      enabled: z.boolean().default(false),
+      intervalMs: z.number().int().min(200).default(2000),
+    })
+    .prefault({}),
   chatSpam: z
     .object({
       enabled: z.boolean().default(false),

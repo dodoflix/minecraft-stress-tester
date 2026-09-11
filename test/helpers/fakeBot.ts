@@ -1,4 +1,10 @@
-import { type BotDriver, type BotEventMap, type BotSpec, TypedEmitter } from "../../src/drivers/driver.js";
+import {
+  type BotDriver,
+  type BotEventMap,
+  type BotSpec,
+  type ControlState,
+  TypedEmitter,
+} from "../../src/drivers/driver.js";
 
 /**
  * In-memory BotDriver for testing the engine/collector/behaviors against the driver
@@ -45,5 +51,19 @@ export class FakeBot extends TypedEmitter<BotEventMap> implements BotDriver {
     this.emit("connected");
     this.emit("login");
     this.emit("spawned");
+  }
+}
+
+/** A FakeBot that also has movement (like FullBot), for antiAfk / movement behavior tests. */
+export class MovingFakeBot extends FakeBot {
+  readonly looks: [number, number][] = [];
+  readonly controls: [ControlState, boolean][] = [];
+
+  look(yaw: number, pitch: number): void {
+    this.looks.push([yaw, pitch]);
+  }
+
+  setControlState(control: ControlState, state: boolean): void {
+    this.controls.push([control, state]);
   }
 }

@@ -116,9 +116,9 @@ describe("Engine orchestration", () => {
     }
   });
 
-  it("throws for the unimplemented full driver when no factory is supplied", () => {
+  it("accepts the full driver without a factory override", () => {
     const config = configSchema.parse({ target: { host: "h" }, driver: "full" });
-    expect(() => new Engine(config)).toThrow(/full/);
+    expect(() => new Engine(config)).not.toThrow();
   });
 
   it("ignores a late end after shutdown (no reconnect scheduled)", async () => {

@@ -1,11 +1,13 @@
 import { buildBehaviors } from "../behaviors/index.js";
 import type { Config } from "../config/schema.js";
 import type { Behavior, BotDriver, BotSpec } from "../drivers/driver.js";
+import { FullBot } from "../drivers/full.js";
 import { LightBot } from "../drivers/light.js";
 import { MetricsCollector, type MetricsSnapshot } from "../metrics/collector.js";
 import { type PreflightResult, preflight } from "../net/slp.js";
 import { startConsoleReporter } from "../report/console.js";
-import { type RunReport, writeCsvReport, writeHtmlReport, writeJsonReport } from "../report/export.js";
+import type { RunReport } from "../report/export.js";
+import { formatSummary, writeReports } from "../report/summary.js";
 import { startTuiReporter } from "../report/tui.js";
 import { assertAuthorized } from "../safety/authorization.js";
 import { makeUsername } from "../util/names.js";
@@ -45,7 +47,7 @@ export class Engine {
     if (options.driverFactory) {
       this.factory = options.driverFactory;
     } else if (config.driver === "full") {
-      throw new Error("The 'full' (mineflayer) driver is not implemented yet - use driver: light.");
+      this.factory = (spec) => new FullBot(spec);
     } else {
       this.factory = (spec) => new LightBot(spec);
     }
@@ -159,7 +161,7 @@ export class Engine {
     for (const e of this.registry.all()) e.bot.disconnect("run_complete");
 
     const snapshot = this.collector.snapshot();
-    if (!this.quiet) printSummary(snapshot);
+    if (!this.quiet) this.log(`${formatSummary(snapshot)}\n`);
 
     const report: RunReport = {
       finishedAt: new Date().toISOString(),
@@ -167,10 +169,7 @@ export class Engine {
       preflight: this.preflightResult,
       metrics: snapshot,
     };
-    const { dir, json, csv, html } = this.config.report;
-    if (json) this.log(`Report written: ${writeJsonReport(dir, report)}\n`);
-    if (csv) this.log(`Report written: ${writeCsvReport(dir, report)}\n`);
-    if (html) this.log(`Report written: ${writeHtmlReport(dir, report)}\n`);
+    for (const path of writeReports(report, this.config.report)) this.log(`Report written: ${path}\n`);
 
     this.resolveRun?.(snapshot);
   }
@@ -188,28 +187,4 @@ export class Engine {
     }
     return startConsoleReporter(this.collector);
   }
-}
-
-function printSummary(s: ReturnType<MetricsCollector["snapshot"]>): void {
-  const lines = [
-    "",
-    "=== Run summary ===",
-    `duration:        ${(s.elapsedMs / 1000).toFixed(1)}s`,
-    `attempted:       ${s.attempted}`,
-    `spawned:         ${s.spawned} (${(s.connectSuccessRate * 100).toFixed(1)}% of attempts)`,
-    `peak logged-in:  ${s.loggedIn}`,
-    `kicked/errors:   ${s.kicked} / ${s.errors}`,
-    `est. server TPS: ${s.tps.toFixed(1)}`,
-    `time-to-connect: p50=${s.timeToConnectMs.p50}ms p95=${s.timeToConnectMs.p95}ms p99=${s.timeToConnectMs.p99}ms`,
-    `time-to-spawn:   p50=${s.timeToSpawnMs.p50}ms p95=${s.timeToSpawnMs.p95}ms p99=${s.timeToSpawnMs.p99}ms`,
-    s.serverPingMs.count
-      ? `server ping:     p50=${s.serverPingMs.p50}ms p95=${s.serverPingMs.p95}ms p99=${s.serverPingMs.p99}ms`
-      : "server ping:     n/a",
-    `inbound total:   ${s.packetsIn} pkts / ${(s.bytesIn / 1024 / 1024).toFixed(2)} MB`,
-  ];
-  if (Object.keys(s.kickReasons).length) {
-    lines.push("kick reasons:");
-    for (const [reason, n] of Object.entries(s.kickReasons)) lines.push(`  ${n}x  ${reason}`);
-  }
-  process.stdout.write(`${lines.join("\n")}\n`);
 }

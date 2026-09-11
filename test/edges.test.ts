@@ -61,7 +61,7 @@ describe("buildBehaviors with chatSpam", () => {
   it("includes chatSpam when enabled", () => {
     const cfg = configSchema.parse({
       target: { host: "h" },
-      behaviors: { chatSpam: { enabled: true, message: "x" } },
+      behaviors: { chatSpam: { enabled: true, message: "x" }, antiAfk: { enabled: false } },
     });
     expect(buildBehaviors(cfg)).toHaveLength(1);
   });
@@ -69,7 +69,11 @@ describe("buildBehaviors with chatSpam", () => {
   it("includes both auth and chatSpam when both enabled", () => {
     const cfg = configSchema.parse({
       target: { host: "h" },
-      behaviors: { auth: { enabled: true, password: "p" }, chatSpam: { enabled: true } },
+      behaviors: {
+        auth: { enabled: true, password: "p" },
+        chatSpam: { enabled: true },
+        antiAfk: { enabled: false },
+      },
     });
     expect(buildBehaviors(cfg)).toHaveLength(2);
   });

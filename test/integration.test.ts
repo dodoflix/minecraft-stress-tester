@@ -39,4 +39,21 @@ describe.skipIf(!hasJava)("integration: bots vs a real Paper server", () => {
     expect(snap.tps).toBeGreaterThan(18);
     expect(snap.tps).toBeLessThanOrEqual(20);
   }, 60000);
+
+  it("FullBot (mineflayer) connects, spawns, and moves", async () => {
+    const config = configSchema.parse({
+      authorized: true,
+      target: { host: "127.0.0.1", port: server.port },
+      driver: "full",
+      ramp: { count: 2, connectRate: 2, holdSeconds: 6, jitter: 0 },
+      behaviors: { antiAfk: { enabled: true }, movement: { enabled: true } },
+      report: { json: false },
+    });
+
+    const snap = await new Engine(config, { quiet: true }).run();
+
+    expect(snap.spawned).toBe(2);
+    expect(snap.connectSuccessRate).toBe(1);
+    expect(snap.errors).toBe(0);
+  }, 60000);
 });

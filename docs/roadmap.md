@@ -13,12 +13,14 @@ real-server integration test, CI/CD.
 Full-screen TUI dashboard (`--tui`, dependency-free ANSI), CSV + self-contained HTML
 report export (`--csv` / `--html`), in-session server-perceived ping via `player_info`.
 
-## Phase 3 - realism & scale
+## ✅ Phase 3 - realism & scale (shipped)
 
-- **FullBot** (mineflayer + pathfinder): movement, chunk loading, block interaction,
-  anti-AFK - realistic game-logic load.
-- Behavior pack: world-load fly-arounds, randomized movement.
-- Child-process sharding over IPC for >2k bots.
+**FullBot** (mineflayer) for realistic game-logic load - selected with `driver: full`;
+antiAfk (head rotation) and movement (random walk, chunk loading) behaviors; child-process
+sharding (`--shards N`) to get past the single-process ceiling.
+
+_Not yet:_ pathfinder-based navigation and block interaction (basic movement covers chunk
+load and no-movement kicks for now).
 
 ## Phase 4 - real-world targets
 

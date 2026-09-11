@@ -32,7 +32,8 @@ Once published: `npx mcst --config run.yaml`.
 | `-H, --host <host>` | Target host. |
 | `-p, --port <port>` | Target port (default 25565). |
 | `-n, --count <n>` | Number of bots. |
-| `-d, --driver <light\|full>` | Bot driver (`full` is planned). |
+| `-d, --driver <light\|full>` | `light` = raw protocol (scale); `full` = mineflayer (realistic movement/chunks). |
+| `-s, --shards <n>` | Run across N worker processes to get past the single-process ceiling. |
 | `--mc-version <ver>` | Force a Minecraft version (default: auto-detect from ping). |
 | `--tui` | Full-screen live dashboard instead of console lines. |
 | `--csv` | Also write a CSV report. |
