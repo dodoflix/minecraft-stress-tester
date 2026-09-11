@@ -1,15 +1,59 @@
 import { probeProxy } from "./proxyProbe.js";
 
+/** A provider is a list URL plus the proxy scheme its bare lines carry (default socks5). */
+export type ProxyProvider = string | { url: string; scheme?: string };
+
 /**
  * Public free-proxy lists that need no registration or payment. Each is a plain-text list
- * (one proxy per line) hosted on GitHub raw. Free proxies are unreliable and untrustworthy,
- * so we over-fetch and validate hard (see resolveAutoProxies). SOCKS5 sources by default,
- * since HTTP CONNECT to arbitrary game ports is usually blocked on free HTTP proxies.
+ * (one `ip:port` or `scheme://ip:port` per line) hosted on GitHub raw or a keyless API. Free
+ * proxies are unreliable and untrustworthy, so we over-fetch across many sources and validate
+ * hard (see resolveAutoProxies). SOCKS5/SOCKS4 tunnel arbitrary TCP so they work for game ports;
+ * HTTP CONNECT is often port-restricted, so those yield less but are still tried.
  */
-export const DEFAULT_PROVIDERS = [
-  "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt",
-  "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt",
-  "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/socks5/data.txt",
+export const DEFAULT_PROVIDERS: ProxyProvider[] = [
+  // socks5
+  { url: "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks5.txt", scheme: "socks5" },
+  { url: "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks5.txt", scheme: "socks5" },
+  {
+    url: "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/socks5/data.txt",
+    scheme: "socks5",
+  },
+  { url: "https://raw.githubusercontent.com/hookzof/socks5_list/master/proxy.txt", scheme: "socks5" },
+  {
+    url: "https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-socks5.txt",
+    scheme: "socks5",
+  },
+  {
+    url: "https://raw.githubusercontent.com/sunny9577/proxy-scraper/master/generated/socks5_proxies.txt",
+    scheme: "socks5",
+  },
+  { url: "https://raw.githubusercontent.com/prxchk/proxy-list/main/socks5.txt", scheme: "socks5" },
+  {
+    url: "https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks5&timeout=10000&country=all",
+    scheme: "socks5",
+  },
+  // socks4
+  { url: "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/socks4.txt", scheme: "socks4" },
+  { url: "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/socks4.txt", scheme: "socks4" },
+  {
+    url: "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/socks4/data.txt",
+    scheme: "socks4",
+  },
+  {
+    url: "https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks4&timeout=10000&country=all",
+    scheme: "socks4",
+  },
+  // http
+  { url: "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt", scheme: "http" },
+  { url: "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/http.txt", scheme: "http" },
+  {
+    url: "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/http/data.txt",
+    scheme: "http",
+  },
+  {
+    url: "https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=10000&country=all",
+    scheme: "http",
+  },
 ];
 
 const LINE = /^(?:(socks5|socks4|http|https):\/\/)?([\w.-]+):(\d{1,5})$/;
@@ -106,18 +150,24 @@ async function probeUntil(
   return ok;
 }
 
-/** Fetch and parse every provider, tolerating individual failures. Dedupes the union. */
+function providerParts(p: ProxyProvider): { url: string; scheme: string } {
+  return typeof p === "string" ? { url: p, scheme: "socks5" } : { url: p.url, scheme: p.scheme ?? "socks5" };
+}
+
+/** Fetch and parse every provider (tagging bare lines with its scheme), tolerating individual
+ * failures. Dedupes the union. A plain-string provider defaults to the socks5 scheme. */
 export async function fetchFreeProxies(
-  providers: string[],
+  providers: ProxyProvider[],
   fetchImpl: typeof fetch = fetch,
 ): Promise<string[]> {
   const lists = await Promise.all(
-    providers.map(async (url) => {
+    providers.map(async (p) => {
+      const { url, scheme } = providerParts(p);
       try {
         // A provider that hangs must not stall the whole run; bound each fetch.
         const res = await fetchImpl(url, { signal: AbortSignal.timeout(10000) });
         if (!res.ok) return [];
-        return parseProxyList(await res.text());
+        return parseProxyList(await res.text(), scheme);
       } catch {
         return []; // a dead/slow provider must not sink the whole fetch
       }

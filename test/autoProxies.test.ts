@@ -120,12 +120,14 @@ describe("resolveAutoProxies", () => {
   });
 
   it("falls back to the built-in providers and default limits", async () => {
-    // No providers/max/concurrency given: exercises DEFAULT_PROVIDERS and the default caps.
+    // No providers given: exercises DEFAULT_PROVIDERS. It spans socks5/socks4/http, so the same
+    // three IPs come back tagged under all three schemes (9 unique).
     const result = await resolveAutoProxies(target, {
       fetchImpl,
       validator: async (proxy) => ({ proxy, ok: true, latencyMs: 1 }),
     });
-    expect(result).toEqual(["socks5://1.1.1.1:1080", "socks5://2.2.2.2:1080", "socks5://3.3.3.3:1080"]);
+    expect(result).toHaveLength(9);
+    for (const s of ["socks5", "socks4", "http"]) expect(result).toContain(`${s}://1.1.1.1:1080`);
   });
 
   it("stops probing early once max reachable proxies are found", async () => {
@@ -164,6 +166,7 @@ describe("resolveAutoProxies", () => {
   it("reports progress", async () => {
     const events: { checked: number; total: number; ok: number }[] = [];
     const result = await resolveAutoProxies(target, {
+      providers: ["X"], // single provider so the count is exactly fetchN(4)
       fetchImpl: fetchN(4),
       validator: async (proxy) => ({ proxy, ok: true, latencyMs: 1 }),
       max: 100,
