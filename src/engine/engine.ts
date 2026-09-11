@@ -70,11 +70,18 @@ export class Engine {
 
     if (!this.skipPreflight) {
       this.log(`Preflight ping ${host}:${port} ...\n`);
-      this.preflightResult = await preflight(host, port, this.config.target.version);
-      const p = this.preflightResult;
-      this.log(
-        `  ${p.versionName} (protocol ${p.protocol}) | players ${p.online}/${p.max} | ping ${p.latencyMs}ms | "${p.motd}"\n`,
-      );
+      try {
+        this.preflightResult = await preflight(host, port, this.config.target.version);
+        const p = this.preflightResult;
+        this.log(
+          `  ${p.versionName} (protocol ${p.protocol}) | players ${p.online}/${p.max} | ping ${p.latencyMs}ms | "${p.motd}"\n`,
+        );
+      } catch (err) {
+        // Not fatal: the server may be throttling the probe, or blocking our direct IP while we
+        // proxy the bots. Bots still connect (auto-negotiating the version), so warn and go on.
+        this.log(`  preflight failed: ${err instanceof Error ? err.message : String(err)} (continuing)\n`);
+        this.preflightResult = null;
+      }
     }
     // Auto-negotiate by default: minecraft-protocol maps the server's protocol number
     // to a client version it supports (handles patch releases like 26.1.2 -> 26.1).

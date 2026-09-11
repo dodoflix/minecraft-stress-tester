@@ -127,7 +127,9 @@ async function runCommand(opts: Record<string, unknown>): Promise<void> {
   // Shard-worker mode: run the given config quietly and hand the snapshot to the parent.
   if (opts.shardConfig) {
     const config = configSchema.parse(JSON.parse(readFileSync(opts.shardConfig as string, "utf8")));
-    const snapshot = await new Engine(config, { quiet: true }).run();
+    // Workers skip preflight: it would be N redundant direct pings from the real IP (defeating
+    // proxies), and bots auto-negotiate the version anyway.
+    const snapshot = await new Engine(config, { quiet: true, skipPreflight: true }).run();
     process.send?.(snapshot);
     return;
   }
