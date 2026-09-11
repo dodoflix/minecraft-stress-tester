@@ -36,6 +36,10 @@ behaviors:
     password: "stress-test-pw"
     registerCommand: "/register {password} {password}" # sent first if the account is new
     loginCommand: "/login {password}" # then this to authenticate
+  commands: # one-shot commands once spawned into the world (post-auth on limbo/transfer networks)
+    enabled: true
+    list: ["/survival"] # e.g. leave the hub for the survival server after logging in
+    delayMs: 2000
   movement: # random walk (full driver only): loads chunks, defeats no-movement kicks
     enabled: true
     intervalMs: 2000
