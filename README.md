@@ -31,12 +31,15 @@ sockets.
 - **Authorization gate** - no run without explicit consent.
 - **Observability** - server-perceived ping (from `player_info`), a full-screen TUI (`--tui`)
   or local web (`--web`) live dashboard, and JSON / CSV / HTML run reports.
+- **Platform commands** - a control-plane API (`mcst serve`), a browser control panel
+  (`mcst gui`), an interactive one-bot console (`mcst debug`), a defensive security scan
+  (`mcst scan`), and programmable bots via blueprints (`mcst script`).
 - **Preflight ping**, YAML/JSON config, CLI.
 - **Real-server tested** - the integration suite downloads and boots the newest supported
   Paper build and runs actual bots against it.
 
-The v1 CLI is complete; the [roadmap](docs/roadmap.md) covers v2 - a UI, scripting, a debug
-console, automatic free proxies, and a defensive security scanner.
+See the [roadmap](docs/roadmap.md) for what's next (a React/shadcn UI, sandboxed user scripts,
+a visual node editor, and richer plugin advisory data).
 
 ## Quickstart
 
