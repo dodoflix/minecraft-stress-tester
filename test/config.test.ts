@@ -76,6 +76,13 @@ describe("loadConfig", () => {
     expect(loadConfig(undefined, { host: "h", authorized: true, viewDistance: 8 }).viewDistance).toBe(8);
   });
 
+  it("shards defaults to 1, and reads from config file or CLI (CLI wins)", () => {
+    expect(loadConfig(undefined, { host: "h", authorized: true }).shards).toBe(1);
+    const p = tmpFile("run.json", JSON.stringify({ target: { host: "h" }, shards: 4 }));
+    expect(loadConfig(p, { authorized: true }).shards).toBe(4); // from file
+    expect(loadConfig(p, { authorized: true, shards: 8 }).shards).toBe(8); // CLI overrides file
+  });
+
   it("report defaults: json on, csv/html off, console mode", () => {
     const c = loadConfig(undefined, { host: "h", authorized: true });
     expect(c.report.json).toBe(true);

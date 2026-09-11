@@ -9,6 +9,7 @@ target:
 
 driver: light          # light = raw protocol (scale) | full = mineflayer (realism)
 viewDistance: 2        # chunks each bot requests; low keeps the client light (raise for chunk-load tests)
+shards: 1              # worker processes to spread across cores; raise for big bot counts
 
 ramp:
   count: 50            # bots to reach

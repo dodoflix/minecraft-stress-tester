@@ -32,6 +32,7 @@ export async function runSharded(config: Config, shards: number): Promise<Metric
 function runWorker(config: Config, count: number, index: number, dir: string): Promise<MetricsSnapshot> {
   const shardConfig: Config = {
     ...config,
+    shards: 1, // each worker is a single-process run
     ramp: { ...config.ramp, count },
     report: { ...config.report, json: false, csv: false, html: false, mode: "console" },
   };

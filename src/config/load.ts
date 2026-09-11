@@ -13,6 +13,7 @@ export interface CliOverrides {
   authorized?: boolean;
   version?: string;
   viewDistance?: number;
+  shards?: number;
   tui?: boolean;
   web?: boolean;
   webPort?: number;
@@ -58,6 +59,7 @@ export function loadConfig(filePath: string | undefined, cli: CliOverrides = {})
     ...(cli.authorized !== undefined ? { authorized: cli.authorized } : {}),
     ...(cli.driver ? { driver: cli.driver } : {}),
     ...(cli.viewDistance ? { viewDistance: cli.viewDistance } : {}),
+    ...(cli.shards ? { shards: cli.shards } : {}),
     target: {
       ...(cli.host ? { host: cli.host } : {}),
       ...(cli.port ? { port: cli.port } : {}),
