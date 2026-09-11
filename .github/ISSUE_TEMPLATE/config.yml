@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security / responsible disclosure
+    url: https://github.com/dodoflix/minecraft-stress-tester/security/advisories/new
+    about: Report a vulnerability or misuse concern privately — do not open a public issue.

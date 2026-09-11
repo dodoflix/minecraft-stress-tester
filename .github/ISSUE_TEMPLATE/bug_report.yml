@@ -1,0 +1,39 @@
+name: Bug report
+description: Something misbehaves against a server you are authorized to test.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you ran, what you expected, what you got.
+    validations:
+      required: true
+  - type: input
+    id: server
+    attributes:
+      label: Target server
+      description: Software and version (e.g. Paper 1.21.8, Vanilla 26.1), online/offline mode.
+    validations:
+      required: true
+  - type: input
+    id: driver
+    attributes:
+      label: Driver / bot count
+      description: light or full, and how many bots.
+  - type: textarea
+    id: config
+    attributes:
+      label: Config (redact secrets)
+      render: yaml
+  - type: input
+    id: env
+    attributes:
+      label: Node / OS version
+  - type: checkboxes
+    id: authorized
+    attributes:
+      label: Authorization
+      options:
+        - label: I own or have explicit permission to test the target server.
+          required: true
