@@ -2,7 +2,7 @@ import { z } from "zod";
 
 /**
  * Run configuration schema. Validated at load time; the rest of the app consumes
- * the parsed, typed result. The `authorized` flag is a hard trust boundary — see
+ * the parsed, typed result. The `authorized` flag is a hard trust boundary - see
  * safety/authorization.ts. Do not relax it.
  */
 

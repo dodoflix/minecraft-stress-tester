@@ -28,7 +28,7 @@ export function loadConfig(filePath: string | undefined, cli: CliOverrides = {})
   if (filePath) base = (readConfigFile(filePath) ?? {}) as Record<string, unknown>;
 
   // Only defined CLI values are spread in, so the merged object never carries
-  // `undefined` — zod defaults apply for anything omitted.
+  // `undefined` - zod defaults apply for anything omitted.
   const merged = {
     ...base,
     ...(cli.authorized !== undefined ? { authorized: cli.authorized } : {}),

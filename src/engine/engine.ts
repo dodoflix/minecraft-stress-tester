@@ -44,7 +44,7 @@ export class Engine {
     if (options.driverFactory) {
       this.factory = options.driverFactory;
     } else if (config.driver === "full") {
-      throw new Error("The 'full' (mineflayer) driver is not implemented yet — use driver: light.");
+      throw new Error("The 'full' (mineflayer) driver is not implemented yet - use driver: light.");
     } else {
       this.factory = (spec) => new LightBot(spec);
     }
@@ -68,7 +68,7 @@ export class Engine {
     }
     // Auto-negotiate by default: minecraft-protocol maps the server's protocol number
     // to a client version it supports (handles patch releases like 26.1.2 -> 26.1).
-    // ponytail: auto-negotiate costs one extra status ping per bot — pin
+    // ponytail: auto-negotiate costs one extra status ping per bot - pin
     // `target.version` to skip it at high bot counts.
     this.version = this.config.target.version ?? false;
     this.behaviors = buildBehaviors(this.config);

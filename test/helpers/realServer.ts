@@ -28,7 +28,7 @@ const majorMinor = (v: string): string => v.split(".").slice(0, 2).join(".");
 
 /** Newest Paper stable release whose protocol minecraft-protocol's *client* can speak. */
 async function resolveLatest(): Promise<{ version: string; url: string; sha256: string; jarName: string }> {
-  // Client codec support (mc.supportedVersions), NOT just bundled data — the two differ
+  // Client codec support (mc.supportedVersions), NOT just bundled data - the two differ
   // at the bleeding edge (e.g. 26.2 has data but no client codec in mc-protocol 1.68).
   const supported = new Set<string>(mc.supportedVersions);
   const isCompatible = (v: string) => supported.has(v) || supported.has(majorMinor(v));
@@ -84,7 +84,7 @@ function waitForPing(port: number, timeoutMs: number): Promise<void> {
 
 /** Provision (cached) + boot a real offline Paper server on a flat world. */
 export async function startRealServer(opts: { readyTimeoutMs?: number } = {}): Promise<RealServer> {
-  if (!javaAvailable()) throw new Error("java not found — cannot start a real Minecraft server");
+  if (!javaAvailable()) throw new Error("java not found - cannot start a real Minecraft server");
   const { jarPath, version } = await provisionJar();
 
   const port = 30000 + Math.floor(Math.random() * 20000);

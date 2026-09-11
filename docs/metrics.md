@@ -1,6 +1,6 @@
 # Metrics
 
-All metrics are derived client-side from the bots' own connections — no server-side
+All metrics are derived client-side from the bots' own connections - no server-side
 plugin or RCON needed.
 
 ## Server TPS (estimate)
@@ -12,7 +12,7 @@ The server sends an `update_time` packet ~every 20 ticks carrying `worldAge`, a
 TPS ≈ Δ(worldAge) / Δt_real   (clamped to 20)
 ```
 
-`worldAge` — not `timeOfDay` — because time-of-day freezes under `doDaylightCycle false`
+`worldAge` - not `timeOfDay` - because time-of-day freezes under `doDaylightCycle false`
 or `/time set`, while worldAge always advances. When the main thread lags, worldAge
 advances slower per real second and the drop shows up directly. The estimate is smoothed
 (EWMA) and averaged across bots.

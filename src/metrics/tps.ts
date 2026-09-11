@@ -5,7 +5,7 @@
  *
  * Aggregate the per-server estimate across many bots for a stable figure; a single
  * bot's samples are coarse (~1 packet/sec). Proxies (Velocity/Bungee) or Paper/Folia
- * can alter cadence — treat the number as a load trend, not a precise server metric.
+ * can alter cadence - treat the number as a load trend, not a precise server metric.
  */
 export class TpsEstimator {
   private lastAge: bigint | null = null;

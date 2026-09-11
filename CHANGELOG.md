@@ -11,7 +11,7 @@ Complete TypeScript rewrite of the old v0.5 tool, focused on measurement and sca
 ### Features
 
 * server-impact metrics: TPS estimate (from the `worldAge` tick counter), connection funnel with p50/p95/p99, success rate, packet/byte throughput, kick-reason histogram
-* LightBot raw-protocol driver (~1–2k bots per process) with auto version negotiation
+* LightBot raw-protocol driver (~1-2k bots per process) with auto version negotiation
 * ramp scheduler (connections/sec, ramp-up, hold, jitter) and engine-owned exponential-backoff reconnect
 * authorization gate, SLP preflight, YAML/JSON config + CLI, console live view, JSON run report
 * real-server integration test against the newest supported Paper build

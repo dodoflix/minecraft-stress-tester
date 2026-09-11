@@ -24,7 +24,7 @@ export async function preflight(host: string, port: number, version?: string): P
     mc.ping(
       options as unknown as Parameters<typeof mc.ping>[0],
       (err: NodeJS.ErrnoException | null, result) => {
-        if (err) reject(new Error(`cannot reach ${host}:${port} — ${err.code || err.message}`));
+        if (err) reject(new Error(`cannot reach ${host}:${port} - ${err.code || err.message}`));
         else resolve(result);
       },
     );

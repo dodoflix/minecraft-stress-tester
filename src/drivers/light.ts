@@ -5,7 +5,7 @@ import { stringifyReason } from "../util/reason.js";
 import { type BotDriver, type BotEventMap, type BotSpec, TypedEmitter } from "./driver.js";
 
 /**
- * Lightweight raw-protocol bot. No world/chunk parsing — just the login handshake,
+ * Lightweight raw-protocol bot. No world/chunk parsing - just the login handshake,
  * teleport confirmation to reach the in-world state, and metric-bearing packets.
  * Scales to ~1-2k per process because it skips everything mineflayer does.
  */

@@ -7,26 +7,26 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](package.json)
 
 A detailed, open-source load tester for Minecraft servers. It connects a controllable
-swarm of bots and **measures what the load does to the server** — estimated TPS, the
-connection funnel, latency, throughput, and kick reasons — instead of just opening
+swarm of bots and **measures what the load does to the server** - estimated TPS, the
+connection funnel, latency, throughput, and kick reasons - instead of just opening
 sockets.
 
 > [!WARNING]
 > This is a load generator. Run it **only** against servers you own or have explicit
-> written permission to test — anything else is a denial-of-service attack. The tool
+> written permission to test - anything else is a denial-of-service attack. The tool
 > refuses to start until you affirm authorization. See [SECURITY.md](SECURITY.md).
 
 ## Features
 
-- **Server-impact metrics** — TPS estimate (from the `worldAge` tick counter), connection
+- **Server-impact metrics** - TPS estimate (from the `worldAge` tick counter), connection
   funnel with p50/p95/p99, success rate, packet/byte throughput, kick-reason histogram.
-- **LightBot driver** on raw `minecraft-protocol` — ~1–2k bots per process, auto version
+- **LightBot driver** on raw `minecraft-protocol` - ~1-2k bots per process, auto version
   negotiation.
-- **Ramp control** — connections/sec with ramp-up, hold, jitter, and exponential-backoff
+- **Ramp control** - connections/sec with ramp-up, hold, jitter, and exponential-backoff
   reconnect.
-- **Authorization gate** — no run without explicit consent.
+- **Authorization gate** - no run without explicit consent.
 - **Preflight ping**, YAML/JSON config, CLI, live console view, and a JSON run report.
-- **Real-server tested** — the integration suite downloads and boots the newest supported
+- **Real-server tested** - the integration suite downloads and boots the newest supported
   Paper build and runs actual bots against it.
 
 See the [roadmap](docs/roadmap.md) for the full mineflayer `FullBot`, proxy/account pools,
@@ -66,7 +66,7 @@ Report written: ./reports/mcst-2026-09-11T....json
 ## Docs
 
 - [Usage & CLI](docs/usage.md)
-- [Metrics explained](docs/metrics.md) — including how the TPS estimate works and its limits
+- [Metrics explained](docs/metrics.md) - including how the TPS estimate works and its limits
 - [Architecture](docs/architecture.md)
 - [Roadmap](docs/roadmap.md)
 - [Contributing](CONTRIBUTING.md) · [Security & responsible use](SECURITY.md)
