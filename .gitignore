@@ -1,3 +1,9 @@
-.idea
-node_modules
-package-lock.json
+node_modules/
+dist/
+coverage/
+reports/
+.mcst-cache/
+.idea/
+.vscode/
+*.log
+.DS_Store

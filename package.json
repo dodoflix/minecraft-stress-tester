@@ -1,0 +1,52 @@
+{
+  "name": "minecraft-stress-tester",
+  "version": "1.0.0",
+  "description": "The most detailed open-source Minecraft server stress tester: scalable bot load generation with real server-impact metrics (TPS, latency, throughput).",
+  "type": "module",
+  "license": "MIT",
+  "author": "dodo",
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "mcst": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "examples",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "tsx src/cli.ts",
+    "mcst": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:unit": "vitest run test/unit.test.ts",
+    "test:integration": "vitest run test/integration.test.ts --testTimeout=200000",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "minecraft",
+    "stress-test",
+    "load-testing",
+    "mineflayer",
+    "minecraft-protocol",
+    "bots",
+    "benchmark",
+    "tps"
+  ],
+  "dependencies": {
+    "commander": "^15.0.0",
+    "js-yaml": "^5.4.1",
+    "minecraft-protocol": "^1.68.0",
+    "zod": "^4.6.2"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.20.2",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.0"
+  }
+}
