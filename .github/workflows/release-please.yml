@@ -1,0 +1,53 @@
+name: release-please
+
+# Automates versioning + CHANGELOG + tags + GitHub releases.
+# release-please opens/maintains a "release" PR that bumps the version and updates
+# CHANGELOG.md from Conventional Commits; merging that PR creates the tag + GitHub
+# release, and this workflow then publishes to npm.
+#
+# Secrets:
+#   RELEASE_PLEASE_TOKEN  (optional but recommended) — a PAT so the release PR triggers
+#                         the required CI checks under branch protection. Falls back to
+#                         GITHUB_TOKEN (whose PRs do NOT trigger other workflows).
+#   NPM_TOKEN             (optional) — enables npm publishing; skipped when unset.
+
+on:
+  push:
+    branches: [master]
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    env:
+      HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+      # The rest runs only when a release was actually cut (release PR merged).
+      - uses: actions/checkout@v7
+        if: ${{ steps.release.outputs.release_created }}
+      - uses: actions/setup-node@v7
+        if: ${{ steps.release.outputs.release_created }}
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - if: ${{ steps.release.outputs.release_created }}
+        run: npm ci
+      - if: ${{ steps.release.outputs.release_created }}
+        run: npm run build
+      - name: Publish to npm
+        if: ${{ steps.release.outputs.release_created && env.HAS_NPM_TOKEN == 'true' }}
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

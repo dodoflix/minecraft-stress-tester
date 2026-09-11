@@ -47,6 +47,20 @@ See [docs/architecture.md](docs/architecture.md). New drivers implement the
 `BotDriver` interface in `src/drivers/driver.ts`; new behaviors are
 `(bot) => cleanup` functions in `src/behaviors/`; new metrics feed the collector.
 
+## Commits & releases
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`,
+`docs:`, `ci:`, `refactor:`, `chore:`, …). They drive **release-please**, which keeps a
+standing "release" PR that bumps the version and updates `CHANGELOG.md`. Merging that PR
+tags the version and cuts the GitHub release (and publishes to npm when `NPM_TOKEN` is set).
+Don't hand-edit the version or the released changelog sections.
+
+Repo secrets that make it fully automatic:
+
+- `RELEASE_PLEASE_TOKEN` — a PAT so the release PR triggers the required CI checks under
+  branch protection (falls back to `GITHUB_TOKEN`, whose PRs don't trigger other workflows).
+- `NPM_TOKEN` — enables npm publishing; skipped when unset.
+
 ## Safety
 
 Never weaken the authorization gate (`src/safety/authorization.ts`) or add a way
