@@ -34,7 +34,8 @@ sockets.
 - **Real-server tested** - the integration suite downloads and boots the newest supported
   Paper build and runs actual bots against it.
 
-All five roadmap phases are shipped - see the [roadmap](docs/roadmap.md).
+The v1 CLI is complete; the [roadmap](docs/roadmap.md) covers v2 - a UI, scripting, a debug
+console, automatic free proxies, and a defensive security scanner.
 
 ## Quickstart
 
