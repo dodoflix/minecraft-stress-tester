@@ -1,0 +1,17 @@
+# Git hooks (installed via `lefthook install`, run automatically by `npm install`).
+# pre-commit: fast — lint/format only the staged files.
+# pre-push:   heavier — typecheck + the full unit suite before code leaves the machine.
+pre-commit:
+  commands:
+    biome:
+      glob: "*.{ts,js,json,jsonc}"
+      run: npx biome check --write {staged_files}
+      stage_fixes: true
+
+pre-push:
+  parallel: true
+  commands:
+    typecheck:
+      run: npm run typecheck
+    unit:
+      run: npm run test:unit

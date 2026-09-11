@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write # create GitHub release
+  id-token: write # npm provenance
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - run: npm ci
+      - run: npx biome ci .
+      - run: npm run typecheck
+      - run: npm run test:unit
+      - run: npm run build
+      # Publish only when an NPM_TOKEN secret is configured; otherwise the release is
+      # GitHub-only. Add the secret to enable npm publishing on the next tag.
+      - name: Publish to npm
+        if: ${{ env.HAS_NPM_TOKEN == 'true' }}
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true

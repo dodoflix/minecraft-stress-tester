@@ -1,28 +1,91 @@
 # Minecraft Stress Tester
-A tool for stress testing Minecraft servers and helping developers to optimize their servers.
 
-# Requirements
-- [Node.js](https://nodejs.org/en/)
+[![CI](https://github.com/dodoflix/minecraft-stress-tester/actions/workflows/ci.yml/badge.svg)](https://github.com/dodoflix/minecraft-stress-tester/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-brightgreen.svg)](package.json)
 
-# Dependencies
-- [Mineflayer](https://github.com/PrismarineJS/mineflayer)
+A detailed, open-source load tester for Minecraft servers. It connects a controllable
+swarm of bots and **measures what the load does to the server** — estimated TPS, the
+connection funnel, latency, throughput, and kick reasons — instead of just opening
+sockets.
 
-# How to use
-- Clone project.
-```
+> [!WARNING]
+> This is a load generator. Run it **only** against servers you own or have explicit
+> written permission to test — anything else is a denial-of-service attack. The tool
+> refuses to start until you affirm authorization. See [SECURITY.md](SECURITY.md).
+
+## Why
+
+The old v0.x was a mineflayer loop that head-rotated and chat-spammed on a local offline
+server and reported nothing. v1 is a TypeScript rewrite built around **measurement and
+scale**: a lightweight raw-protocol driver that reaches thousands of bots per process,
+server-impact metrics derived entirely client-side, ramp control, and engine-owned
+reconnect — verified in CI against a **real, latest-version Paper server**.
+
+## Features
+
+- **Server-impact metrics** — TPS estimate (from the `worldAge` tick counter), connection
+  funnel with p50/p95/p99, success rate, packet/byte throughput, kick-reason histogram.
+- **LightBot driver** on raw `minecraft-protocol` — ~1–2k bots per process, auto version
+  negotiation.
+- **Ramp control** — connections/sec with ramp-up, hold, jitter, and exponential-backoff
+  reconnect.
+- **Authorization gate** — no run without explicit consent.
+- **Preflight ping**, YAML/JSON config (auto-migrates the old `config.json`), CLI, live
+  console view, and a JSON run report.
+- **Real-server tested** — the integration suite downloads and boots the newest supported
+  Paper build and runs actual bots against it.
+
+See the [roadmap](docs/roadmap.md) for the full mineflayer `FullBot`, proxy/account pools,
+TUI/web dashboards, and child-process sharding.
+
+## Quickstart
+
+```bash
 git clone https://github.com/dodoflix/minecraft-stress-tester.git
-```
-- Make configuration.
-- Open a terminal in project path.
-- Install dependencies.
-```
+cd minecraft-stress-tester
 npm install
-```
-- Make sure your server is in offline mode.
-- Start project.
-```
-node .
+npm start -- --config examples/local.yaml
 ```
 
-# LICENSE
-This project is under MIT License.
+Or from flags:
+
+```bash
+npm start -- --host 127.0.0.1 --port 25565 --count 100 --i-am-authorized
+```
+
+## Sample output
+
+```
+Preflight ping 127.0.0.1:25565 ...
+  Paper 26.1.2 (protocol 774) | players 0/200 | ping 1ms | "mcst-real-test"
+Spawning 100 bots (driver=light), run ~70s
+t=5s  active=100  spawned=100/100(100%)  tps~20.0  connect_p95=48ms  in=1900pkt/s 41.2KB/s  kick=0 err=0
+...
+=== Run summary ===
+spawned:         100 (100.0% of attempts)
+est. server TPS: 19.8
+time-to-connect: p50=19ms p95=48ms p99=61ms
+time-to-spawn:   p50=39ms p95=118ms p99=140ms
+Report written: ./reports/mcst-2026-09-11T....json
+```
+
+## Docs
+
+- [Usage & CLI](docs/usage.md)
+- [Metrics explained](docs/metrics.md) — including how the TPS estimate works and its limits
+- [Architecture](docs/architecture.md)
+- [Roadmap](docs/roadmap.md)
+- [Contributing](CONTRIBUTING.md) · [Security & responsible use](SECURITY.md)
+
+## Development
+
+```bash
+npm run typecheck
+npm run test:unit          # fast
+npm run test:integration   # real Paper server; needs Java 21+
+```
+
+## License
+
+[MIT](LICENSE) © Doğukan Metan
