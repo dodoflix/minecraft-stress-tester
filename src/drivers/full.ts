@@ -72,19 +72,25 @@ export class FullBot extends TypedEmitter<BotEventMap> implements BotDriver {
   }
 
   disconnect(reason = "client_quit"): void {
-    this.bot?.quit(reason);
+    // quit is only attached once the bot is set up; a bot that ended mid-handshake won't have it,
+    // and its socket is already closing, so dropping the reference is enough.
+    if (typeof this.bot?.quit === "function") this.bot.quit(reason);
     this.bot = null;
   }
 
   chat(message: string): void {
-    this.bot?.chat(message);
+    if (typeof this.bot?.chat === "function") this.bot.chat(message);
   }
 
   look(yaw: number, pitch: number): void {
-    void this.bot?.look(yaw, pitch, true);
+    // mineflayer attaches look/setControlState only once physics load (after spawn); a bot that
+    // ended before spawning still has the object but not the method, so guard on the function.
+    if (typeof this.bot?.look === "function") void this.bot.look(yaw, pitch, true);
   }
 
   setControlState(control: ControlState, state: boolean): void {
-    this.bot?.setControlState(control as Parameters<Bot["setControlState"]>[0], state);
+    if (typeof this.bot?.setControlState === "function") {
+      this.bot.setControlState(control as Parameters<Bot["setControlState"]>[0], state);
+    }
   }
 }
