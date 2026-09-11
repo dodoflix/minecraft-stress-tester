@@ -19,6 +19,7 @@ export default defineConfig({
         "src/report/web.ts",
         "src/server/httpServer.ts",
         "src/bot/botApi.ts",
+        "src/scan/recon.ts",
       ],
       thresholds: {
         lines: 95,
