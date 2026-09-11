@@ -71,6 +71,7 @@ Report written: ./reports/mcst-2026-09-11T....json
 ## Docs
 
 - [Usage & CLI](docs/usage.md)
+- [Control-plane API](docs/api.md) - drive runs over HTTP with `mcst serve`
 - [Metrics explained](docs/metrics.md) - including how the TPS estimate works and its limits
 - [Architecture](docs/architecture.md)
 - [Roadmap](docs/roadmap.md)

@@ -106,6 +106,16 @@ export class Engine {
     });
   }
 
+  /** Live metrics mid-run, for the control-plane API. Safe to call any time. */
+  liveSnapshot(): MetricsSnapshot {
+    return this.collector.snapshot();
+  }
+
+  /** Stop a run early (control-plane API / programmatic callers). Idempotent. */
+  stop(reason = "stopped via API"): void {
+    this.shutdown(reason);
+  }
+
   private makeSpec(id: number): BotSpec {
     const account = this.accounts.next(id);
     return {
