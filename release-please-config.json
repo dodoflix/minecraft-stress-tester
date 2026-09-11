@@ -12,10 +12,10 @@
         { "type": "feat", "section": "Features" },
         { "type": "fix", "section": "Bug Fixes" },
         { "type": "perf", "section": "Performance" },
-        { "type": "refactor", "section": "Refactors" },
-        { "type": "docs", "section": "Documentation" },
-        { "type": "ci", "section": "CI/CD" },
-        { "type": "build", "section": "Build" },
+        { "type": "refactor", "section": "Refactors", "hidden": true },
+        { "type": "docs", "section": "Documentation", "hidden": true },
+        { "type": "ci", "section": "CI/CD", "hidden": true },
+        { "type": "build", "section": "Build", "hidden": true },
         { "type": "chore", "section": "Chores", "hidden": true },
         { "type": "test", "section": "Tests", "hidden": true }
       ]
