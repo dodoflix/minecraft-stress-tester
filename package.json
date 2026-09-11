@@ -6,7 +6,7 @@
   "license": "MIT",
   "author": "dodo",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "bin": {
     "mcst": "./dist/cli.js"
@@ -54,7 +54,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.13",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^26.5.0",
+    "@types/node": "^24.13.4",
     "@vitest/coverage-v8": "^5.0.0",
     "lefthook": "^2.1.12",
     "tsx": "^4.23.13",

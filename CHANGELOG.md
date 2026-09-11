@@ -13,10 +13,6 @@
 ### Features
 
 * observability - TUI dashboard, CSV/HTML reports, in-session ping ([c002ff3](https://github.com/dodoflix/minecraft-stress-tester/commit/c002ff3963a46a1ccb010d453b35b5f3399fad59))
-* phase 2 observability (TUI, CSV/HTML reports, server ping) ([2ec5231](https://github.com/dodoflix/minecraft-stress-tester/commit/2ec5231b8eb8d2056b57bb106e35df466c7fcaab))
-* phase 3 - FullBot, movement behaviors, sharding ([de75b1a](https://github.com/dodoflix/minecraft-stress-tester/commit/de75b1a09e7fd494417426d73f45c39fb29955d0))
-* phase 4 - proxies, account rotation, scenarios ([a1b0ba4](https://github.com/dodoflix/minecraft-stress-tester/commit/a1b0ba4a8e1b427c60b7e1b194a937b1dfe40e70))
-* phase 5 - web dashboard, Docker ([f74de61](https://github.com/dodoflix/minecraft-stress-tester/commit/f74de61f16918b60bd07382d0c751b5cee271399))
 * polish - web dashboard, Docker, docs ([077d5f1](https://github.com/dodoflix/minecraft-stress-tester/commit/077d5f1fda182560cd21ab8fbe1ad9b0e0107339))
 * real-world targets - proxy pool, account rotation, scenarios ([1f67639](https://github.com/dodoflix/minecraft-stress-tester/commit/1f67639027c0006e336ae68829765e5bce77f284))
 * realism and scale - FullBot, movement behaviors, sharding ([576f808](https://github.com/dodoflix/minecraft-stress-tester/commit/576f808b6699cd1ae27d417517d10412fb6681b2))
