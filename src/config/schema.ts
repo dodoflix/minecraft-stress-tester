@@ -83,8 +83,10 @@ export const proxiesSchema = z.object({
   autoProviders: z.array(z.string()).default([]),
   /** Health-check fetched proxies against the target and keep only the reachable ones. */
   autoValidate: z.boolean().default(true),
-  /** Cap how many validated free proxies to keep (stops probing once this many are found). */
+  /** Target number of working proxies to use. */
   autoMax: z.number().int().min(1).default(50),
+  /** Validate (and keep) up to autoMax * this many, as a buffer against proxies that die mid-run. */
+  autoOverfetch: z.number().min(1).default(2),
   /** How many fetched proxies to health-check at most. Unset = probe the whole pool until autoMax
    *  usable are found (slower, but finds the most proxies). Set a number to cap it (faster). */
   autoMaxProbes: z.number().int().min(1).optional(),

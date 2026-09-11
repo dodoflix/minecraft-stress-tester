@@ -141,10 +141,29 @@ describe("resolveAutoProxies", () => {
       fetchImpl: fetchN(50),
       validator,
       max: 2,
+      overfetch: 1,
       concurrency: 2,
     });
     expect(result).toHaveLength(2);
     expect(calls).toBeLessThan(50); // did not probe the whole list
+  });
+
+  it("over-fetches a buffer of max * overfetch working proxies", async () => {
+    let calls = 0;
+    const validator = async (proxy: string): Promise<ProxyCheck> => {
+      calls++;
+      return { proxy, ok: true, latencyMs: 1 };
+    };
+    const result = await resolveAutoProxies(target, {
+      providers: ["X"],
+      fetchImpl: fetchN(50),
+      validator,
+      max: 3,
+      overfetch: 2, // keep up to 6
+      concurrency: 10,
+    });
+    expect(result).toHaveLength(6);
+    expect(calls).toBeLessThan(50); // stopped once the buffer was full
   });
 
   it("probes the whole pool when maxProbes is unset", async () => {

@@ -174,6 +174,8 @@ export interface ResolveOptions {
   timeoutMs?: number;
   /** Cap on how many fetched proxies to health-check (they are shuffled first). */
   maxProbes?: number;
+  /** Find (and keep) up to max * overfetch working proxies, as a buffer against flaky ones. */
+  overfetch?: number;
   fetchImpl?: typeof fetch;
   validator?: (proxy: string) => Promise<ProxyCheck>;
   onProgress?: (p: { checked: number; total: number; ok: number }) => void;
@@ -190,6 +192,9 @@ export async function resolveAutoProxies(
 ): Promise<string[]> {
   const providers = opts.providers?.length ? opts.providers : DEFAULT_PROVIDERS;
   const max = opts.max ?? 50;
+  // Over-validate a buffer: keep more working proxies than strictly needed, since free proxies
+  // that pass validation often die by the time bots use them.
+  const target_ = Math.ceil(max * (opts.overfetch ?? 2));
   const fetched = await fetchFreeProxies(providers, opts.fetchImpl);
   if (!fetched.length) return [];
 
@@ -197,10 +202,10 @@ export async function resolveAutoProxies(
 
   const timeoutMs = opts.timeoutMs ?? 4000;
   const validator = opts.validator ?? ((proxy) => probeProxy(proxy, target.host, target.port, timeoutMs));
-  // Shuffle, then probe with high concurrency, stopping once we have `max` usable. `maxProbes`
+  // Shuffle, then probe with high concurrency, stopping once we have `target_` usable. `maxProbes`
   // caps how much of the pool we touch (probing all of it, mostly dead, is slow); unset means
-  // probe the whole pool until `max` are found.
+  // probe the whole pool until `target_` are found.
   const candidates = shuffle(fetched).slice(0, opts.maxProbes ?? fetched.length);
-  const ok = await probeUntil(candidates, validator, max, opts.concurrency ?? 100, opts.onProgress);
-  return pickValidated(ok, max);
+  const ok = await probeUntil(candidates, validator, target_, opts.concurrency ?? 100, opts.onProgress);
+  return pickValidated(ok, target_);
 }
