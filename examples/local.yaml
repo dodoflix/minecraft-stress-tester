@@ -24,7 +24,10 @@ reconnect:
 
 behaviors:
   antiAfk:
-    enabled: true      # (full driver; keep-alive covers light bots for now)
+    enabled: true      # head rotation (FullBot); keep-alive covers light bots
+  movement:
+    enabled: false     # random walk + chunk loading (FullBot only)
+    intervalMs: 2000
   chatSpam:
     enabled: false
     message: "load test"

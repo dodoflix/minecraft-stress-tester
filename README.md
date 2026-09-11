@@ -20,8 +20,9 @@ sockets.
 
 - **Server-impact metrics** - TPS estimate (from the `worldAge` tick counter), connection
   funnel with p50/p95/p99, success rate, packet/byte throughput, kick-reason histogram.
-- **LightBot driver** on raw `minecraft-protocol` - ~1-2k bots per process, auto version
-  negotiation.
+- **Two drivers** - **LightBot** on raw `minecraft-protocol` (~1-2k bots/process) for scale,
+  and **FullBot** on mineflayer (`--driver full`) for realistic movement + chunk loading.
+  Scale further across processes with `--shards N`.
 - **Ramp control** - connections/sec with ramp-up, hold, jitter, and exponential-backoff
   reconnect.
 - **Authorization gate** - no run without explicit consent.
@@ -31,8 +32,7 @@ sockets.
 - **Real-server tested** - the integration suite downloads and boots the newest supported
   Paper build and runs actual bots against it.
 
-See the [roadmap](docs/roadmap.md) for the full mineflayer `FullBot`, proxy/account pools,
-a web dashboard, and child-process sharding.
+See the [roadmap](docs/roadmap.md) for proxy/account pools and a web dashboard.
 
 ## Quickstart
 

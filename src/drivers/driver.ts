@@ -46,7 +46,12 @@ export interface BotDriver extends TypedEmitter<BotEventMap> {
   disconnect(reason?: string): void;
   /** Best-effort chat/command send (version-aware). Used by chat/auth behaviors. */
   chat(message: string): void;
+  /** Movement, implemented by drivers that have a world (FullBot). Absent on LightBot. */
+  look?(yaw: number, pitch: number): void;
+  setControlState?(control: ControlState, state: boolean): void;
 }
+
+export type ControlState = "forward" | "back" | "left" | "right" | "jump" | "sprint";
 
 /** A behavior wires itself to a driver's events and returns a cleanup fn. */
 export type Behavior = (bot: BotDriver) => () => void;

@@ -7,9 +7,9 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html", "lcov"],
       include: ["src/**/*.ts"],
-      // Thin I/O shims (argv/exit, terminal redraw loop); their pure logic is covered
-      // directly (config loader, dashboard renderer).
-      exclude: ["src/cli.ts", "src/report/tui.ts"],
+      // Thin I/O shims and networked drivers exercised by the integration test; their
+      // pure logic (config loader, dashboard, shard math) is covered directly.
+      exclude: ["src/cli.ts", "src/report/tui.ts", "src/drivers/full.ts", "src/engine/sharded.ts"],
       thresholds: {
         lines: 95,
         functions: 95,

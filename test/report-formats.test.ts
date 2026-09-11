@@ -49,6 +49,12 @@ describe("toHtml", () => {
     expect(toHtml(r)).toContain("&lt;script&gt;");
   });
 
+  it("omits the kick section when there were no kicks", () => {
+    const r = report();
+    r.metrics.kickReasons = {};
+    expect(toHtml(r)).not.toContain("Kick reasons");
+  });
+
   it("shows the preflight version and 'n/a' ping when there are no ping samples", () => {
     const r = report();
     r.preflight = { motd: "x", versionName: "Paper 1.21", protocol: 5, online: 0, max: 20, latencyMs: 3 };
