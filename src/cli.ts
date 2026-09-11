@@ -17,6 +17,9 @@ import { formatSummary, writeReports } from "./report/summary.js";
 import { AuthorizationError, assertAuthorized } from "./safety/authorization.js";
 import { scan } from "./scan/scanner.js";
 import { formatScanReport } from "./scan/scanReport.js";
+import { parseBlueprint } from "./script/blueprint.js";
+import { compileToCode } from "./script/compile.js";
+import { runBlueprint } from "./script/run.js";
 import { startServer } from "./server/httpServer.js";
 
 const program = new Command();
@@ -69,8 +72,40 @@ program
   .option("-H, --host <host>", "target host")
   .option("-p, --port <port>", "target port", (v) => parseInt(v, 10))
   .option("--mc-version <ver>", "force Minecraft version (default: auto-detect)")
+  .option("--script <file>", "run a bot blueprint (.json) on the attached bot")
   .option("--i-am-authorized", "affirm you own or are permitted to test the target")
   .action(debugCommand);
+
+const scriptCmd = program.command("script").description("work with bot blueprints (programmable bots)");
+scriptCmd
+  .command("validate <file>")
+  .description("validate a blueprint JSON file")
+  .action((file: string) => {
+    const result = parseBlueprint(readFileSync(file, "utf8"));
+    if (result.ok) process.stdout.write("valid\n");
+    else {
+      process.stderr.write(`invalid:\n  ${(result.errors ?? []).join("\n  ")}\n`);
+      process.exitCode = 1;
+    }
+  });
+scriptCmd
+  .command("eject <file> [out]")
+  .description("compile a blueprint to an editable TypeScript module")
+  .action((file: string, out: string | undefined) => {
+    const result = parseBlueprint(readFileSync(file, "utf8"));
+    if (!result.ok || !result.blueprint) {
+      process.stderr.write(`invalid blueprint:\n  ${(result.errors ?? []).join("\n  ")}\n`);
+      process.exitCode = 1;
+      return;
+    }
+    const code = compileToCode(result.blueprint);
+    if (out) {
+      writeFileSync(out, code, "utf8");
+      process.stdout.write(`Wrote ${out}\n`);
+    } else {
+      process.stdout.write(code);
+    }
+  });
 
 program
   .command("scan")
@@ -199,6 +234,16 @@ async function debugCommand(opts: Record<string, unknown>): Promise<void> {
   process.stdout.write(`Connecting to ${spec.host}:${spec.port} ...\n`);
   const bot = await BotApi.connect(spec);
   process.stdout.write('Spawned. Type "help" for commands.\n');
+
+  if (opts.script) {
+    const result = parseBlueprint(readFileSync(opts.script as string, "utf8"));
+    if (!result.ok || !result.blueprint) {
+      process.stderr.write(`blueprint invalid:\n  ${(result.errors ?? []).join("\n  ")}\n`);
+    } else {
+      runBlueprint(result.blueprint, bot);
+      process.stdout.write(`Running blueprint "${result.blueprint.name}".\n`);
+    }
+  }
 
   const rl = createInterface({ input: process.stdin, output: process.stdout, prompt: "mcst> " });
   bot.on("chat", ({ username, message }) => process.stdout.write(`\n[chat] <${username}> ${message}\n`));
