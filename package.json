@@ -1,6 +1,6 @@
 {
   "name": "minecraft-stress-tester",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The most detailed open-source Minecraft server stress tester: scalable bot load generation with real server-impact metrics (TPS, latency, throughput).",
   "type": "module",
   "license": "MIT",

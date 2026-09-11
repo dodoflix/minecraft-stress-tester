@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2](https://github.com/dodoflix/minecraft-stress-tester/compare/v1.0.1...v1.0.2) (2026-09-11)
+
+
+### Documentation
+
+* clean up changelog to release-please format ([a4ed5f1](https://github.com/dodoflix/minecraft-stress-tester/commit/a4ed5f1439a56145aad8c620d6c6cca9dcc3474f))
+* clean up changelog to release-please format ([d38358c](https://github.com/dodoflix/minecraft-stress-tester/commit/d38358ce81fe3c89093357959e6c2be438e5305b))
+
 ## [1.0.1](https://github.com/dodoflix/minecraft-stress-tester/compare/v1.0.0...v1.0.1) (2026-09-11)
 
 ### CI/CD
