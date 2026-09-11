@@ -138,13 +138,19 @@ IPs must still be an authorized test.
 **Goal.** Help operators **find and patch** weaknesses on servers they own: fingerprint the
 server and its plugins, match against known advisories/CVEs, and produce a report.
 
+Everything here is **best-effort**: fingerprint what a client can observe, report where the data
+supports it, and say "detected, no advisory data" rather than guess when it doesn't.
+
 **Scope.**
 
-- **Recon**: server software/version (from SLP), plus plugin detection via plugin channels /
-  brand messages / command and behavior probes (a client can enumerate a lot of what a server
-  runs).
-- **Known-issue matching**: map detected software + versions to a curated advisory/CVE database
-  and report what's outdated or known-vulnerable, with remediation notes.
+- **Recon**: server software + version from the SLP preflight and the `minecraft:brand` packet
+  (Paper/Spigot/Purpur/vanilla). Plugin detection is best-effort: `/` command tab-complete
+  enumeration, `/pl` and `/version` responses, and observed plugin-channel register/unregister
+  packets. (These are the same techniques server admins install plugins to block, which is what
+  confirms they work; many can be defeated, so results are a floor, not a guarantee.)
+- **Known-issue matching**: query [osv.dev](https://osv.dev/) live (`/v1/query`, `Maven`
+  ecosystem for plugins) for detected software + versions and report what's outdated or
+  known-vulnerable, with remediation notes. No bundled CVE database to go stale.
 - **Safe checks only**: non-destructive verification of specific known issues, for the operator's
   own server.
 
