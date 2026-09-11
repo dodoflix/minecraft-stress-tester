@@ -73,7 +73,7 @@ export const accountsSchema = z.object({
 });
 
 export const proxiesSchema = z.object({
-  /** SOCKS5/HTTP proxies, e.g. "socks5://user:pass@host:1080", "http://host:8080", "host:1080". */
+  /** SOCKS5/SOCKS4 proxies, e.g. "socks5://user:pass@host:1080", "socks4://host:1080", "host:1080". */
   list: z.array(z.string()).default([]),
   /** Max simultaneous bots per proxy (spreads source IPs past per-IP antibot limits). */
   maxPerProxy: z.number().int().min(1).default(50),

@@ -1,4 +1,4 @@
-export type ProxyScheme = "socks5" | "socks4" | "http" | "https";
+export type ProxyScheme = "socks5" | "socks4";
 
 export interface ParsedProxy {
   scheme: ProxyScheme;
@@ -8,10 +8,10 @@ export interface ParsedProxy {
   password?: string;
 }
 
-const SCHEMES: ProxyScheme[] = ["socks5", "socks4", "http", "https"];
+const SCHEMES: ProxyScheme[] = ["socks5", "socks4"];
 
 /**
- * Parse "socks5://user:pass@host:1080", "http://host:8080", or bare "host:1080" (defaults to
+ * Parse "socks5://user:pass@host:1080", "socks4://host:1080", or bare "host:1080" (defaults to
  * socks5, port 1080). An unrecognized scheme falls back to socks5.
  */
 export function parseProxy(url: string): ParsedProxy {

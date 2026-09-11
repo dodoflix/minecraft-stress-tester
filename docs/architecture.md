@@ -22,8 +22,8 @@ each a full Engine on a slice of the bot budget, and merges their snapshots.
 | `config/scenarios.ts` | Named load profiles (join-flood, sustained-load, chat-flood, chunk-thrash). |
 | `safety/authorization.ts` | Hard consent gate. Refuses to run unauthorized. |
 | `net/slp.ts` | Server-list-ping preflight (reachability, version, players, RTT). |
-| `net/proxy.ts` | SOCKS5/HTTP proxy pool (round-robin + per-proxy caps) and proxy URL parsing. |
-| `net/proxyConnect.ts` | Tunnels a bot's game socket through a SOCKS5/4 or HTTP CONNECT proxy. |
+| `net/proxy.ts` | SOCKS5/SOCKS4 proxy pool (round-robin + per-proxy caps) and proxy URL parsing. |
+| `net/proxyConnect.ts` | Tunnels a bot's game socket through a SOCKS5/4 proxy. |
 | `net/autoProxies.ts` | Fetch + validate free public proxies (`proxies.auto`). |
 | `net/proxyProbe.ts` | Health-check one proxy against the target (used by autoProxies). |
 | `net/accounts.ts` | Offline username generation or Microsoft account rotation. |

@@ -17,19 +17,20 @@ const fetchN = (n: number): typeof fetch =>
   })) as unknown as typeof fetch;
 
 describe("parseProxyList", () => {
-  it("normalizes bare and schemed lines, skipping junk", () => {
+  it("normalizes bare and schemed lines, skipping junk and unsupported schemes", () => {
     const text = [
       "# comment",
       "1.2.3.4:1080",
       "socks5://5.6.7.8:1080",
-      "http://9.9.9.9:8080",
+      "socks4://8.8.8.8:1080",
+      "http://9.9.9.9:8080", // unsupported scheme -> skipped
       "garbage",
       "",
     ].join("\n");
     expect(parseProxyList(text)).toEqual([
       "socks5://1.2.3.4:1080",
       "socks5://5.6.7.8:1080",
-      "http://9.9.9.9:8080",
+      "socks4://8.8.8.8:1080",
     ]);
   });
 
@@ -120,14 +121,14 @@ describe("resolveAutoProxies", () => {
   });
 
   it("falls back to the built-in providers and default limits", async () => {
-    // No providers given: exercises DEFAULT_PROVIDERS. It spans socks5/socks4/http, so the same
-    // three IPs come back tagged under all three schemes (9 unique).
+    // No providers given: exercises DEFAULT_PROVIDERS. It spans socks5/socks4, so the same three
+    // IPs come back tagged under both schemes (6 unique).
     const result = await resolveAutoProxies(target, {
       fetchImpl,
       validator: async (proxy) => ({ proxy, ok: true, latencyMs: 1 }),
     });
-    expect(result).toHaveLength(9);
-    for (const s of ["socks5", "socks4", "http"]) expect(result).toContain(`${s}://1.1.1.1:1080`);
+    expect(result).toHaveLength(6);
+    for (const s of ["socks5", "socks4"]) expect(result).toContain(`${s}://1.1.1.1:1080`);
   });
 
   it("stops probing early once max reachable proxies are found", async () => {

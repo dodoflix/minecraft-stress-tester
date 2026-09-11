@@ -15,9 +15,9 @@ describe("parseProxy", () => {
     expect(parseProxy("10.0.0.1:9050")).toMatchObject({ scheme: "socks5", host: "10.0.0.1", port: 9050 });
     expect(parseProxy("10.0.0.1")).toMatchObject({ scheme: "socks5", host: "10.0.0.1", port: 1080 });
   });
-  it("recognizes http and socks4 schemes, falls back to socks5 on unknown", () => {
-    expect(parseProxy("http://1.2.3.4:8080").scheme).toBe("http");
+  it("recognizes socks4, falls back to socks5 on any other scheme", () => {
     expect(parseProxy("socks4://1.2.3.4:1080").scheme).toBe("socks4");
+    expect(parseProxy("http://1.2.3.4:8080").scheme).toBe("socks5"); // http unsupported -> socks5
     expect(parseProxy("ftp://1.2.3.4:21").scheme).toBe("socks5");
   });
 });

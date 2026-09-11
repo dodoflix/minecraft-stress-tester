@@ -17,8 +17,7 @@ web UI, and blueprints all as clients of it.
   browser. See [gui.md](gui.md).
 - **Programmable bots** (`mcst script`, `mcst debug --script`) - blueprint-driven bots (data,
   no sandbox) that eject to editable TypeScript. See [scripting.md](scripting.md).
-- **Automatic free proxies** (`proxies.auto`) - fetch + validate free public proxies, plus HTTP
-  CONNECT tunneling.
+- **Automatic free proxies** (`proxies.auto`) - fetch + validate free public SOCKS5/SOCKS4 proxies.
 - **Defensive security scan** (`mcst scan`) - fingerprint + curated advisories + osv.dev +
   best-effort plugin detection. See [security-scan.md](security-scan.md).
 

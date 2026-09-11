@@ -7,8 +7,8 @@ export type ProxyProvider = string | { url: string; scheme?: string };
  * Public free-proxy lists that need no registration or payment. Each is a plain-text list
  * (one `ip:port` or `scheme://ip:port` per line) hosted on GitHub raw or a keyless API. Free
  * proxies are unreliable and untrustworthy, so we over-fetch across many sources and validate
- * hard (see resolveAutoProxies). SOCKS5/SOCKS4 tunnel arbitrary TCP so they work for game ports;
- * HTTP CONNECT is often port-restricted, so those yield less but are still tried.
+ * hard (see resolveAutoProxies). SOCKS5/SOCKS4 only: they tunnel arbitrary TCP, so they work for
+ * game ports, unlike free HTTP proxies which block CONNECT to non-443 ports.
  */
 export const DEFAULT_PROVIDERS: ProxyProvider[] = [
   // socks5
@@ -43,20 +43,9 @@ export const DEFAULT_PROVIDERS: ProxyProvider[] = [
     url: "https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks4&timeout=10000&country=all",
     scheme: "socks4",
   },
-  // http
-  { url: "https://raw.githubusercontent.com/TheSpeedX/PROXY-List/master/http.txt", scheme: "http" },
-  { url: "https://raw.githubusercontent.com/monosans/proxy-list/main/proxies/http.txt", scheme: "http" },
-  {
-    url: "https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/http/data.txt",
-    scheme: "http",
-  },
-  {
-    url: "https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=10000&country=all",
-    scheme: "http",
-  },
 ];
 
-const LINE = /^(?:(socks5|socks4|http|https):\/\/)?([\w.-]+):(\d{1,5})$/;
+const LINE = /^(?:(socks5|socks4):\/\/)?([\w.-]+):(\d{1,5})$/;
 
 /**
  * Parse a proxy list into normalized `scheme://host:port` strings. Accepts bare `host:port`
