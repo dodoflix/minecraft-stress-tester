@@ -7,6 +7,7 @@ target:
   port: 25565
 
 driver: full            # mineflayer
+shards: 1              # full bots are heavy; keep few per process (raise per core if needed)
 
 ramp:
   count: 40

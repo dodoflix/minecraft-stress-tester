@@ -7,6 +7,7 @@ target:
   port: 25565
 
 driver: light
+shards: 4              # spread the 800-bot flood across cores
 
 ramp:
   count: 800
