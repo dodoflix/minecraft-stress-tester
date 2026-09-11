@@ -54,6 +54,15 @@ program
   .action(serveCommand);
 
 program
+  .command("gui")
+  .description("launch the web control panel (start/stop runs, edit configs, browse reports)")
+  .option("-p, --port <port>", "listen port (default 8080)", (v) => parseInt(v, 10))
+  .option("--host <host>", "bind address (default 127.0.0.1)")
+  .option("--reports-dir <dir>", "run history directory (default ./reports)")
+  .option("--configs-dir <dir>", "config store directory (default ./configs)")
+  .action(guiCommand);
+
+program
   .command("debug")
   .description("attach one bot and drive it from an interactive console (develop against a server)")
   .option("-c, --config <path>", "config file (.yaml or .json)")
@@ -148,6 +157,20 @@ async function serveCommand(opts: Record<string, unknown>): Promise<void> {
   process.stdout.write(`Control-plane API listening on ${handle.url}\n`);
   process.stdout.write(`API token: ${handle.token}\n`);
   process.stdout.write("Pass it as `Authorization: Bearer <token>` or `?token=<token>`.\n");
+  process.once("SIGINT", () => {
+    void handle.close().then(() => process.exit(0));
+  });
+}
+
+async function guiCommand(opts: Record<string, unknown>): Promise<void> {
+  const handle = await startServer({
+    port: opts.port as number | undefined,
+    host: opts.host as string | undefined,
+    reportsDir: opts.reportsDir as string | undefined,
+    configsDir: opts.configsDir as string | undefined,
+  });
+  process.stdout.write(`Web control panel: ${handle.url}\n`);
+  process.stdout.write("Open that URL in your browser (the page carries its API token). Ctrl+C to stop.\n");
   process.once("SIGINT", () => {
     void handle.close().then(() => process.exit(0));
   });
