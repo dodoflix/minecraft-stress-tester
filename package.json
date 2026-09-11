@@ -23,6 +23,7 @@
     "test": "vitest run",
     "test:unit": "vitest run test/unit.test.ts",
     "test:integration": "vitest run test/integration.test.ts --testTimeout=200000",
+    "test:coverage": "vitest run --coverage --testTimeout=200000",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepublishOnly": "npm run build"
   },
@@ -45,6 +46,7 @@
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.20.2",
+    "@vitest/coverage-v8": "^5.0.0",
     "tsx": "^4.23.13",
     "typescript": "^5.9.3",
     "vitest": "^5.0.0"
