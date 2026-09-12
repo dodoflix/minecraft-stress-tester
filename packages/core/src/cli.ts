@@ -21,6 +21,7 @@ import { formatScanReport } from "./scan/scanReport.js";
 import { parseBlueprint } from "./script/blueprint.js";
 import { compileToCode } from "./script/compile.js";
 import { runBlueprint } from "./script/run.js";
+import { runUserScript } from "./script/sandbox/host.js";
 import type { StartServer } from "./serverContract.js";
 
 // serve/gui are the only CLI paths that need the control-plane server. It lives in a sibling
@@ -86,6 +87,8 @@ program
   .option("-p, --port <port>", "target port", (v) => parseInt(v, 10))
   .option("--mc-version <ver>", "force Minecraft version (default: auto-detect)")
   .option("--script <file>", "run a bot blueprint (.json) on the attached bot")
+  .option("--user-script <file>", "run a sandboxed user JS script (.js) against the bot, then exit")
+  .option("--script-timeout <ms>", "wall-clock cap for --user-script (default 30000)", (v) => parseInt(v, 10))
   .option("--i-am-authorized", "affirm you own or are permitted to test the target")
   .action(debugCommand);
 
@@ -277,8 +280,27 @@ async function debugCommand(opts: Record<string, unknown>): Promise<void> {
 
   process.stdout.write(`Connecting to ${spec.host}:${spec.port} ...\n`);
   const bot = await BotApi.connect(spec);
-  process.stdout.write('Spawned. Type "help" for commands.\n');
+  process.stdout.write("Spawned.\n");
 
+  // Headless sandbox runner: run untrusted user JS in an isolate against this bot, then exit.
+  if (opts.userScript) {
+    const code = readFileSync(opts.userScript as string, "utf8");
+    process.stdout.write(`Running sandboxed script ${opts.userScript} ...\n`);
+    try {
+      await runUserScript(bot, code, {
+        timeoutMs: opts.scriptTimeout as number | undefined,
+        onLog: (level, args) => process.stdout.write(`[${level}] ${args.join(" ")}\n`),
+      });
+      process.stdout.write("Script finished.\n");
+    } catch (err) {
+      process.stderr.write(`Script error: ${err instanceof Error ? err.message : String(err)}\n`);
+      process.exitCode = 1;
+    }
+    bot.disconnect();
+    process.exit(process.exitCode ?? 0);
+  }
+
+  process.stdout.write('Type "help" for commands.\n');
   if (opts.script) {
     const result = parseBlueprint(readFileSync(opts.script as string, "utf8"));
     if (!result.ok || !result.blueprint) {

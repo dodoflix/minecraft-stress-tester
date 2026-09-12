@@ -10,7 +10,7 @@ import {
   type ValidationResult,
   validateConfig,
 } from "../api.ts";
-import { MonacoYaml } from "../components/MonacoYaml.tsx";
+import { CodeEditor } from "../components/CodeEditor.tsx";
 import { SchemaForm } from "../components/SchemaForm.tsx";
 import { Badge } from "../components/ui/badge.tsx";
 import { Button } from "../components/ui/button.tsx";
@@ -154,7 +154,7 @@ export function ConfigEditor() {
             <SchemaForm fields={fields} value={obj} onChange={onFormChange} />
           </TabsContent>
           <TabsContent value="yaml">
-            <MonacoYaml value={text} onChange={onYamlChange} />
+            <CodeEditor value={text} onChange={onYamlChange} language="yaml" />
           </TabsContent>
         </Tabs>
       </div>

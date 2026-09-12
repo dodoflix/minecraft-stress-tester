@@ -37,6 +37,10 @@ export class TypedEmitter<M extends { [K in keyof M]: unknown[] }> {
     this.ee.on(e as string, l as (...a: unknown[]) => void);
     return this;
   }
+  off<E extends keyof M>(e: E, l: (...a: M[E]) => void): this {
+    this.ee.off(e as string, l as (...a: unknown[]) => void);
+    return this;
+  }
   emit<E extends keyof M>(e: E, ...a: M[E]): void {
     this.ee.emit(e as string, ...a);
   }

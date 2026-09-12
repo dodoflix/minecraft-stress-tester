@@ -57,7 +57,9 @@ workspaces; the 95% coverage gate is global in `vitest.config.ts`.
 - `scan/`: defensive scanner (fingerprint, curated advisories, osv.dev, plugin inference; pure + tested;
   `recon.ts` excluded).
 - `script/`: `blueprint.ts` (zod model, event-triggered actions), `run.ts` (interpreter), `compile.ts`
-  (eject to TS). Pure + tested.
+  (eject to TS). Pure + tested. `script/sandbox/`: `protocol.ts` (allowlist + `dispatchScriptCall`,
+  pure + tested) drives untrusted user JS run in a worker-thread isolate (`host.ts`/`worker.ts`,
+  excluded I/O). Never `eval` user code in-process; the isolate reaches only the allowlisted Bot API.
 - `@mcst/ui` (`packages/ui/`): the React + Vite + Tailwind + shadcn SPA (dashboard, schema-driven
   config editor + Monaco YAML, history). Browser I/O, excluded from coverage; the form descriptor it
   renders is the pure, tested `config/formSchema.ts` in core, so the UI cannot drift from the CLI.

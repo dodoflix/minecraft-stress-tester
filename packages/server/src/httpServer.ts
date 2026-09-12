@@ -3,7 +3,16 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { dirname, extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { ServeHandle, ServeOptions, StartServer } from "minecraft-stress-tester";
+import {
+  BotApi,
+  type BotSpec,
+  buildRunConfig,
+  checkUserScript,
+  runUserScript,
+  type ServeHandle,
+  type ServeOptions,
+  type StartServer,
+} from "minecraft-stress-tester";
 import { ConfigStore } from "./configStore.js";
 import { type ApiContext, type ApiRequest, handleRequest } from "./router.js";
 import { RunManager } from "./runManager.js";
@@ -117,6 +126,14 @@ export const startServer: StartServer = (opts: ServeOptions = {}): Promise<Serve
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? "/", `http://${host}`);
     if (streamMetrics(req, res, url, ctx)) return;
+    if (url.pathname === "/api/script/validate" && req.method === "POST") {
+      void scriptValidate(req, res, ctx);
+      return;
+    }
+    if (url.pathname === "/api/script/run" && req.method === "POST") {
+      void scriptRun(req, res, ctx);
+      return;
+    }
     if (url.pathname.startsWith("/api")) {
       void serve(req, res, url, ctx);
       return;
@@ -152,6 +169,67 @@ export const startServer: StartServer = (opts: ServeOptions = {}): Promise<Serve
     });
   });
 };
+
+function sendJson(res: ServerResponse, status: number, body: unknown): void {
+  res.writeHead(status, { "content-type": "application/json" });
+  res.end(JSON.stringify(body));
+}
+
+// POST /api/script/validate -> parse-check user code in an isolate (no bot). Body: { code }.
+async function scriptValidate(req: IncomingMessage, res: ServerResponse, ctx: ApiContext): Promise<void> {
+  const query = new URL(req.url ?? "/", "http://localhost").searchParams;
+  if (tokenOf(req, query) !== ctx.token) return sendJson(res, 401, { error: "missing or invalid API token" });
+  const body = (await readBody(req)) as { code?: string };
+  sendJson(res, 200, await checkUserScript(String(body?.code ?? "")));
+}
+
+// POST /api/script/run -> connect one bot and run user code against it in an isolate, return logs.
+// Body: { code, target: { host, port, version? }, authorized, timeoutMs? }.
+async function scriptRun(req: IncomingMessage, res: ServerResponse, ctx: ApiContext): Promise<void> {
+  const query = new URL(req.url ?? "/", "http://localhost").searchParams;
+  if (tokenOf(req, query) !== ctx.token) return sendJson(res, 401, { error: "missing or invalid API token" });
+  const body = (await readBody(req)) as {
+    code?: string;
+    target?: unknown;
+    authorized?: unknown;
+    timeoutMs?: unknown;
+  };
+  const built = buildRunConfig({ authorized: body?.authorized, target: body?.target });
+  if (!built.success || !built.config)
+    return sendJson(res, 400, { error: "invalid target", issues: built.issues });
+  const config = built.config;
+  if (config.authorized !== true)
+    return sendJson(res, 400, { error: "authorization not confirmed: set authorized true" });
+
+  const spec: BotSpec = {
+    id: 0,
+    username: `${config.accounts.usernamePrefix}-script`,
+    host: config.target.host,
+    port: config.target.port,
+    version: config.target.version ?? false,
+    auth: config.accounts.mode,
+    profilesFolder: config.accounts.profilesFolder,
+    config,
+  };
+  const logs: Array<{ level: string; message: string }> = [];
+  let bot: BotApi;
+  try {
+    bot = await BotApi.connect(spec);
+  } catch (e) {
+    return sendJson(res, 502, { error: `connect failed: ${e instanceof Error ? e.message : String(e)}` });
+  }
+  let error: string | undefined;
+  try {
+    await runUserScript(bot, String(body?.code ?? ""), {
+      timeoutMs: Math.min(Number(body?.timeoutMs) || 30_000, 60_000),
+      onLog: (level, args) => logs.push({ level, message: args.map((a) => String(a)).join(" ") }),
+    });
+  } catch (e) {
+    error = e instanceof Error ? e.message : String(e);
+  }
+  bot.disconnect();
+  sendJson(res, 200, { ok: !error, logs, error });
+}
 
 async function serve(req: IncomingMessage, res: ServerResponse, url: URL, ctx: ApiContext): Promise<void> {
   const query = url.searchParams;
