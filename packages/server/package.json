@@ -1,6 +1,6 @@
 {
   "name": "@mcst/server",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Control-plane API and web UI server for minecraft-stress-tester.",
   "type": "module",
   "license": "MIT",
