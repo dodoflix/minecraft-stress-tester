@@ -162,3 +162,9 @@ export const importBlueprintToGraph = (blueprint: unknown) =>
     method: "POST",
     body: JSON.stringify({ blueprint }),
   });
+
+/** WebSocket URL for the bidirectional control channel (token in the query). */
+export function wsUrl(): string {
+  const base = location.origin.replace(/^http/, "ws");
+  return `${base}/ws?token=${encodeURIComponent(token)}`;
+}
