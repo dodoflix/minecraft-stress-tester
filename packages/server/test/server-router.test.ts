@@ -1,11 +1,11 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import type { MetricsSnapshot } from "minecraft-stress-tester";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { MetricsSnapshot } from "../src/metrics/collector.js";
-import { ConfigStore } from "../src/server/configStore.js";
-import { type ApiContext, type ApiRequest, handleRequest } from "../src/server/router.js";
-import { type RunEngine, RunManager } from "../src/server/runManager.js";
+import { ConfigStore } from "../src/configStore.js";
+import { type ApiContext, type ApiRequest, handleRequest } from "../src/router.js";
+import { type RunEngine, RunManager } from "../src/runManager.js";
 
 const TOKEN = "secret-token";
 

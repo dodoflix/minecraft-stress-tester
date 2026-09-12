@@ -1,0 +1,49 @@
+{
+  "name": "minecraft-stress-tester",
+  "version": "1.2.0",
+  "description": "The most detailed open-source Minecraft server stress tester: scalable bot load generation with real server-impact metrics (TPS, latency, throughput).",
+  "type": "module",
+  "license": "MIT",
+  "author": "dodo",
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "mcst": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "minecraft",
+    "stress-test",
+    "load-testing",
+    "mineflayer",
+    "minecraft-protocol",
+    "bots",
+    "benchmark",
+    "tps"
+  ],
+  "dependencies": {
+    "commander": "^15.0.0",
+    "js-yaml": "^5.4.1",
+    "minecraft-protocol": "^1.68.0",
+    "mineflayer": "^4.39.0",
+    "mineflayer-pathfinder": "^2.4.5",
+    "socks": "^2.8.10",
+    "zod": "^4.6.2"
+  }
+}

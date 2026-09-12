@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { extname, join } from "node:path";
 import { load as loadYaml } from "js-yaml";
-import { type Config, configSchema } from "../config/schema.js";
+import { type Config, configSchema } from "minecraft-stress-tester";
 
 export interface ValidationResult {
   valid: boolean;

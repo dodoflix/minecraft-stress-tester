@@ -1,0 +1,30 @@
+{
+  "name": "@mcst/server",
+  "version": "1.2.0",
+  "private": true,
+  "description": "Control-plane API and web UI server for minecraft-stress-tester.",
+  "type": "module",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "js-yaml": "^5.4.1",
+    "minecraft-stress-tester": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^24.13.4"
+  }
+}

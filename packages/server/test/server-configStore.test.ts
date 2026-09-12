@@ -2,7 +2,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ConfigStore, isSafeConfigName, validateConfig } from "../src/server/configStore.js";
+import { ConfigStore, isSafeConfigName, validateConfig } from "../src/configStore.js";
 
 const VALID_YAML = "authorized: true\ntarget:\n  host: localhost\n";
 

@@ -12,7 +12,20 @@ CLI/config ─▶ Engine ─▶ Ramp scheduler ─▶ Driver (LightBot / FullBot
 For runs above the single-process ceiling, an orchestrator forks N worker processes,
 each a full Engine on a slice of the bot budget, and merges their snapshots.
 
-## Modules (`src/`)
+## Workspace layout
+
+An npm-workspaces monorepo, one build graph, dependencies pointing one way:
+
+| Package | Path | What |
+|---------|------|------|
+| `minecraft-stress-tester` | `packages/core` | The headless engine, config, Bot API, script model, scanner, report renderers, and the `mcst` CLI (bin). Published to npm; importable as a library. Depends on nothing internal. |
+| `@mcst/server` | `packages/server` | The control-plane API + web UI shell wrapping core (REST + SSE). Depends on core. `mcst serve`/`gui` load it lazily. |
+| `@mcst/ui` | `packages/ui` | The web app, built to static assets `@mcst/server` serves. Depends on core. |
+
+The `mcst serve`/`gui` commands live in core but load `@mcst/server` with a dynamic import, so
+core builds on its own (no import cycle) and the server ships as its own package.
+
+## Modules (`packages/core/src/`)
 
 | Path | Responsibility |
 |------|----------------|
@@ -38,11 +51,14 @@ each a full Engine on a slice of the bot budget, and merges their snapshots.
 | `behaviors/` | `(bot) => cleanup` behaviors: auth, chatSpam, antiAfk, movement. |
 | `metrics/` | Collector, sorted-array percentiles, TPS estimator. |
 | `report/` | Console line, TUI dashboard, web (HTTP + SSE) dashboard, JSON/CSV/HTML export, summary. |
-| `server/` | Control-plane API (`mcst serve`): pure router + run manager + config/history stores, HTTP/SSE shell. |
 | `bot/` | Bot API (single-bot mineflayer surface) + the `mcst debug` REPL dispatcher. |
 | `scan/` | Defensive scanner (`mcst scan`): fingerprint, curated advisories, osv.dev, plugin inference. |
 | `script/` | Blueprint model, interpreter, and code compiler for programmable bots (`mcst script`). |
-| `ui/` | Self-contained web control panel page served by `server/` (`mcst gui`). |
+| `index.ts` | Public library surface (the `minecraft-stress-tester` entry point). |
+
+The control-plane server and web UI live in the other packages: `@mcst/server`
+(`packages/server/src`, pure router + run manager + config/history stores + HTTP/SSE shell +
+the control-panel page) and `@mcst/ui` (`packages/ui`).
 
 ## Why the engine owns reconnection
 

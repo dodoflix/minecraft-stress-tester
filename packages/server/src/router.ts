@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { configSchema } from "../config/schema.js";
+import { configSchema } from "minecraft-stress-tester";
 import type { ConfigStore } from "./configStore.js";
 import { validateConfig } from "./configStore.js";
 import { listHistory, readHistory } from "./history.js";

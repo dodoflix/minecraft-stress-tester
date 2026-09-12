@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { isReportFile, listHistory, readHistory } from "../src/server/history.js";
+import { isReportFile, listHistory, readHistory } from "../src/history.js";
 
 function report(finishedAt: string, spawned: number, tps: number) {
   return JSON.stringify({

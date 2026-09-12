@@ -4,7 +4,7 @@
 pre-commit:
   commands:
     biome:
-      glob: "*.{ts,js,json,jsonc}"
+      glob: "**/*.{ts,js,json,jsonc}"
       # --no-errors-on-unmatched: don't fail when every staged file is biome-ignored
       # (e.g. only examples/*.json changed).
       run: npx biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}

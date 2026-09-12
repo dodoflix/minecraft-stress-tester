@@ -21,7 +21,16 @@ import { formatScanReport } from "./scan/scanReport.js";
 import { parseBlueprint } from "./script/blueprint.js";
 import { compileToCode } from "./script/compile.js";
 import { runBlueprint } from "./script/run.js";
-import { startServer } from "./server/httpServer.js";
+import type { StartServer } from "./serverContract.js";
+
+// serve/gui are the only CLI paths that need the control-plane server. It lives in a sibling
+// workspace (@mcst/server) that depends on core; loading it lazily with a non-literal specifier
+// keeps core buildable on its own (no import cycle) and off the hot path for every other command.
+async function loadStartServer(): Promise<StartServer> {
+  const spec = "@mcst/server";
+  const mod = (await import(spec)) as unknown as { startServer: StartServer };
+  return mod.startServer;
+}
 
 const program = new Command();
 program
@@ -215,6 +224,7 @@ async function runCommand(opts: Record<string, unknown>): Promise<void> {
 }
 
 async function serveCommand(opts: Record<string, unknown>): Promise<void> {
+  const startServer = await loadStartServer();
   const handle = await startServer({
     port: opts.port as number | undefined,
     host: opts.host as string | undefined,
@@ -231,6 +241,7 @@ async function serveCommand(opts: Record<string, unknown>): Promise<void> {
 }
 
 async function guiCommand(opts: Record<string, unknown>): Promise<void> {
+  const startServer = await loadStartServer();
   const handle = await startServer({
     port: opts.port as number | undefined,
     host: opts.host as string | undefined,
