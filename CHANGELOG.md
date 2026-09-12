@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.3.0](https://github.com/dodoflix/minecraft-stress-tester/compare/v1.2.0...v1.3.0) (2026-09-12)
+
+
+### Features
+
+* allow shards in config ([#32](https://github.com/dodoflix/minecraft-stress-tester/issues/32)) ([0f9506e](https://github.com/dodoflix/minecraft-stress-tester/commit/0f9506e17666e2a7870ca45fe026d8ea1a0553f5))
+* automatic free proxies + HTTP CONNECT ([#36](https://github.com/dodoflix/minecraft-stress-tester/issues/36)) ([e8e3589](https://github.com/dodoflix/minecraft-stress-tester/commit/e8e3589a2a8c07e352d39da57a82fdc0b02edda2))
+* bidirectional WebSocket transport for debug + script control ([#51](https://github.com/dodoflix/minecraft-stress-tester/issues/51)) ([6772e1f](https://github.com/dodoflix/minecraft-stress-tester/commit/6772e1f7db5affdbeb01d29dd3d5db407bab0c5d))
+* bot API + debug mode ([#35](https://github.com/dodoflix/minecraft-stress-tester/issues/35)) ([089c4a2](https://github.com/dodoflix/minecraft-stress-tester/commit/089c4a2d44244099c4f1975f78a7a95550006815))
+* control-plane API ([#34](https://github.com/dodoflix/minecraft-stress-tester/issues/34)) ([0ad8cc9](https://github.com/dodoflix/minecraft-stress-tester/commit/0ad8cc9fb799572fd1dc4ae06ee04435f5d1207a))
+* deeper security recon and advisory matching ([#50](https://github.com/dodoflix/minecraft-stress-tester/issues/50)) ([72e322a](https://github.com/dodoflix/minecraft-stress-tester/commit/72e322aeee7cd990aaecc92d0b47824ba49eb255))
+* defensive security scanner ([#37](https://github.com/dodoflix/minecraft-stress-tester/issues/37)) ([b6f51da](https://github.com/dodoflix/minecraft-stress-tester/commit/b6f51da3afd81afd0bfa24ad0538c9c4306f11ea))
+* packaging for npm and containers ([#52](https://github.com/dodoflix/minecraft-stress-tester/issues/52)) ([73f80be](https://github.com/dodoflix/minecraft-stress-tester/commit/73f80be0c005bea2854389ea8a1c316db6ef403b))
+* programmable bots via blueprints ([#39](https://github.com/dodoflix/minecraft-stress-tester/issues/39)) ([8d0efef](https://github.com/dodoflix/minecraft-stress-tester/commit/8d0efeffe9106028e11bff57402988e2d6c57cac))
+* replace behaviors.* with a composable behavior pipeline ([#49](https://github.com/dodoflix/minecraft-stress-tester/issues/49)) ([7e97ecb](https://github.com/dodoflix/minecraft-stress-tester/commit/7e97ecb68983d46fb733e593524c968a07aff36e))
+* sandboxed user scripts in a worker-thread isolate ([#47](https://github.com/dodoflix/minecraft-stress-tester/issues/47)) ([7826ac6](https://github.com/dodoflix/minecraft-stress-tester/commit/7826ac6ee645c00cec7cd9dac2586d74c1391780))
+* visual node editor compiling to blueprints ([#48](https://github.com/dodoflix/minecraft-stress-tester/issues/48)) ([f32f47b](https://github.com/dodoflix/minecraft-stress-tester/commit/f32f47b676d1cfffd9080828a352e16a46a85102))
+* web control panel ([#38](https://github.com/dodoflix/minecraft-stress-tester/issues/38)) ([acf7f88](https://github.com/dodoflix/minecraft-stress-tester/commit/acf7f8811f5cdbe247148063dbf864d9660544ed))
+* web UI SPA (React + Vite + Tailwind + shadcn) ([#54](https://github.com/dodoflix/minecraft-stress-tester/issues/54)) ([2654e46](https://github.com/dodoflix/minecraft-stress-tester/commit/2654e467c6a275202307126f59692d495e86c6df))
+
+
+### Bug Fixes
+
+* make auto-proxies actually work (hang, validation, providers) ([#43](https://github.com/dodoflix/minecraft-stress-tester/issues/43)) ([b4dce18](https://github.com/dodoflix/minecraft-stress-tester/commit/b4dce18c50c18813f8201a97bf44628e3a933787))
+* subcommand option parsing + repo polish ([#41](https://github.com/dodoflix/minecraft-stress-tester/issues/41)) ([075435a](https://github.com/dodoflix/minecraft-stress-tester/commit/075435afd0180584414d511a8f5439dc81e768aa))
+
+
+### Performance
+
+* request low view distance per bot; hint sharding for big counts ([#29](https://github.com/dodoflix/minecraft-stress-tester/issues/29)) ([61efeac](https://github.com/dodoflix/minecraft-stress-tester/commit/61efeacb17006fbda783e0affc08c5ede2823a74))
+
 ## [1.2.0](https://github.com/dodoflix/minecraft-stress-tester/compare/v1.1.0...v1.2.0) (2026-09-11)
 
 
