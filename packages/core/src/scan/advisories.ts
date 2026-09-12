@@ -1,5 +1,5 @@
 import { compareVersions, type Fingerprint } from "./fingerprint.js";
-import type { ScanFinding, Severity } from "./types.js";
+import type { PluginDetection, ScanFinding, Severity } from "./types.js";
 
 interface Advisory {
   id: string;
@@ -57,7 +57,51 @@ export function matchKnownIssues(fp: Fingerprint): ScanFinding[] {
     detail: a.detail,
     remediation: a.remediation,
     source: "advisory",
+    confidence: "high",
   }));
+}
+
+export interface PluginAdvisory {
+  id: string;
+  /** Lowercase plugin name this rule applies to. */
+  plugin: string;
+  title: string;
+  severity: Severity;
+  detail: string;
+  remediation: string;
+  /** True when the detected version is affected. */
+  affected: (version: string) => boolean;
+}
+
+// Curated plugin version-range advisories. Deliberately small and honest: entries are added only as
+// reliable version-range data appears; live CVE matching comes from osv.dev (queryOsv). The
+// mechanism is what ships here.
+export const PLUGIN_ADVISORIES: PluginAdvisory[] = [];
+
+/** Match curated plugin advisories against detected plugins (needs a detected version). Pure. */
+export function matchPluginAdvisories(
+  detections: PluginDetection[],
+  advisories: PluginAdvisory[] = PLUGIN_ADVISORIES,
+): ScanFinding[] {
+  const out: ScanFinding[] = [];
+  for (const d of detections) {
+    if (!d.version) continue;
+    const name = d.name.toLowerCase();
+    for (const a of advisories) {
+      if (a.plugin === name && a.affected(d.version)) {
+        out.push({
+          id: a.id,
+          title: a.title,
+          severity: a.severity,
+          detail: a.detail,
+          remediation: a.remediation,
+          source: "advisory",
+          confidence: d.confidence,
+        });
+      }
+    }
+  }
+  return out;
 }
 
 interface OsvVuln {
@@ -106,5 +150,6 @@ export async function queryOsv(
     detail: v.details ?? `${pkg}@${version} is affected by ${v.id ?? "a known advisory"}.`,
     remediation: "Update the affected plugin/library to a fixed version.",
     source: "osv.dev",
+    confidence: "high",
   }));
 }

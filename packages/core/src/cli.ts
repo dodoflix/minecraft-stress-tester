@@ -130,7 +130,11 @@ program
   .option("-H, --host <host>", "target host")
   .option("-p, --port <port>", "target port", (v) => parseInt(v, 10))
   .option("--mc-version <ver>", "force Minecraft version (default: auto-detect)")
-  .option("--deep", "join one bot to detect plugins (brand + command tab-complete)")
+  .option("--deep", "join one bot to detect plugins (brand + plugin channels + command tab-complete)")
+  .option(
+    "--probe-versions",
+    "with --deep, best-effort plugin versions via read-only /version (unlocks CVE matching)",
+  )
   .option("--json", "also write the report as JSON to the reports dir")
   .option("--i-am-authorized", "affirm you own or are permitted to test the target")
   .action(scanCommand);
@@ -357,7 +361,7 @@ async function scanCommand(opts: Record<string, unknown>): Promise<void> {
   process.stdout.write(`Scanning ${config.target.host}:${config.target.port} ...\n`);
   const report = await scan(
     { host: config.target.host, port: config.target.port, version: config.target.version },
-    { deep: Boolean(opts.deep), spec },
+    { deep: Boolean(opts.deep), probeVersions: Boolean(opts.probeVersions), spec },
   );
   process.stdout.write(`${formatScanReport(report)}\n`);
 
