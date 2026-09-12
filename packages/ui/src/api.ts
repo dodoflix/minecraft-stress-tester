@@ -148,3 +148,17 @@ export const runScript = (payload: {
   authorized: boolean;
   timeoutMs?: number;
 }) => api<ScriptRunResult>("/script/run", { method: "POST", body: JSON.stringify(payload) });
+
+export interface CompileGraphResult {
+  ok: boolean;
+  blueprint?: unknown;
+  code?: string;
+  errors?: string[];
+}
+export const compileGraph = (graph: unknown) =>
+  api<CompileGraphResult>("/graph/compile", { method: "POST", body: JSON.stringify({ graph }) });
+export const importBlueprintToGraph = (blueprint: unknown) =>
+  api<{ ok: boolean; graph?: unknown; errors?: string[] }>("/graph/import", {
+    method: "POST",
+    body: JSON.stringify({ blueprint }),
+  });

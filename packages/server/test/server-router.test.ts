@@ -183,6 +183,57 @@ describe("handleRequest", () => {
     });
   });
 
+  describe("graph", () => {
+    const graph = {
+      name: "g",
+      nodes: [
+        { id: "e", kind: "event", type: "spawn" },
+        { id: "a", kind: "action", type: "chat", data: { message: "hi" } },
+      ],
+      edges: [{ id: "1", source: "e", target: "a" }],
+    };
+
+    it("compiles a graph to a blueprint and ejected code", () => {
+      const r = handleRequest(req("POST", "/api/graph/compile", { body: { graph } }), ctx);
+      expect(r.status).toBe(200);
+      const body = r.body as { ok: boolean; blueprint: { rules: unknown[] }; code: string };
+      expect(body.ok).toBe(true);
+      expect(body.blueprint.rules).toHaveLength(1);
+      expect(body.code).toContain("chat");
+    });
+
+    it("imports a blueprint into a graph", () => {
+      const blueprint = { name: "b", rules: [{ on: "spawn", actions: [{ type: "stop" }] }] };
+      const r = handleRequest(req("POST", "/api/graph/import", { body: { blueprint } }), ctx);
+      expect(r.status).toBe(200);
+      expect((r.body as { graph: { nodes: unknown[] } }).graph.nodes.length).toBeGreaterThan(0);
+    });
+
+    it("defaults an empty body to an empty graph and blueprint", () => {
+      expect(handleRequest(req("POST", "/api/graph/compile", { body: {} }), ctx).status).toBe(200);
+      expect(handleRequest(req("POST", "/api/graph/import", { body: {} }), ctx).status).toBe(200);
+    });
+
+    it("400s a malformed graph and blueprint, 405s GET, 404s an unknown action", () => {
+      const bad = {
+        nodes: [
+          { id: "e", kind: "event", type: "spawn" },
+          { id: "a", kind: "action", type: "wait", data: { ms: 9e9 } },
+        ],
+        edges: [{ id: "1", source: "e", target: "a" }],
+      };
+      expect(handleRequest(req("POST", "/api/graph/compile", { body: { graph: bad } }), ctx).status).toBe(
+        400,
+      );
+      expect(
+        handleRequest(req("POST", "/api/graph/import", { body: { blueprint: { rules: "nope" } } }), ctx)
+          .status,
+      ).toBe(400);
+      expect(handleRequest(req("GET", "/api/graph/compile"), ctx).status).toBe(405);
+      expect(handleRequest(req("POST", "/api/graph/bogus", { body: {} }), ctx).status).toBe(404);
+    });
+  });
+
   describe("schema", () => {
     it("returns the JSON Schema and generated form fields, 404s a write", () => {
       const r = handleRequest(req("GET", "/api/schema"), ctx);

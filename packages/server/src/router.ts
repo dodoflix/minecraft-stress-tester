@@ -1,5 +1,15 @@
 import { timingSafeEqual } from "node:crypto";
-import { buildRunConfig, configFormFields, configJsonSchema, toHtml } from "minecraft-stress-tester";
+import {
+  blueprintToGraph,
+  buildRunConfig,
+  compileToCode,
+  configFormFields,
+  configJsonSchema,
+  graphToBlueprint,
+  parseBlueprint,
+  type ScriptGraph,
+  toHtml,
+} from "minecraft-stress-tester";
 import type { ConfigStore } from "./configStore.js";
 import { validateConfig } from "./configStore.js";
 import { listHistory, readHistory } from "./history.js";
@@ -59,6 +69,7 @@ export function handleRequest(req: ApiRequest, ctx: ApiContext): ApiResponse {
   if (resource === "runs") return runs(req, ctx, id, sub);
   if (resource === "configs") return configs(req, ctx, id);
   if (resource === "history") return history(req, ctx, id, sub);
+  if (resource === "graph") return graph(req, id);
   // Schema descriptor for the UI's generated config form; derived from the one zod schema.
   if (resource === "schema" && req.method === "GET") {
     return json(200, { jsonSchema: configJsonSchema(), fields: configFormFields() });
@@ -120,6 +131,24 @@ function configs(req: ApiRequest, ctx: ApiContext, name?: string): ApiResponse {
     return ctx.configs.delete(name) ? json(200, { deleted: name }) : json(404, { error: "config not found" });
   }
   return json(405, { error: "method not allowed" });
+}
+
+// The visual node editor: compile a graph to a blueprint + ejected code, or turn a blueprint into a
+// graph. Pure (a code generator over the one blueprint model), so it lives in the pure router.
+function graph(req: ApiRequest, action?: string): ApiResponse {
+  if (req.method !== "POST") return json(405, { error: "method not allowed" });
+  const body = (req.body ?? {}) as { graph?: ScriptGraph; blueprint?: unknown };
+  if (action === "compile") {
+    const result = graphToBlueprint(body.graph ?? { nodes: [], edges: [] });
+    if (!result.ok || !result.blueprint) return json(400, { ok: false, errors: result.errors });
+    return json(200, { ok: true, blueprint: result.blueprint, code: compileToCode(result.blueprint) });
+  }
+  if (action === "import") {
+    const parsed = parseBlueprint(body.blueprint ?? {});
+    if (!parsed.ok || !parsed.blueprint) return json(400, { ok: false, errors: parsed.errors });
+    return json(200, { ok: true, graph: blueprintToGraph(parsed.blueprint) });
+  }
+  return json(404, { error: "not found" });
 }
 
 function history(req: ApiRequest, ctx: ApiContext, file?: string, sub?: string): ApiResponse {
