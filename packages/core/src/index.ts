@@ -12,7 +12,13 @@ export {
   type Vitals,
 } from "./bot/botApi.js";
 export { dispatch, HELP, type ReplResult } from "./bot/repl.js";
-export { type CliOverrides, loadConfig } from "./config/load.js";
+export {
+  configFormFields,
+  configJsonSchema,
+  type FieldKind,
+  type FormField,
+} from "./config/formSchema.js";
+export { type BuildResult, buildRunConfig, type CliOverrides, loadConfig } from "./config/load.js";
 export {
   accountsSchema,
   behaviorsSchema,

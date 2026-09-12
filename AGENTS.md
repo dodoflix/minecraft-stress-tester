@@ -52,14 +52,15 @@ workspaces; the 95% coverage gate is global in `vitest.config.ts`.
   tunnel + MC-status validation, excluded), `autoProxies.ts` (fetch/parse/dedupe/pick/probe, tested),
   `slp.ts` (preflight), `accounts.ts`.
 - `@mcst/server` (`packages/server/src/`): control-plane API, pure `router.ts`/`runManager.ts`/
-  `configStore.ts`/`history.ts` (tested) + `httpServer.ts` (socket + SSE, serves the UI at `/`,
-  excluded) + `ui/page.ts` (the control-panel page). Imports core via `minecraft-stress-tester`.
+  `configStore.ts`/`history.ts` (tested) + `httpServer.ts` (socket + SSE, serves the built `@mcst/ui`
+  assets + a token script under a strict CSP, excluded). Imports core via `minecraft-stress-tester`.
 - `scan/`: defensive scanner (fingerprint, curated advisories, osv.dev, plugin inference; pure + tested;
   `recon.ts` excluded).
 - `script/`: `blueprint.ts` (zod model, event-triggered actions), `run.ts` (interpreter), `compile.ts`
   (eject to TS). Pure + tested.
-- `@mcst/server`'s `ui/page.ts`: self-contained web control panel (no build step), pure string
-  builder, tested (moves to `@mcst/ui` when the React app lands).
+- `@mcst/ui` (`packages/ui/`): the React + Vite + Tailwind + shadcn SPA (dashboard, schema-driven
+  config editor + Monaco YAML, history). Browser I/O, excluded from coverage; the form descriptor it
+  renders is the pure, tested `config/formSchema.ts` in core, so the UI cannot drift from the CLI.
 - `behaviors/`: built-in `auth`/`movement`/`antiAfk`/`chatSpam`/`commands`. A roadmap workstream
   removes this system in favor of composable script pipelines.
 
