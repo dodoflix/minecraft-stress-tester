@@ -1,5 +1,6 @@
 import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
 import "monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution";
+import "monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution";
 import EditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import { useEffect, useRef } from "react";
 
@@ -10,7 +11,17 @@ function isDark(): boolean {
   return document.documentElement.classList.contains("dark");
 }
 
-export function MonacoYaml({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+export function CodeEditor({
+  value,
+  onChange,
+  language = "yaml",
+  height = "520px",
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  language?: string;
+  height?: string;
+}) {
   const host = useRef<HTMLDivElement>(null);
   const editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const onChangeRef = useRef(onChange);
@@ -22,7 +33,7 @@ export function MonacoYaml({ value, onChange }: { value: string; onChange: (v: s
     if (!host.current) return;
     const ed = monaco.editor.create(host.current, {
       value,
-      language: "yaml",
+      language,
       theme: isDark() ? "vs-dark" : "vs",
       minimap: { enabled: false },
       automaticLayout: true,
@@ -52,5 +63,5 @@ export function MonacoYaml({ value, onChange }: { value: string; onChange: (v: s
     }
   }, [value]);
 
-  return <div ref={host} className="h-[520px] w-full overflow-hidden rounded-md border" />;
+  return <div ref={host} style={{ height }} className="w-full overflow-hidden rounded-md border" />;
 }

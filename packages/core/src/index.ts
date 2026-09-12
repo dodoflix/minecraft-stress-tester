@@ -91,4 +91,18 @@ export {
 } from "./script/blueprint.js";
 export { compileToCode } from "./script/compile.js";
 export { runActions, runBlueprint, type ScriptableBot, type Sleep } from "./script/run.js";
+export {
+  checkUserScript,
+  runUserScript,
+  type SandboxOptions,
+  type ScriptHostBot,
+} from "./script/sandbox/host.js";
+export {
+  dispatchScriptCall,
+  isScriptBotMethod,
+  SCRIPT_BOT_EVENTS,
+  SCRIPT_BOT_METHODS,
+  type ScriptBotEvent,
+  type ScriptBotMethod,
+} from "./script/sandbox/protocol.js";
 export type { ServeHandle, ServeOptions, StartServer } from "./serverContract.js";

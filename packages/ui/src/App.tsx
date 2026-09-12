@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs.t
 import { ConfigEditor } from "./views/ConfigEditor.tsx";
 import { Dashboard } from "./views/Dashboard.tsx";
 import { History } from "./views/History.tsx";
+import { Scripts } from "./views/Scripts.tsx";
 
 type Theme = "light" | "dark";
 
@@ -45,6 +46,7 @@ export function App() {
         <TabsList className="self-start">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="config">Config</TabsTrigger>
+          <TabsTrigger value="scripts">Scripts</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
         <TabsContent value="dashboard">
@@ -52,6 +54,9 @@ export function App() {
         </TabsContent>
         <TabsContent value="config">
           <ConfigEditor />
+        </TabsContent>
+        <TabsContent value="scripts">
+          <Scripts />
         </TabsContent>
         <TabsContent value="history">
           <History />

@@ -31,9 +31,39 @@ mcst debug --config examples/local.yaml --script examples/blueprints/greeter.jso
 `mcst script eject` compiles a blueprint to a TypeScript module that drives the Bot API directly,
 so you can take it further in a real editor. The visual node graph compiles to this same Bot API.
 
+## Sandboxed user scripts
+
+Beyond data-only blueprints, you can run arbitrary user JavaScript against a bot. It executes in a
+**real isolate** (a worker thread with its own V8 heap), never an in-process `eval`. The isolate is
+given only the Bot API plus `console` and `sleep(ms)`; there is no `require`, `process`, `fs`, `net`,
+or `env` by name, a memory cap, and a wall-clock timeout. Every bot method is async:
+
+```js
+const pos = await bot.position();
+await bot.chat("hello");
+bot.on("chat", (m) => console.log(m.username, m.message));
+await sleep(1000);
+```
+
+Available: `chat`, `command`, `look`, `setControl`, `goto`, `stop`, `position`, `vitals`, `players`,
+`nearbyEntities`, `inventory`, and `bot.on(event, cb)` for `chat`/`death`/`kicked`/`end`/`error`.
+
+Run one headless against a bot you attach:
+
+```bash
+mcst debug --user-script examples/scripts/patrol.js -H <host> --i-am-authorized
+```
+
+or author, validate, and run it from the web UI's **Scripts** tab (over `POST /api/script/validate`
+and `POST /api/script/run`; see [api.md](api.md)).
+
+**How the boundary works.** The isolate can reach the host only by posting Bot API calls, which the
+host validates against a fixed allowlist before touching the bot. This protects the host process and
+bounds CPU/memory. It is built for the local, authorized, localhost-by-default posture: a determined
+`vm` escape inside the worker would reach the worker's own realm, so do not expose script execution
+to untrusted networks.
+
 ## What is deferred
 
-The visual node-graph editor and arbitrary user-authored TypeScript/JavaScript are not shipped
-yet. Running untrusted code needs real isolation (a worker/isolate exposing only the Bot API),
-which is deliberately not faked with an in-process `eval`. Blueprints cover the safe, useful core
-today and are the compile target both editors will use. See the [roadmap](roadmap.md).
+The visual node-graph editor is not shipped yet; it will compile to the same blueprint model and Bot
+API. See the [roadmap](roadmap.md).

@@ -130,3 +130,21 @@ export function streamRun(id: string, onSnap: (s: MetricsSnapshot) => void): () 
   };
   return () => es.close();
 }
+
+export const validateScript = (code: string) =>
+  api<{ ok: boolean; error?: string }>("/script/validate", {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
+
+export interface ScriptRunResult {
+  ok: boolean;
+  logs: Array<{ level: string; message: string }>;
+  error?: string;
+}
+export const runScript = (payload: {
+  code: string;
+  target: { host: string; port: number };
+  authorized: boolean;
+  timeoutMs?: number;
+}) => api<ScriptRunResult>("/script/run", { method: "POST", body: JSON.stringify(payload) });
