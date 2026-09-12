@@ -23,9 +23,8 @@ accounts:
     - carol@example.com
   profilesFolder: ./.mcst-accounts
 
-behaviors:
-  antiAfk:
-    enabled: true
+pipeline:
+  - use: antiAfk
 
 report:
   json: true

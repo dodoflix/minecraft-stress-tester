@@ -24,21 +24,16 @@ reconnect:
   baseBackoffMs: 1000
   maxBackoffMs: 30000
 
-behaviors:
-  antiAfk:
-    enabled: true      # head rotation (FullBot); keep-alive covers light bots
-  movement:
-    enabled: false     # random walk + chunk loading (FullBot only)
-    intervalMs: 2000
-  chatSpam:
-    enabled: false
-    message: "load test"
-    delayMs: 3000
-  auth:                # offline-mode auth plugins (/register /login)
-    enabled: false
-    password: "changeme"
-    loginCommand: "/login {password}"
-    registerCommand: "/register {password} {password}"
+# Ordered per-bot behavior pipeline (replaces the old behaviors.* toggles). Each stage gates the
+# next on success; add, remove, or reorder stages. Uncomment to enable more.
+pipeline:
+  - use: antiAfk        # head rotation (FullBot); keep-alive covers light bots
+  # - use: movement     # random walk + chunk loading (FullBot only)
+  #   with: { intervalMs: 2000 }
+  # - use: auth         # offline-mode auth plugins (/register /login), runs first when present
+  #   with: { password: "changeme" }
+  # - use: chatSpam
+  #   with: { message: "load test", delayMs: 3000 }
 
 accounts:
   mode: offline        # offline | microsoft

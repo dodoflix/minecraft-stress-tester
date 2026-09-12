@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { buildBehaviors } from "../src/behaviors/index.js";
 import { configSchema } from "../src/config/schema.js";
 import { buildSpawnSchedule, jittered } from "../src/engine/ramp.js";
 import { Histogram } from "../src/metrics/histogram.js";
 import { parsePing } from "../src/net/slp.js";
+import { buildPipeline } from "../src/pipeline/stdlib.js";
 import { longToBigInt } from "../src/util/long.js";
 
 describe("jittered", () => {
@@ -57,24 +57,20 @@ describe("Histogram single value", () => {
   });
 });
 
-describe("buildBehaviors with chatSpam", () => {
-  it("includes chatSpam when enabled", () => {
+describe("buildPipeline", () => {
+  it("resolves a single-stage pipeline", () => {
     const cfg = configSchema.parse({
       target: { host: "h" },
-      behaviors: { chatSpam: { enabled: true, message: "x" }, antiAfk: { enabled: false } },
+      pipeline: [{ use: "chatSpam", with: { message: "x" } }],
     });
-    expect(buildBehaviors(cfg)).toHaveLength(1);
+    expect(buildPipeline(cfg).map((s) => s.kind)).toEqual(["chatSpam"]);
   });
 
-  it("includes both auth and chatSpam when both enabled", () => {
+  it("resolves an ordered multi-stage pipeline", () => {
     const cfg = configSchema.parse({
       target: { host: "h" },
-      behaviors: {
-        auth: { enabled: true, password: "p" },
-        chatSpam: { enabled: true },
-        antiAfk: { enabled: false },
-      },
+      pipeline: [{ use: "auth", with: { password: "p" } }, { use: "chatSpam" }],
     });
-    expect(buildBehaviors(cfg)).toHaveLength(2);
+    expect(buildPipeline(cfg).map((s) => s.kind)).toEqual(["auth", "chatSpam"]);
   });
 });

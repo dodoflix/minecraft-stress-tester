@@ -168,4 +168,17 @@ describe("compileToCode", () => {
   it("handles an empty blueprint", () => {
     expect(compileToCode(bp([]))).toContain("// no rules");
   });
+  it("emits completion signals for succeed and fail", () => {
+    const code = compileToCode(
+      bp([
+        { on: "spawn", actions: [{ type: "fail", reason: "nope" }] },
+        { on: "chat", actions: [{ type: "succeed" }] },
+      ]),
+    );
+    expect(code).toContain('throw new Error("nope")');
+    expect(code).toContain("return; // succeeded");
+    expect(compileToCode(bp([{ on: "spawn", actions: [{ type: "fail" }] }]))).toContain(
+      'throw new Error("failed")',
+    );
+  });
 });

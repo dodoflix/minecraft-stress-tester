@@ -58,6 +58,3 @@ export interface BotDriver extends TypedEmitter<BotEventMap> {
 }
 
 export type ControlState = "forward" | "back" | "left" | "right" | "jump" | "sprint";
-
-/** A behavior wires itself to a driver's events and returns a cleanup fn. */
-export type Behavior = (bot: BotDriver) => () => void;

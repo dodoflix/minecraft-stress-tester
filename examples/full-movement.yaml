@@ -14,12 +14,11 @@ ramp:
   connectRate: 4
   holdSeconds: 180
 
-behaviors:
-  antiAfk:
-    enabled: true
-  movement:
-    enabled: true
-    intervalMs: 1000    # pick a new direction each second
+pipeline:
+  - use: antiAfk
+  - use: movement
+    with:
+      intervalMs: 1000    # pick a new direction each second
 
 report:
   mode: web             # live web dashboard at http://localhost:8787

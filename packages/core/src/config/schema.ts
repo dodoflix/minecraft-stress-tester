@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { blueprintSchema } from "../script/blueprint.js";
 
 /**
  * Run configuration schema. Validated at load time; the rest of the app consumes
@@ -32,49 +33,64 @@ export const reconnectSchema = z.object({
   maxBackoffMs: z.number().int().min(0).default(30000),
 });
 
-export const behaviorsSchema = z.object({
-  antiAfk: z
-    .object({
-      enabled: z.boolean().default(true),
-      intervalMs: z.number().int().min(200).default(3000),
-    })
-    .prefault({}),
-  // Random walk (FullBot only): loads chunks and defeats no-movement kicks.
-  movement: z
-    .object({
-      enabled: z.boolean().default(false),
-      intervalMs: z.number().int().min(200).default(2000),
-    })
-    .prefault({}),
-  chatSpam: z
-    .object({
-      enabled: z.boolean().default(false),
-      message: z.string().default("minecraft-stress-tester"),
-      delayMs: z.number().int().min(50).default(3000),
-    })
-    .prefault({}),
-  auth: z
-    .object({
-      enabled: z.boolean().default(false),
-      password: z.string().default(""),
-      loginCommand: z.string().default("/login {password}"),
-      registerCommand: z.string().default("/register {password} {password}"),
-      /** Wait this long after joining before sending the commands, so the server's login prompt
-       *  is ready. Fires on every join, so limbo/auth servers and post-transfer real servers both work. */
-      delayMs: z.number().int().min(0).default(1000),
-    })
-    .prefault({}),
-  // Run one-shot commands once the bot spawns into the world, e.g. ["/survival"] to leave the
-  // hub after auth. Fires once per bot, on the first spawn (already authed on limbo networks).
-  commands: z
-    .object({
-      enabled: z.boolean().default(false),
-      list: z.array(z.string()).default([]),
-      /** Wait after spawn before sending, and stagger between commands. */
-      delayMs: z.number().int().min(0).default(2000),
-    })
-    .prefault({}),
+// Per-stage option schemas for the pipeline standard library (see pipeline/stdlib.ts).
+export const authOptions = z.object({
+  password: z.string().default(""),
+  loginCommand: z.string().default("/login {password}"),
+  registerCommand: z.string().default("/register {password} {password}"),
+  /** Wait this long after joining before sending the commands, so the server's login prompt
+   *  is ready. Fires on every join, so limbo/auth servers and post-transfer real servers both work. */
+  delayMs: z.number().int().min(0).default(1000),
 });
+export const chatSpamOptions = z.object({
+  message: z.string().default("minecraft-stress-tester"),
+  delayMs: z.number().int().min(50).default(3000),
+});
+export const antiAfkOptions = z.object({
+  intervalMs: z.number().int().min(200).default(3000),
+});
+export const movementOptions = z.object({
+  intervalMs: z.number().int().min(200).default(2000),
+});
+export const commandsOptions = z.object({
+  list: z.array(z.string()).default([]),
+  /** Wait after spawn before sending, and stagger between commands. */
+  delayMs: z.number().int().min(0).default(2000),
+});
+export const blueprintStageOptions = z.object({ blueprint: blueprintSchema });
+
+export type AuthOptions = z.infer<typeof authOptions>;
+export type ChatSpamOptions = z.infer<typeof chatSpamOptions>;
+export type AntiAfkOptions = z.infer<typeof antiAfkOptions>;
+export type MovementOptions = z.infer<typeof movementOptions>;
+export type CommandsOptions = z.infer<typeof commandsOptions>;
+export type BlueprintStageOptions = z.infer<typeof blueprintStageOptions>;
+
+export const STAGE_KINDS = ["auth", "commands", "chatSpam", "antiAfk", "movement", "blueprint"] as const;
+export type StageKind = (typeof STAGE_KINDS)[number];
+
+// Gating fields shared by every stage: how the runner sequences and recovers.
+const gate = {
+  /** On a failed stage: stop the pipeline, skip to the next stage, or retry this one. */
+  onFailure: z.enum(["stop", "continue", "retry"]).default("continue"),
+  retries: z.number().int().min(0).default(0),
+  /** Fail the stage if it has not completed within this many ms (unset = wait indefinitely). */
+  timeoutMs: z.number().int().min(0).optional(),
+};
+
+/** One ordered pipeline stage: a standard-library behavior (or a blueprint) plus its options and
+ *  gating policy. Replaces the old fixed `behaviors.*` toggles. */
+export const stageSchema = z.discriminatedUnion("use", [
+  z.object({ use: z.literal("auth"), with: authOptions.prefault({}), ...gate }),
+  z.object({ use: z.literal("commands"), with: commandsOptions.prefault({}), ...gate }),
+  z.object({ use: z.literal("chatSpam"), with: chatSpamOptions.prefault({}), ...gate }),
+  z.object({ use: z.literal("antiAfk"), with: antiAfkOptions.prefault({}), ...gate }),
+  z.object({ use: z.literal("movement"), with: movementOptions.prefault({}), ...gate }),
+  z.object({ use: z.literal("blueprint"), with: blueprintStageOptions, ...gate }),
+]);
+
+export const pipelineSchema = z.array(stageSchema).default([]);
+export type PipelineStage = z.infer<typeof stageSchema>;
 
 export const accountsSchema = z.object({
   mode: z.enum(["offline", "microsoft"]).default("offline"),
@@ -123,7 +139,8 @@ export const configSchema = z.object({
   shards: z.number().int().min(1).default(1),
   ramp: rampSchema.prefault({}),
   reconnect: reconnectSchema.prefault({}),
-  behaviors: behaviorsSchema.prefault({}),
+  /** Ordered per-bot behavior pipeline; each stage gates the next on success. Replaces behaviors.*. */
+  pipeline: pipelineSchema,
   accounts: accountsSchema.prefault({}),
   proxies: proxiesSchema.prefault({}),
   report: z

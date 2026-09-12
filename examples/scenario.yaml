@@ -1,5 +1,5 @@
 # Start from a named scenario and override only what you need. The scenario seeds
-# ramp/driver/behaviors; anything you set here (or pass on the CLI) wins.
+# ramp/driver/pipeline; anything you set here (or pass on the CLI) wins.
 authorized: true
 
 scenario: chat-flood    # join-flood | sustained-load | chat-flood | chunk-thrash

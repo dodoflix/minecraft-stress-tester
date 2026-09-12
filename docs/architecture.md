@@ -48,7 +48,7 @@ core builds on its own (no import cycle) and the server ships as its own package
 | `drivers/driver.ts` | `BotDriver` interface + typed event map. |
 | `drivers/light.ts` | Raw `minecraft-protocol` bot (scale). |
 | `drivers/full.ts` | mineflayer bot (realistic movement / chunk loading). |
-| `behaviors/` | `(bot) => cleanup` behaviors: auth, chatSpam, antiAfk, movement. |
+| `pipeline/` | Composable per-bot behavior pipeline: `stage.ts` (Stage + completion signal), `runner.ts` (ordered, gated execution), `stdlib.ts` (auth/commands/chatSpam/antiAfk/movement + blueprint stages). |
 | `metrics/` | Collector, sorted-array percentiles, TPS estimator. |
 | `report/` | Console line, TUI dashboard, web (HTTP + SSE) dashboard, JSON/CSV/HTML export, summary. |
 | `bot/` | Bot API (single-bot mineflayer surface) + the `mcst debug` REPL dispatcher. |

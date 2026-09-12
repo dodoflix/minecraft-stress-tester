@@ -5,31 +5,31 @@
 export type ScenarioName = "join-flood" | "sustained-load" | "chat-flood" | "chunk-thrash";
 
 const SCENARIO_OVERLAYS: Record<ScenarioName, Record<string, unknown>> = {
-  // Hammer the login/connection path: many bots, fast, brief, no reconnect.
+  // Hammer the login/connection path: many bots, fast, brief, no reconnect, no behaviors.
   "join-flood": {
     driver: "light",
     ramp: { count: 500, connectRate: 50, rampUpSeconds: 0, holdSeconds: 5 },
     reconnect: { enabled: false },
-    behaviors: { antiAfk: { enabled: false } },
+    pipeline: [],
   },
   // Steady population over a long window.
   "sustained-load": {
     driver: "light",
     ramp: { count: 200, connectRate: 10, rampUpSeconds: 10, holdSeconds: 300 },
-    behaviors: { antiAfk: { enabled: true } },
+    pipeline: [{ use: "antiAfk" }],
   },
   // Stress chat handling / anti-spam plugins.
   "chat-flood": {
     driver: "light",
     ramp: { count: 100, connectRate: 10, holdSeconds: 60 },
-    behaviors: { chatSpam: { enabled: true, delayMs: 500 } },
+    pipeline: [{ use: "chatSpam", with: { delayMs: 500 } }],
   },
   // Realistic movement to churn chunk loading and physics (FullBot).
   "chunk-thrash": {
     driver: "full",
     viewDistance: 8, // actually load chunks (the point of this scenario)
     ramp: { count: 40, connectRate: 4, holdSeconds: 120 },
-    behaviors: { antiAfk: { enabled: true }, movement: { enabled: true, intervalMs: 500 } },
+    pipeline: [{ use: "antiAfk" }, { use: "movement", with: { intervalMs: 500 } }],
   },
 };
 

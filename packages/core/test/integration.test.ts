@@ -46,7 +46,7 @@ describe.skipIf(!hasJava)("integration: bots vs a real Paper server", () => {
       target: { host: "127.0.0.1", port: server.port },
       driver: "full",
       ramp: { count: 2, connectRate: 2, holdSeconds: 6, jitter: 0 },
-      behaviors: { antiAfk: { enabled: true }, movement: { enabled: true } },
+      pipeline: [{ use: "antiAfk" }, { use: "movement" }],
       report: { json: false },
     });
 
