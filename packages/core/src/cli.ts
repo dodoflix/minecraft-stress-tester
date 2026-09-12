@@ -29,8 +29,15 @@ import type { StartServer } from "./serverContract.js";
 // keeps core buildable on its own (no import cycle) and off the hot path for every other command.
 async function loadStartServer(): Promise<StartServer> {
   const spec = "@mcst/server";
-  const mod = (await import(spec)) as unknown as { startServer: StartServer };
-  return mod.startServer;
+  try {
+    const mod = (await import(spec)) as unknown as { startServer: StartServer };
+    return mod.startServer;
+  } catch {
+    throw new Error(
+      "mcst serve/gui need the @mcst/server package. Install it (npm i @mcst/server) or use the " +
+        "container image, which bundles it.",
+    );
+  }
 }
 
 const program = new Command();
@@ -230,7 +237,19 @@ async function runCommand(opts: Record<string, unknown>): Promise<void> {
   await new Engine(config).run();
 }
 
+// The control-plane binds localhost by default; a non-local bind exposes it to the network, so
+// warn explicitly. It still requires the bearer token, but this is the opt-in the user should see.
+function warnNonLocalBind(host: unknown): void {
+  if (typeof host === "string" && host && !isLocalHost(host)) {
+    process.stderr.write(
+      `Warning: binding ${host} exposes the control-plane beyond localhost. It stays token-gated,\n` +
+        "         but only do this on a trusted network and keep the token secret.\n",
+    );
+  }
+}
+
 async function serveCommand(opts: Record<string, unknown>): Promise<void> {
+  warnNonLocalBind(opts.host);
   const startServer = await loadStartServer();
   const handle = await startServer({
     port: opts.port as number | undefined,
@@ -248,6 +267,7 @@ async function serveCommand(opts: Record<string, unknown>): Promise<void> {
 }
 
 async function guiCommand(opts: Record<string, unknown>): Promise<void> {
+  warnNonLocalBind(opts.host);
   const startServer = await loadStartServer();
   const handle = await startServer({
     port: opts.port as number | undefined,

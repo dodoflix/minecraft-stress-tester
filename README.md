@@ -19,11 +19,19 @@ processes and works against real servers.
 ## Quickstart
 
 ```bash
+# Run without installing (published as `minecraft-stress-tester`, bin `mcst`):
+npx minecraft-stress-tester --host 127.0.0.1 --count 100 --i-am-authorized
+
+# Or from a clone:
 git clone https://github.com/dodoflix/minecraft-stress-tester.git
-cd minecraft-stress-tester
-npm install
-npm start -- --config examples/local.yaml      # or: --host 127.0.0.1 --count 100 --i-am-authorized
+cd minecraft-stress-tester && npm install
+npm start -- --config examples/local.yaml
+
+# Or the web UI in a container (serve/gui). Bind 0.0.0.0 to reach it from the host:
+docker run --rm -p 8080:8080 ghcr.io/dodoflix/minecraft-stress-tester gui --host 0.0.0.0
 ```
+
+See [docs/install.md](docs/install.md) for npm, npx, and container details.
 
 ## Commands
 
@@ -38,7 +46,7 @@ npm start -- --config examples/local.yaml      # or: --host 127.0.0.1 --count 10
 
 ## Docs
 
-- [Usage & CLI](docs/usage.md) · [Metrics](docs/metrics.md) · [Architecture](docs/architecture.md) · [Roadmap](docs/roadmap.md)
+- [Install & distribution](docs/install.md) · [Usage & CLI](docs/usage.md) · [Metrics](docs/metrics.md) · [Architecture](docs/architecture.md) · [Roadmap](docs/roadmap.md)
 - [Web control panel](docs/gui.md) · [Control-plane API](docs/api.md) · [Debug & Bot API](docs/debug.md) · [Programmable bots](docs/scripting.md) · [Behavior pipeline](docs/pipeline.md) · [Security scan](docs/security-scan.md)
 - [Contributing](CONTRIBUTING.md) · [Security & responsible use](SECURITY.md)
 
