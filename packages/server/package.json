@@ -1,7 +1,6 @@
 {
   "name": "@mcst/server",
   "version": "1.2.0",
-  "private": true,
   "description": "Control-plane API and web UI server for minecraft-stress-tester.",
   "type": "module",
   "license": "MIT",
@@ -29,5 +28,8 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.13.4",
     "@types/ws": "^8.18.1"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -1,7 +1,6 @@
 {
   "name": "@mcst/ui",
   "version": "1.2.0",
-  "private": true,
   "description": "Web UI for minecraft-stress-tester (React app; built assets served by @mcst/server).",
   "type": "module",
   "exports": {
@@ -36,5 +35,8 @@
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.3",
     "vite": "^8.3.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

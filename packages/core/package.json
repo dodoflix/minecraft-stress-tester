@@ -45,5 +45,8 @@
     "mineflayer-pathfinder": "^2.4.5",
     "socks": "^2.8.10",
     "zod": "^4.6.2"
+  },
+  "optionalDependencies": {
+    "@mcst/server": "^1.2.0"
   }
 }

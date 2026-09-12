@@ -6,7 +6,7 @@ Guidance for any AI agent working in this repo. Read this before making changes.
 
 `minecraft-stress-tester`: a detailed open-source load tester for Minecraft servers that measures
 server impact (TPS, connection funnel, latency, throughput, kicks). TypeScript, ESM, Node >= 24.
-The v1 CLI and the v2 platform are shipped; remaining work is in `docs/roadmap.md` ("What's next").
+The v1 CLI and the v2/v2.1 platform are shipped; any remaining ideas are in `docs/roadmap.md` ("Later").
 
 ## Quality gates (all enforced in CI; keep every one green)
 
