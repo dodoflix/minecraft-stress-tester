@@ -137,6 +137,8 @@ export {
   runUserScript,
   type SandboxOptions,
   type ScriptHostBot,
+  type ScriptRun,
+  startUserScript,
 } from "./script/sandbox/host.js";
 export {
   dispatchScriptCall,

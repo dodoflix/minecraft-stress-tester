@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "./components/ui/button.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs.tsx";
 import { ConfigEditor } from "./views/ConfigEditor.tsx";
+import { Console } from "./views/Console.tsx";
 import { Dashboard } from "./views/Dashboard.tsx";
 import { GraphEditor } from "./views/GraphEditor.tsx";
 import { History } from "./views/History.tsx";
@@ -49,6 +50,7 @@ export function App() {
           <TabsTrigger value="config">Config</TabsTrigger>
           <TabsTrigger value="scripts">Scripts</TabsTrigger>
           <TabsTrigger value="graph">Graph</TabsTrigger>
+          <TabsTrigger value="console">Console</TabsTrigger>
           <TabsTrigger value="history">History</TabsTrigger>
         </TabsList>
         <TabsContent value="dashboard">
@@ -62,6 +64,9 @@ export function App() {
         </TabsContent>
         <TabsContent value="graph">
           <GraphEditor />
+        </TabsContent>
+        <TabsContent value="console">
+          <Console />
         </TabsContent>
         <TabsContent value="history">
           <History />

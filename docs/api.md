@@ -63,3 +63,16 @@ curl -s -XPOST localhost:8080/api/runs -H "Authorization: Bearer $TOKEN" \
 # Stream its metrics
 curl -N localhost:8080/api/runs/<id>/stream?token=$TOKEN
 ```
+
+## WebSocket channel (bidirectional)
+
+SSE remains the one-way metrics stream; a WebSocket at `ws://<host>:<port>/ws` carries the
+**remote debug console** and **live script control**. It is gated by the same token (pass it as
+`?token=<token>` or an `Authorization: Bearer` header) on the same localhost-by-default bind, and
+versioned: the server's first frame is `{ "type": "hello", "protocol": 1, "version": "..." }`.
+
+Client -> server messages: `attach` (`{ target: { host, port? }, authorized }`), `debug`
+(`{ line }`, runs one REPL command against the attached bot), `script.start`
+(`{ code, timeoutMs? }`, runs sandboxed user JS), `script.stop`, and `ping`. Server -> client:
+`hello`, `ack`, `result` (debug output), `event` (bot chat/kicked/end), `log` (script output),
+`script.done`, `pong`, and `error`. Each message may carry an `id` the server echoes back.

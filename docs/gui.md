@@ -24,6 +24,8 @@ and carries the API token, so no login is needed. It binds `127.0.0.1` by defaul
   a sandboxed isolate against a target, streaming its logs.
 - **Graph**: a visual node editor (event/action nodes) that compiles to the same blueprint model and
   ejects to code; graphs and blueprints round-trip.
+- **Console**: a remote debug console over the WebSocket channel: attach a bot to a target and drive
+  it live (the same commands as `mcst debug`), plus live script control.
 
 ## Implementation
 

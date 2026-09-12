@@ -53,7 +53,7 @@ workspaces; the 95% coverage gate is global in `vitest.config.ts`.
   `slp.ts` (preflight), `accounts.ts`.
 - `@mcst/server` (`packages/server/src/`): control-plane API, pure `router.ts`/`runManager.ts`/
   `configStore.ts`/`history.ts` (tested) + `httpServer.ts` (socket + SSE, serves the built `@mcst/ui`
-  assets + a token script under a strict CSP, excluded). Imports core via `minecraft-stress-tester`.
+  assets + a token script under a strict CSP, excluded) + `wsServer.ts` (bidirectional WebSocket at /ws for the debug console + live script control, excluded; pure `wsProtocol.ts`/`wsRouter.ts` tested). Imports core via `minecraft-stress-tester`.
 - `scan/`: defensive scanner (fingerprint, curated version + plugin advisories, osv.dev CVE matching,
   plugin detection from channels/commands/brand + best-effort version probe, all confidence-labeled;
   pure + tested; `recon.ts` excluded). Non-destructive: read-only status ping, tab-complete, /version.

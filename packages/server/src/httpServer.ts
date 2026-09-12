@@ -16,6 +16,7 @@ import {
 import { ConfigStore } from "./configStore.js";
 import { type ApiContext, type ApiRequest, handleRequest } from "./router.js";
 import { RunManager } from "./runManager.js";
+import { attachWsServer } from "./wsServer.js";
 
 export type { ServeHandle, ServeOptions };
 
@@ -155,6 +156,9 @@ export const startServer: StartServer = (opts: ServeOptions = {}): Promise<Serve
     res.writeHead(405, { "content-type": "application/json" });
     res.end(JSON.stringify({ error: "method not allowed" }));
   });
+
+  // Bidirectional channel (remote debug console + live script control) on the same bind + token.
+  attachWsServer(server, { token, version: ctx.version });
 
   return new Promise((resolve) => {
     server.listen(port, host, () => {

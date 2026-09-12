@@ -35,6 +35,7 @@ export default defineConfig({
         "packages/core/src/script/sandbox/host.ts",
         "packages/core/src/script/sandbox/worker.ts",
         "packages/server/src/httpServer.ts",
+        "packages/server/src/wsServer.ts",
       ],
       thresholds: {
         lines: 95,

@@ -61,12 +61,20 @@ function cloneable(args: unknown[]): unknown[] {
  * authorized, localhost-by-default posture. A `node:vm` escape inside the worker would reach the
  * worker realm, so do not expose script execution to untrusted networks.
  */
-export function runUserScript(
+export interface ScriptRun {
+  /** Resolves/rejects when the script finishes, errors, or times out. */
+  done: Promise<void>;
+  /** Terminate the isolate now (rejects `done`). Safe to call more than once. */
+  stop: () => void;
+}
+
+/** Start a sandboxed script and get a handle to await or stop it. */
+export function startUserScript(
   bot: ScriptHostBot,
   code: string,
   opts: SandboxOptions = {},
   mode: "run" | "check" = "run",
-): Promise<void> {
+): ScriptRun {
   const timeoutMs = opts.timeoutMs ?? 30_000;
   const memoryMb = opts.memoryMb ?? 128;
   const worker = new Worker(new URL("./worker.js", import.meta.url), {
@@ -75,10 +83,11 @@ export function runUserScript(
     env: {}, // deny the isolate the host's environment variables
   });
 
-  return new Promise<void>((resolve, reject) => {
+  let finish!: (err?: Error) => void;
+  const done = new Promise<void>((resolve, reject) => {
     let settled = false;
     const listeners: Array<[ScriptBotEvent, (...a: unknown[]) => void]> = [];
-    const finish = (err?: Error) => {
+    finish = (err?: Error) => {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
@@ -122,4 +131,15 @@ export function runUserScript(
       finish(exitCode === 0 ? undefined : new Error(`isolate exited with code ${exitCode}`)),
     );
   });
+
+  return { done, stop: () => finish(new Error("script stopped")) };
+}
+
+export function runUserScript(
+  bot: ScriptHostBot,
+  code: string,
+  opts: SandboxOptions = {},
+  mode: "run" | "check" = "run",
+): Promise<void> {
+  return startUserScript(bot, code, opts, mode).done;
 }
