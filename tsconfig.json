@@ -7,5 +7,5 @@
       "@mcst/server": ["./packages/server/src/index.ts"]
     }
   },
-  "include": ["packages/*/src/**/*.ts"]
+  "include": ["packages/core/src/**/*.ts", "packages/server/src/**/*.ts"]
 }

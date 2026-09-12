@@ -1,8 +1,9 @@
 import { readFileSync } from "node:fs";
 import { extname } from "node:path";
 import { load as loadYaml } from "js-yaml";
+import type { z } from "zod";
 import { applyScenario, type ScenarioName } from "./scenarios.js";
-import { type Config, configSchema } from "./schema.js";
+import { type Config, configSchema, SCENARIOS } from "./schema.js";
 
 /** Raw CLI overrides that map onto the config before validation. */
 export interface CliOverrides {
@@ -44,6 +45,28 @@ function deepMerge(a: Record<string, unknown>, b: Record<string, unknown>): Reco
     out[k] = isPlainObject(v) && isPlainObject(prev) ? deepMerge(prev, v) : v;
   }
   return out;
+}
+
+export interface BuildResult {
+  success: boolean;
+  config?: Config;
+  issues?: z.core.$ZodIssue[];
+}
+
+/**
+ * Build a run Config from a raw object (an API body or a form): apply a named scenario overlay as
+ * the lowest layer (the body overrides it), consume the `scenario` key, then validate. Same layering
+ * as the CLI, so the API/UI can never drift from it. Pure and unit-tested.
+ */
+export function buildRunConfig(raw: unknown): BuildResult {
+  const obj = isPlainObject(raw) ? raw : {};
+  const { scenario, ...rest } = obj as { scenario?: unknown } & Record<string, unknown>;
+  const valid = typeof scenario === "string" && (SCENARIOS as readonly string[]).includes(scenario);
+  const merged = valid ? deepMerge(applyScenario(scenario as ScenarioName), rest) : rest;
+  const parsed = configSchema.safeParse(merged);
+  return parsed.success
+    ? { success: true, config: parsed.data }
+    : { success: false, issues: parsed.error.issues };
 }
 
 export function loadConfig(filePath: string | undefined, cli: CliOverrides = {}): Config {

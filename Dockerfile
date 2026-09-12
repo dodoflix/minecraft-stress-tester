@@ -9,6 +9,7 @@ RUN npm ci
 COPY tsconfig.base.json tsconfig.json ./
 COPY packages/core ./packages/core
 COPY packages/server ./packages/server
+COPY packages/ui ./packages/ui
 RUN npm run build
 
 # Runtime
@@ -22,5 +23,6 @@ COPY packages/ui/package.json ./packages/ui/
 RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build /app/packages/core/dist ./packages/core/dist
 COPY --from=build /app/packages/server/dist ./packages/server/dist
+COPY --from=build /app/packages/ui/dist ./packages/ui/dist
 # Reports and the Microsoft token cache live under /app; mount volumes to persist.
 ENTRYPOINT ["node", "packages/core/dist/cli.js"]

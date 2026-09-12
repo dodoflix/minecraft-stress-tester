@@ -36,7 +36,13 @@ mcst serve --port 9000 --token my-fixed-token
 | DELETE | `/api/configs/:name` | Delete a config file. |
 | POST | `/api/configs/validate` | Validate config text without saving. Body: `{ content, ext? }`. |
 | GET | `/api/history` | List past run reports (newest first). |
-| GET | `/api/history/:file` | Read one full run report. |
+| GET | `/api/history/:file` | Read one full run report (JSON). |
+| GET | `/api/history/:file/html` | The report rendered as HTML (the same renderer the CLI writes). |
+| GET | `/api/schema` | The config JSON Schema plus a flat field descriptor list, both derived from the zod schema. Drives the web UI's generated config form. |
+
+`POST /api/runs` also accepts a `scenario` field (`join-flood`, `sustained-load`, `chat-flood`,
+`chunk-thrash`); it is applied as a preset overlay under the rest of the body, exactly as the CLI's
+`--scenario` does.
 
 Config file names are restricted to a single safe segment ending in `.yaml`, `.yml`, or
 `.json`; report file names to the `mcst-*.json` reports the engine writes.
