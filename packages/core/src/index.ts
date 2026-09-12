@@ -90,6 +90,16 @@ export {
   type Trigger,
 } from "./script/blueprint.js";
 export { compileToCode } from "./script/compile.js";
+export {
+  type ActionType,
+  blueprintToGraph,
+  type GraphEdge,
+  type GraphNode,
+  type GraphResult,
+  graphToBlueprint,
+  type NodeKind,
+  type ScriptGraph,
+} from "./script/graph.js";
 export { runActions, runBlueprint, type ScriptableBot, type Sleep } from "./script/run.js";
 export {
   checkUserScript,

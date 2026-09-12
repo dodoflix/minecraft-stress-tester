@@ -63,7 +63,12 @@ bounds CPU/memory. It is built for the local, authorized, localhost-by-default p
 `vm` escape inside the worker would reach the worker's own realm, so do not expose script execution
 to untrusted networks.
 
-## What is deferred
+## Visual node editor
 
-The visual node-graph editor is not shipped yet; it will compile to the same blueprint model and Bot
-API. See the [roadmap](roadmap.md).
+The web UI's **Graph** tab is a node editor (React Flow): drop event nodes (`spawn`/`chat`/`death`)
+and action nodes (`chat`/`command`/`look`/`goto`/`wait`/`stop`), wire an event to a chain of actions,
+and edit each node's fields. It is a code generator over the one blueprint model, not a second
+engine: "Compile + eject" turns the graph into a blueprint and the same ejected TypeScript as
+`mcst script eject`. Graphs import/export as JSON, and a blueprint round-trips into the graph
+("Blueprint to graph"). Backed by `POST /api/graph/compile` and `POST /api/graph/import` (both pure;
+see [api.md](api.md)).

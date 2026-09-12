@@ -20,6 +20,10 @@ and carries the API token, so no login is needed. It binds `127.0.0.1` by defaul
   sync, with live validation against the config schema. Save, load, or delete named configs.
 - **History**: browse past run reports; each opens the full HTML report (the same renderer the CLI
   writes to disk) in a sandboxed frame.
+- **Scripts**: author user JavaScript in a Monaco editor (import/export), validate it, and run it in
+  a sandboxed isolate against a target, streaming its logs.
+- **Graph**: a visual node editor (event/action nodes) that compiles to the same blueprint model and
+  ejects to code; graphs and blueprints round-trip.
 
 ## Implementation
 
