@@ -18,9 +18,7 @@ ramp:
 reconnect:
   enabled: false        # let kicked bots stay down; measure the flood, not recovery
 
-behaviors:
-  antiAfk:
-    enabled: false
+pipeline: []           # connection flood only; no in-world behaviors
 
 report:
   mode: console

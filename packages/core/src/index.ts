@@ -20,19 +20,34 @@ export {
 } from "./config/formSchema.js";
 export { type BuildResult, buildRunConfig, type CliOverrides, loadConfig } from "./config/load.js";
 export {
+  type AntiAfkOptions,
+  type AuthOptions,
   accountsSchema,
-  behaviorsSchema,
+  antiAfkOptions,
+  authOptions,
+  type BlueprintStageOptions,
+  blueprintStageOptions,
+  type ChatSpamOptions,
+  type CommandsOptions,
   type Config,
+  chatSpamOptions,
+  commandsOptions,
   configSchema,
+  type MovementOptions,
+  movementOptions,
+  type PipelineStage,
+  pipelineSchema,
   proxiesSchema,
   rampSchema,
   reconnectSchema,
   SCENARIOS,
+  STAGE_KINDS,
+  type StageKind,
+  stageSchema,
   type Target,
   targetSchema,
 } from "./config/schema.js";
 export {
-  type Behavior,
   type BotDriver,
   type BotEvent,
   type BotEventMap,
@@ -63,6 +78,14 @@ export {
   parseProxy,
 } from "./net/proxy.js";
 export { type PreflightResult, parsePing, preflight } from "./net/slp.js";
+export {
+  type FailurePolicy,
+  type PipelineHandle,
+  type ResolvedStage,
+  runPipeline,
+} from "./pipeline/runner.js";
+export type { Stage, StageContext, StageHandle, StageResult, StageStatus } from "./pipeline/stage.js";
+export { buildPipeline, stageFactory } from "./pipeline/stdlib.js";
 export {
   type RunReport,
   toCsv,

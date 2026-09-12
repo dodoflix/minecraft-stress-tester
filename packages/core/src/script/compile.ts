@@ -15,6 +15,10 @@ function actionLine(a: Action): string {
       return `await new Promise((r) => setTimeout(r, ${a.ms}));`;
     case "stop":
       return "bot.stop();";
+    case "succeed":
+      return "return; // succeeded";
+    case "fail":
+      return `throw new Error(${JSON.stringify(a.reason ?? "failed")});`;
   }
 }
 

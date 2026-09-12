@@ -64,8 +64,10 @@ workspaces; the 95% coverage gate is global in `vitest.config.ts`.
 - `@mcst/ui` (`packages/ui/`): the React + Vite + Tailwind + shadcn SPA (dashboard, schema-driven
   config editor + Monaco YAML, history). Browser I/O, excluded from coverage; the form descriptor it
   renders is the pure, tested `config/formSchema.ts` in core, so the UI cannot drift from the CLI.
-- `behaviors/`: built-in `auth`/`movement`/`antiAfk`/`chatSpam`/`commands`. A roadmap workstream
-  removes this system in favor of composable script pipelines.
+- `pipeline/`: the per-bot behavior pipeline that replaced the old `behaviors.*` toggles. `stage.ts`
+  (Stage + completion signal succeeded/failed/done), `runner.ts` (ordered, gated, retry/timeout
+  execution; pure + tested), `stdlib.ts` (the standard library: auth/commands/chatSpam/antiAfk/
+  movement + a blueprint stage). Config is a per-bot ordered `pipeline` list; each stage gates the next.
 
 ## Invariants (do not regress)
 

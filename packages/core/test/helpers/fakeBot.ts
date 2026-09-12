@@ -7,7 +7,7 @@ import {
 } from "../../src/drivers/driver.js";
 
 /**
- * In-memory BotDriver for testing the engine/collector/behaviors against the driver
+ * In-memory BotDriver for testing the engine/collector/pipeline stages against the driver
  * *contract* (events + chat), with no network. Tests drive it by emitting lifecycle
  * events and asserting on observed behavior (chat calls, disconnects), so they verify
  * logic, not the LightBot implementation.

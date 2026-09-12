@@ -14,9 +14,8 @@ ramp:
   rampUpSeconds: 20     # climb to full rate over 20s instead of all at once
   holdSeconds: 600
 
-behaviors:
-  antiAfk:
-    enabled: true       # keep bots from being AFK-kicked over the long hold
+pipeline:
+  - use: antiAfk         # keep bots from being AFK-kicked over the long hold
 
 report:
   mode: tui             # full-screen live dashboard

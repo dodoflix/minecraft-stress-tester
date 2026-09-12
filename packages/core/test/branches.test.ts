@@ -2,15 +2,15 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { chatSpam } from "../src/behaviors/chatSpam.js";
 import { loadConfig } from "../src/config/load.js";
-import { configSchema } from "../src/config/schema.js";
+import { configSchema, stageSchema } from "../src/config/schema.js";
 import { buildSpawnSchedule, runDurationMs } from "../src/engine/ramp.js";
 import { Registry } from "../src/engine/registry.js";
 import type { MetricsSnapshot } from "../src/metrics/collector.js";
 import { MetricsCollector } from "../src/metrics/collector.js";
 import { Histogram } from "../src/metrics/histogram.js";
 import { parsePing } from "../src/net/slp.js";
+import { stageFactory } from "../src/pipeline/stdlib.js";
 import { formatLine } from "../src/report/console.js";
 import { FakeBot } from "./helpers/fakeBot.js";
 
@@ -59,11 +59,13 @@ describe("parsePing branch coverage", () => {
   });
 });
 
-describe("chatSpam start guard", () => {
+describe("chatSpam stage start guard", () => {
   it("a second spawn does not double the interval", () => {
     vi.useFakeTimers();
     const bot = new FakeBot();
-    chatSpam({ enabled: true, message: "x", delayMs: 1000 })(bot);
+    stageFactory(stageSchema.parse({ use: "chatSpam", with: { message: "x", delayMs: 1000 } }))(bot, {
+      spawned: () => false,
+    });
     bot.emit("spawned");
     bot.emit("spawned"); // guard: already running
     vi.advanceTimersByTime(3000);
@@ -158,12 +160,17 @@ describe("registry replace on a missing id", () => {
   });
 });
 
-describe("chatSpam stop with no running interval", () => {
-  it("end before spawn is harmless", () => {
+describe("chatSpam stage stop with no running interval", () => {
+  it("stop before spawn is harmless", () => {
     vi.useFakeTimers();
     const bot = new FakeBot();
-    chatSpam({ enabled: true, message: "x", delayMs: 500 })(bot);
-    expect(() => bot.emit("end", "gone")).not.toThrow(); // stop() with null timer
+    const h = stageFactory(stageSchema.parse({ use: "chatSpam", with: { message: "x", delayMs: 500 } }))(
+      bot,
+      {
+        spawned: () => false,
+      },
+    );
+    expect(() => h.stop()).not.toThrow(); // stop() with null timer
     vi.advanceTimersByTime(2000);
     expect(bot.chats).toHaveLength(0);
   });

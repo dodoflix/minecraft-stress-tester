@@ -1,12 +1,13 @@
-import { buildBehaviors } from "../behaviors/index.js";
 import type { Config } from "../config/schema.js";
-import type { Behavior, BotDriver, BotSpec } from "../drivers/driver.js";
+import type { BotDriver, BotSpec } from "../drivers/driver.js";
 import { FullBot } from "../drivers/full.js";
 import { LightBot } from "../drivers/light.js";
 import { MetricsCollector, type MetricsSnapshot } from "../metrics/collector.js";
 import { AccountManager } from "../net/accounts.js";
 import { ProxyPool } from "../net/proxy.js";
 import { type PreflightResult, preflight } from "../net/slp.js";
+import { type ResolvedStage, runPipeline } from "../pipeline/runner.js";
+import { buildPipeline } from "../pipeline/stdlib.js";
 import { startConsoleReporter } from "../report/console.js";
 import type { RunReport } from "../report/export.js";
 import { formatSummary, writeReports } from "../report/summary.js";
@@ -33,7 +34,7 @@ export class Engine {
   private readonly timers = new Set<NodeJS.Timeout>();
   private readonly proxies: ProxyPool;
   private readonly accounts: AccountManager;
-  private behaviors: Behavior[] = [];
+  private pipeline: ResolvedStage[] = [];
   private factory: DriverFactory;
   private version: string | false = false;
   private preflightResult: PreflightResult | null = null;
@@ -95,7 +96,7 @@ export class Engine {
     // ponytail: auto-negotiate costs one extra status ping per bot - pin
     // `target.version` to skip it at high bot counts.
     this.version = this.config.target.version ?? false;
-    this.behaviors = buildBehaviors(this.config);
+    this.pipeline = buildPipeline(this.config);
 
     const schedule = buildSpawnSchedule(this.config.ramp);
     const total = runDurationMs(this.config.ramp, schedule);
@@ -162,7 +163,7 @@ export class Engine {
   private launch(spec: BotSpec, fresh: boolean): void {
     const bot = this.factory(spec);
     this.collector.track(bot);
-    for (const behavior of this.behaviors) behavior(bot);
+    runPipeline(bot, this.pipeline);
     if (fresh) this.registry.add(bot, spec);
     else this.registry.replace(spec.id, bot);
 

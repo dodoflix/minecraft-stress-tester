@@ -14,6 +14,9 @@ export const actionSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal("goto"), x: z.number(), y: z.number(), z: z.number() }),
   z.object({ type: z.literal("wait"), ms: z.number().int().min(0).max(600000) }),
   z.object({ type: z.literal("stop") }),
+  // Completion signals: end the sequence and report an outcome the pipeline runner can gate on.
+  z.object({ type: z.literal("succeed") }),
+  z.object({ type: z.literal("fail"), reason: z.string().optional() }),
 ]);
 
 export const TRIGGERS = ["spawn", "chat", "death"] as const;

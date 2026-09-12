@@ -30,26 +30,30 @@ reconnect:
   baseBackoffMs: 1000
   maxBackoffMs: 30000
 
-behaviors:
-  auth: # register + login on join (servers with an AuthMe/nLogin-style plugin, offline mode)
-    enabled: true
-    password: "stress-test-pw"
-    registerCommand: "/register {password} {password}" # sent first if the account is new
-    loginCommand: "/login {password}" # then this to authenticate
-  commands: # one-shot commands once spawned into the world (post-auth on limbo/transfer networks)
-    enabled: true
-    list: ["/survival"] # e.g. leave the hub for the survival server after logging in
-    delayMs: 2000
-  movement: # random walk (full driver only): loads chunks, defeats no-movement kicks
-    enabled: true
-    intervalMs: 2000
-  antiAfk: # small look/jump so idle bots aren't kicked for inactivity
-    enabled: true
-    intervalMs: 3000
-  chatSpam: # periodic chat (keep it benign and slow to avoid mutes)
-    enabled: true
-    message: "load test in progress"
-    delayMs: 8000
+# Ordered per-bot behavior pipeline: each stage gates the next on success. auth runs first, and
+# only once it succeeds do the later stages start (chat spam after login, not before).
+pipeline:
+  - use: auth # register + login on join (AuthMe/nLogin-style plugin, offline mode)
+    with:
+      password: "stress-test-pw"
+      registerCommand: "/register {password} {password}" # sent first if the account is new
+      loginCommand: "/login {password}" # then this to authenticate
+    onFailure: retry # if the login send is slow, retry before giving up
+    retries: 2
+  - use: commands # one-shot commands once spawned (post-auth on limbo/transfer networks)
+    with:
+      list: ["/survival"] # e.g. leave the hub for the survival server after logging in
+      delayMs: 2000
+  - use: movement # random walk (full driver only): loads chunks, defeats no-movement kicks
+    with:
+      intervalMs: 2000
+  - use: antiAfk # small look so idle bots aren't kicked for inactivity
+    with:
+      intervalMs: 3000
+  - use: chatSpam # periodic chat (keep it benign and slow to avoid mutes)
+    with:
+      message: "load test in progress"
+      delayMs: 8000
 
 accounts:
   mode: offline # offline usernames (register/login above handles auth). Use "microsoft" for online-mode.

@@ -9,7 +9,7 @@ describe("applyScenario", () => {
   it("returns the expected overlay per name", () => {
     expect(applyScenario("join-flood")).toMatchObject({ driver: "light", reconnect: { enabled: false } });
     expect(applyScenario("chunk-thrash")).toMatchObject({ driver: "full", viewDistance: 8 });
-    expect(applyScenario("chat-flood")).toMatchObject({ behaviors: { chatSpam: { enabled: true } } });
+    expect(applyScenario("chat-flood")).toMatchObject({ pipeline: [{ use: "chatSpam" }] });
   });
 });
 
@@ -38,7 +38,7 @@ describe("loadConfig with scenarios", () => {
     const p = file(JSON.stringify({ scenario: "chunk-thrash", ramp: { count: 3 } }));
     const c = loadConfig(p, { host: "h", authorized: true });
     expect(c.driver).toBe("full"); // from scenario
-    expect(c.behaviors.movement.enabled).toBe(true); // from scenario
+    expect(c.pipeline.some((s) => s.use === "movement")).toBe(true); // from scenario
     expect(c.ramp.count).toBe(3); // file overrides scenario's count
     expect(c.ramp.holdSeconds).toBe(120); // scenario value preserved by deep merge
   });

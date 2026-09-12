@@ -44,8 +44,8 @@ describe("configFormFields", () => {
     expect(byPath("proxies.list")?.default).toEqual([]);
   });
 
-  it("keeps top-level section as the group through deep nesting", () => {
-    expect(byPath("behaviors.antiAfk.enabled")).toMatchObject({ kind: "boolean", group: "behaviors" });
+  it("uses the top-level section as the group", () => {
+    expect(byPath("reconnect.maxRetries")).toMatchObject({ kind: "integer", group: "reconnect" });
   });
 
   it("humanizes labels and never leaks the sentinel max", () => {
