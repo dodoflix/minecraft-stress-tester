@@ -1,11 +1,11 @@
 import type { Fingerprint } from "./fingerprint.js";
-import { type ScanFinding, SEVERITY_ORDER } from "./types.js";
+import { type PluginDetection, type ScanFinding, SEVERITY_ORDER } from "./types.js";
 
 export interface ScanReport {
   target: { host: string; port: number };
   scannedAt: string;
   fingerprint: Fingerprint;
-  plugins: string[];
+  plugins: PluginDetection[];
   findings: ScanFinding[];
 }
 
@@ -21,7 +21,7 @@ export function assembleFindings(...groups: ScanFinding[][]): ScanFinding[] {
 export function buildScanReport(input: {
   target: { host: string; port: number };
   fingerprint: Fingerprint;
-  plugins: string[];
+  plugins: PluginDetection[];
   findings: ScanFinding[];
   scannedAt?: string;
 }): ScanReport {
@@ -37,10 +37,13 @@ export function buildScanReport(input: {
 /** Human-readable console report. Pure. */
 export function formatScanReport(report: ScanReport): string {
   const fp = report.fingerprint;
+  const plugins = report.plugins.length
+    ? report.plugins.map((p) => `${p.name}${p.version ? `@${p.version}` : ""} (${p.confidence})`).join(", ")
+    : "none detected";
   const lines = [
     `=== Security scan: ${report.target.host}:${report.target.port} ===`,
     `software: ${fp.software}   version: ${fp.version ?? "unknown"}   protocol: ${fp.protocol}`,
-    `plugins:  ${report.plugins.length ? report.plugins.join(", ") : "none detected"}`,
+    `plugins:  ${plugins}`,
     "",
   ];
   if (!report.findings.length) {
@@ -49,9 +52,10 @@ export function formatScanReport(report: ScanReport): string {
   }
   lines.push(`${report.findings.length} finding(s):`);
   for (const f of report.findings) {
+    const conf = f.confidence ? `, ${f.confidence} confidence` : "";
     lines.push(
       "",
-      `[${f.severity.toUpperCase()}] ${f.title} (${f.id}, ${f.source})`,
+      `[${f.severity.toUpperCase()}] ${f.title} (${f.id}, ${f.source}${conf})`,
       `  ${f.detail}`,
       `  fix: ${f.remediation}`,
     );

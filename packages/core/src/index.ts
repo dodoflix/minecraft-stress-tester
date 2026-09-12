@@ -96,9 +96,17 @@ export {
 } from "./report/export.js";
 export { formatSummary, writeReports } from "./report/summary.js";
 export { AuthorizationError, assertAuthorized } from "./safety/authorization.js";
+export { matchKnownIssues, matchPluginAdvisories, type PluginAdvisory, queryOsv } from "./scan/advisories.js";
+export {
+  inferFromChannels,
+  inferFromCommands,
+  mergeDetections,
+  parsePluginVersions,
+  pluginMavenCoordinate,
+} from "./scan/plugins.js";
 export { type ScanDeps, type ScanOptions, scan } from "./scan/scanner.js";
 export { assembleFindings, buildScanReport, formatScanReport, type ScanReport } from "./scan/scanReport.js";
-export type { ScanFinding } from "./scan/types.js";
+export type { Confidence, PluginDetection, ScanFinding, Severity } from "./scan/types.js";
 export {
   type Action,
   actionSchema,
