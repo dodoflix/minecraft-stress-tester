@@ -20,6 +20,7 @@
     "build": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@mcst/ui": "^1.2.0",
     "js-yaml": "^5.4.1",
     "minecraft-stress-tester": "^1.2.0"
   },

@@ -23,7 +23,7 @@
     "test:unit": "vitest run --exclude '**/integration.test.ts'",
     "test:integration": "vitest run packages/core/test/integration.test.ts --testTimeout=200000",
     "test:coverage": "vitest run --coverage --exclude '**/integration.test.ts'",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p packages/ui/tsconfig.json --noEmit",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",

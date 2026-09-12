@@ -17,7 +17,9 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
-      include: ["packages/*/src/**/*.ts"],
+      // core + server hold the pure logic under the 95% gate. @mcst/ui is a browser app (Vite/React),
+      // I/O by nature; the logic it must not drift from (the config form descriptor) lives in core.
+      include: ["packages/core/src/**/*.ts", "packages/server/src/**/*.ts"],
       // Thin I/O shims and networked drivers exercised by the integration test; their
       // pure logic (config loader, dashboard, shard math) is covered directly.
       exclude: [

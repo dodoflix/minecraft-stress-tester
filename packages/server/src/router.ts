@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { configSchema } from "minecraft-stress-tester";
+import { buildRunConfig, configFormFields, configJsonSchema, toHtml } from "minecraft-stress-tester";
 import type { ConfigStore } from "./configStore.js";
 import { validateConfig } from "./configStore.js";
 import { listHistory, readHistory } from "./history.js";
@@ -58,7 +58,11 @@ export function handleRequest(req: ApiRequest, ctx: ApiContext): ApiResponse {
 
   if (resource === "runs") return runs(req, ctx, id, sub);
   if (resource === "configs") return configs(req, ctx, id);
-  if (resource === "history") return history(req, ctx, id);
+  if (resource === "history") return history(req, ctx, id, sub);
+  // Schema descriptor for the UI's generated config form; derived from the one zod schema.
+  if (resource === "schema" && req.method === "GET") {
+    return json(200, { jsonSchema: configJsonSchema(), fields: configFormFields() });
+  }
   return json(404, { error: "not found" });
 }
 
@@ -66,14 +70,14 @@ function runs(req: ApiRequest, ctx: ApiContext, id?: string, sub?: string): ApiR
   if (!id) {
     if (req.method === "GET") return json(200, { runs: ctx.runs.list() });
     if (req.method === "POST") {
-      const parsed = configSchema.safeParse(req.body ?? {});
-      if (!parsed.success) {
-        return json(400, { error: "invalid config", issues: parsed.error.issues });
+      const parsed = buildRunConfig(req.body ?? {});
+      if (!parsed.success || !parsed.config) {
+        return json(400, { error: "invalid config", issues: parsed.issues });
       }
-      if (parsed.data.authorized !== true) {
+      if (parsed.config.authorized !== true) {
         return json(400, { error: "authorization not confirmed: set authorized: true" });
       }
-      return json(201, ctx.runs.start(parsed.data));
+      return json(201, ctx.runs.start(parsed.config));
     }
     return json(405, { error: "method not allowed" });
   }
@@ -118,9 +122,12 @@ function configs(req: ApiRequest, ctx: ApiContext, name?: string): ApiResponse {
   return json(405, { error: "method not allowed" });
 }
 
-function history(req: ApiRequest, ctx: ApiContext, file?: string): ApiResponse {
+function history(req: ApiRequest, ctx: ApiContext, file?: string, sub?: string): ApiResponse {
   if (req.method !== "GET") return json(405, { error: "method not allowed" });
   if (!file) return json(200, { history: listHistory(ctx.reportsDir) });
   const report = readHistory(ctx.reportsDir, file);
-  return report ? json(200, report) : json(404, { error: "report not found" });
+  if (!report) return json(404, { error: "report not found" });
+  // The one HTML report renderer, reused for the UI's history view (shown in a sandboxed frame).
+  if (sub === "html") return json(200, { html: toHtml(report) });
+  return json(200, report);
 }

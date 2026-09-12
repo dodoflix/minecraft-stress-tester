@@ -13,15 +13,18 @@ and carries the API token, so no login is needed. It binds `127.0.0.1` by defaul
 
 ## What you can do
 
-- **Runs**: fill in target/bots/driver/hold, confirm authorization, and start a run. The runs
-  table updates live; a running run streams metrics (active, spawned, TPS, connect p95, packet
-  rate, kicks) over SSE, with a stop button.
-- **Configs**: list saved configs, load one into the editor, validate against the schema, save,
-  or delete.
-- **History**: browse past run reports and view the full JSON.
+- **Dashboard**: fill in target / bots / driver / scenario, confirm authorization, and start a
+  run. The runs list updates live; selecting a running run streams metrics (attempted, connected,
+  spawned, active, TPS, packet rate, KiB/s, kicks) over SSE, with a stop button.
+- **Config**: edit a config as a schema-generated form **or** as YAML in a Monaco editor, kept in
+  sync, with live validation against the config schema. Save, load, or delete named configs.
+- **History**: browse past run reports; each opens the full HTML report (the same renderer the CLI
+  writes to disk) in a sandboxed frame.
 
 ## Implementation
 
-The panel is a single self-contained page (no build step, no external CDNs) that speaks the same
-REST + SSE endpoints as the CLI. It is intentionally lean; a richer React/shadcn build can
-replace the page later without changing the API it talks to.
+The panel is a React + Vite + Tailwind + shadcn/ui single-page app (`@mcst/ui`), built to static
+assets that `@mcst/server` serves under a strict CSP with no external CDNs (Monaco and its worker
+are bundled locally). It speaks the same REST + SSE endpoints as the CLI. The config form is
+generated from the zod schema (`GET /api/schema`), so it never drifts from the CLI; the history
+view reuses the one HTML report renderer (`GET /api/history/:file/html`).

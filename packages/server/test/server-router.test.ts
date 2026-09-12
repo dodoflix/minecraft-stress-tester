@@ -164,5 +164,33 @@ describe("handleRequest", () => {
       expect(handleRequest(req("GET", "/api/history/mcst-missing.json"), ctx).status).toBe(404);
       expect(handleRequest(req("POST", "/api/history"), ctx).status).toBe(405);
     });
+
+    it("renders a report to HTML via the shared renderer, 404s a missing one", () => {
+      const name = "mcst-2026-09-11T01-00-00-000Z.json";
+      writeFileSync(
+        join(dir, name),
+        JSON.stringify({
+          finishedAt: "2026-09-11T01:00:00.000Z",
+          target: { host: "localhost", port: 25565 },
+          preflight: null,
+          metrics: snap(),
+        }),
+      );
+      const r = handleRequest(req("GET", `/api/history/${name}/html`), ctx);
+      expect(r.status).toBe(200);
+      expect((r.body as { html: string }).html).toContain("<");
+      expect(handleRequest(req("GET", "/api/history/mcst-missing.json/html"), ctx).status).toBe(404);
+    });
+  });
+
+  describe("schema", () => {
+    it("returns the JSON Schema and generated form fields, 404s a write", () => {
+      const r = handleRequest(req("GET", "/api/schema"), ctx);
+      expect(r.status).toBe(200);
+      const body = r.body as { jsonSchema: { type: string }; fields: { path: string }[] };
+      expect(body.jsonSchema.type).toBe("object");
+      expect(body.fields.some((f) => f.path === "target.host")).toBe(true);
+      expect(handleRequest(req("POST", "/api/schema"), ctx).status).toBe(404);
+    });
   });
 });

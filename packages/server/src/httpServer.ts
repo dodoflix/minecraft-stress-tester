@@ -1,13 +1,40 @@
 import { randomBytes } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
+import { dirname, extname, join, normalize } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { ServeHandle, ServeOptions, StartServer } from "minecraft-stress-tester";
 import { ConfigStore } from "./configStore.js";
 import { type ApiContext, type ApiRequest, handleRequest } from "./router.js";
 import { RunManager } from "./runManager.js";
-import { renderUiPage } from "./ui/page.js";
 
 export type { ServeHandle, ServeOptions };
+
+// No external CDNs; Monaco's worker is a same-origin file and its styles are injected inline.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'self' data:",
+  "worker-src 'self' blob:",
+  "connect-src 'self'",
+  "frame-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+].join("; ");
+
+const MIME: Record<string, string> = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "application/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".svg": "image/svg+xml",
+  ".map": "application/json; charset=utf-8",
+  ".ico": "image/x-icon",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+};
 
 function pkgVersion(): string {
   try {
@@ -16,6 +43,39 @@ function pkgVersion(): string {
   } catch {
     return "0.0.0";
   }
+}
+
+// The built @mcst/ui assets. Resolved via the package so it works installed or in the workspace;
+// null when the UI has not been built yet.
+function resolveUiDir(): string | null {
+  try {
+    const pkgPath = fileURLToPath(import.meta.resolve("@mcst/ui/package.json"));
+    const dist = join(dirname(pkgPath), "dist");
+    return existsSync(join(dist, "index.html")) ? dist : null;
+  } catch {
+    return null;
+  }
+}
+
+function serveStatic(res: ServerResponse, uiDir: string | null, pathname: string): void {
+  if (!uiDir) {
+    res.writeHead(200, { "content-type": "text/html; charset=utf-8", "content-security-policy": CSP });
+    res.end("<h1>UI not built</h1><p>Run <code>npm run build</code>, then reload this page.</p>");
+    return;
+  }
+  const rel = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
+  const filePath = normalize(join(uiDir, rel));
+  if (filePath !== uiDir && !filePath.startsWith(`${uiDir}/`)) {
+    res.writeHead(403).end();
+    return;
+  }
+  // Serve the file, or fall back to index.html so the SPA owns unknown routes.
+  const target = existsSync(filePath) && statSync(filePath).isFile() ? filePath : join(uiDir, "index.html");
+  res.writeHead(200, {
+    "content-type": MIME[extname(target)] ?? "application/octet-stream",
+    "content-security-policy": CSP,
+  });
+  res.end(readFileSync(target));
 }
 
 function tokenOf(req: IncomingMessage, query: URLSearchParams): string | undefined {
@@ -53,15 +113,30 @@ export const startServer: StartServer = (opts: ServeOptions = {}): Promise<Serve
     version: pkgVersion(),
   };
 
+  const uiDir = resolveUiDir();
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? "/", `http://${host}`);
-    if (req.method === "GET" && (url.pathname === "/" || url.pathname === "/index.html")) {
-      res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-      res.end(renderUiPage(token));
+    if (streamMetrics(req, res, url, ctx)) return;
+    if (url.pathname.startsWith("/api")) {
+      void serve(req, res, url, ctx);
       return;
     }
-    if (streamMetrics(req, res, url, ctx)) return;
-    void serve(req, res, url, ctx);
+    if (req.method === "GET") {
+      // The API token, injected same-origin so the page never needs an inline script.
+      if (url.pathname === "/__mcst.js") {
+        res.writeHead(200, {
+          "content-type": "application/javascript; charset=utf-8",
+          "content-security-policy": CSP,
+          "cache-control": "no-store",
+        });
+        res.end(`window.__MCST_TOKEN__=${JSON.stringify(token)};`);
+        return;
+      }
+      serveStatic(res, uiDir, url.pathname);
+      return;
+    }
+    res.writeHead(405, { "content-type": "application/json" });
+    res.end(JSON.stringify({ error: "method not allowed" }));
   });
 
   return new Promise((resolve) => {
