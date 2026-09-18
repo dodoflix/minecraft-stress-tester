@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@mcst/ui": "^1.2.0",
-    "js-yaml": "^5.4.1",
+    "js-yaml": "^5.4.2",
     "minecraft-stress-tester": "^1.2.0",
     "ws": "^8.21.3"
   },
