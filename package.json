@@ -30,12 +30,12 @@
     "prepare": "lefthook install || true"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.13",
+    "@biomejs/biome": "^2.5.15",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^24.13.4",
-    "@vitest/coverage-v8": "^5.0.0",
-    "lefthook": "^2.1.12",
-    "tsx": "^4.23.13",
+    "@types/node": "^26.6.5",
+    "@vitest/coverage-v8": "^5.0.5",
+    "lefthook": "^2.2.2",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   }
