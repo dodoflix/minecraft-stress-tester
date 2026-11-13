@@ -38,13 +38,13 @@
     "tps"
   ],
   "dependencies": {
-    "commander": "^15.0.0",
-    "js-yaml": "^5.4.1",
+    "commander": "^15.1.0",
+    "js-yaml": "^5.5.0",
     "minecraft-protocol": "^1.68.0",
     "mineflayer": "^4.39.0",
     "mineflayer-pathfinder": "^2.4.5",
     "socks": "^2.8.10",
-    "zod": "^4.6.2"
+    "zod": "^4.6.7"
   },
   "optionalDependencies": {
     "@mcst/server": "^1.2.0"
